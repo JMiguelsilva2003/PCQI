@@ -1,30 +1,21 @@
-from fastapi import FastAPI, Depends, HTTPException, status, Header
-from sqlalchemy.orm import Session
-import os
-
-from app import models, crud
-from app.database import SessionLocal, engine
+from fastapi import FastAPI
+from app import models
+from app.database import engine
+from app.routers import auth
 
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+app = FastAPI(
+    title="PCQI API",
+    description="API para a Plataforma de Controle de Qualidade Inteligente.",
+    version="1.0.0"
+)
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-async def verify_api_key(x_api_key: str = Header(...)):
-    if x_api_key != os.getenv("API_KEY"):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API Key")
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 
 @app.get("/")
 def read_root():
-    return {"message": "Bem-vindo à API do PCQI!"}
+    return {"message": "Bem-vindo à API do PCQI v1!"}
 
-@app.post("/api/v1/machine/heartbeat", status_code=status.HTTP_200_OK, dependencies=[Depends(verify_api_key)])
-def machine_heartbeat(db: Session = Depends(get_db)):
-    crud.update_machine_heartbeat(db=db, machine_id=1)
-    return {"status": "acknowledged"}
+# from app.routers import machines
+# app.include_router(machines.router, prefix="/api/v1/machines", tags=["Machines"])
