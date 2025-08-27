@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from . import models
+from app import models
 import datetime
 
 def update_machine_heartbeat(db: Session, machine_id: int):
