@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
+# schemas dos users
 class UserBase(BaseModel):
     email: str
 
@@ -21,3 +22,18 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: Optional[str] = None
+
+# schemas das maquinas
+class MachineBase(BaseModel):
+    name: str
+
+class MachineCreate(MachineBase):
+    pass
+
+class Machine(MachineBase):
+    id: int
+    owner_id: int
+    current_speed_ppm: int
+
+    class Config:
+        orm_mode = True
