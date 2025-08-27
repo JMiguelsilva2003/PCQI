@@ -6,15 +6,9 @@ from app import crud, schemas
 from app.database import SessionLocal
 from app.security import verify_password, create_access_token
 from app.routers import descriptions as desc
+from app.auth import get_db
 
 router = APIRouter()
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 @router.post(
     "/register",

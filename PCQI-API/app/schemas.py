@@ -14,7 +14,7 @@ class User(UserBase):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class Token(BaseModel):
     access_token: str
@@ -36,4 +36,4 @@ class Machine(MachineBase):
     current_speed_ppm: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
