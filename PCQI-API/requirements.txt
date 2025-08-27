@@ -6,3 +6,4 @@ python-dotenv
 supabase
 passlib[bcrypt]
 python-jose[cryptography]
+python-multipart
