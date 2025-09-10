@@ -4,7 +4,7 @@ function callApi(){
   return fetch(url)
     .then(response => {
       if (response.ok) {
-        return response;
+        return response.json();
       } else {
         throw new Error('API request failed');
       }
