@@ -1,15 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="../styles/style.css">
-</head>
-<body>
-    <button id="btnChamar">Chamar API</button>
-    <pre id="resultado">teste api coneção...</pre>
-</body>
-<script src="../scripts/config.js"></script>
-<script src="../scripts/script.js"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cadastro Index</title>
+    <link rel="stylesheet" href="../styles\cadastro.css" />
+  </head>
+  <body>
+    <section class="main flex">
+      <section class="login">
+        <div class="container flex col">
+          <div class="signintxt">Sign in</div>
+          <div class="textboxes flex col">
+            <input class="textbox email" type="text" placeholder="Email" />
+            <input
+              class="textbox password"
+              type="password"
+              placeholder="Password"
+            />
+          </div>
+          <div class="forgotpassword">
+            <a href="">Forgot your password?</a>
+          </div>
+          <button class="signinbtn">SIGN IN</button>
+        </div>
+      </section>
+
+      <section class="cadastro">
+        <div class="container flex col">
+          <div class="title">Hello, friend!</div>
+
+          <div class="subtitle">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sed
+            sapien scelerisque, tempor nisi id, vulputate purus. Maecenas quis
+            mauris nunc
+          </div>
+
+          <button class="signupbtn">SIGN UP</button>
+        </div>
+      </section>
+    </section>
+  </body>
 </html>
