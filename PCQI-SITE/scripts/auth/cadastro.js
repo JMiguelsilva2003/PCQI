@@ -60,10 +60,10 @@ function mostrarNotificacao(mensagem, sucess = false) {
     notificacao.textContent = mensagem;
 
     if (sucess){
-        notificacao.style.color = "green";
+        notificacao.style.backgroundColor = "green";
     }
     else {
-        notificacao.style.color = "red";
+        notificacao.style.backgroundColor = "red";
     }
 
     // Mostra
