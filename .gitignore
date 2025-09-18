@@ -125,5 +125,5 @@ __pycache__/
 *.pyc
 
 .env
-
+test.db
 .vscode/

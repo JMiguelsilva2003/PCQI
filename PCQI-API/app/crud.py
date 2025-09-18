@@ -17,6 +17,21 @@ def create_user(db: Session, user: schemas.UserCreate):
     db.refresh(db_user)
     return db_user
 
+def get_user(db: Session, user_id: int):
+    """Busca um usuário pelo seu ID."""
+    return db.query(models.User).filter(models.User.id == user_id).first()
+
+def get_users(db: Session, skip: int = 0, limit: int = 100):
+    """Retorna todos os usuários."""
+    return db.query(models.User).offset(skip).limit(limit).all()
+
+def update_user_role(db: Session, user: models.User, role: str):
+    """Atualiza a role de um usuário."""
+    user.role = role
+    db.commit()
+    db.refresh(user)
+    return user
+
 # Funções CRUD para Máquinas
 def get_machine(db: Session, machine_id: int):
     """Busca uma única máquina pelo seu ID."""

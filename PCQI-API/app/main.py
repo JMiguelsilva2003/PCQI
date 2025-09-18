@@ -1,10 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from app import models
 from app.database import engine
 from app.routers import auth, machines
 from fastapi.middleware.cors import CORSMiddleware
-
-models.Base.metadata.create_all(bind=engine)
+from app.routers import auth, machines, admin
+from app.auth import get_current_admin_user
 
 app = FastAPI(
     title="PCQI API",
@@ -30,6 +30,7 @@ app.add_middleware(
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(machines.router, prefix="/api/v1/machines", tags=["Machines"],)
+app.include_router(admin.router, prefix="/api/v1/admin", tags=["Admin"], dependencies=[Depends(get_current_admin_user)])
 
 @app.get("/")
 def read_root():
