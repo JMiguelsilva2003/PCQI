@@ -30,7 +30,7 @@ form.addEventListener('submit', async function(event) {
     
     try {
         // monta e faz a requisicao
-        const response = await fetch("<url da requisicao>", {
+        const response = await fetch("https://jsonplaceholder.typicode.com/posts", {
             method: "POST",
             headers: { "Content-Type": "application/json" }, // aqui mudaria para header se fosse padronizado
             body: JSONdata
@@ -39,12 +39,11 @@ form.addEventListener('submit', async function(event) {
         // pega a resposta da API em json
         const APIresponse = await response.json();
         if (response.ok) {
-            // pega e salva o token no localstorage
-            const token = APIresponse.token;
-            localStorage.setItem("authentication-token", token)
-            
-            // redireciona
-            window.location.href = 'index.html';
+            // popa notificacao de sucesso
+            //mostrarNotificacao(APIresponse.message, true);
+            mostrarNotificacao("teste", true);
+
+            // faz o slide para login
         } else {
             // mensagem de erro
             mostrarNotificacao(APIresponse.message || "Erro no cadastro. Tente novamente.");
@@ -56,8 +55,22 @@ form.addEventListener('submit', async function(event) {
 
 });
 
-function mostrarNotificacao(mensagem, sucesso = false) {
+function mostrarNotificacao(mensagem, sucess = false) {
+    const notificacao = document.getElementById('notificacao');
     notificacao.textContent = mensagem;
-    notificacao.style.color = sucesso ? "green" : "red";
-    notificacao.style.display = "block";
+
+    if (sucess){
+        notificacao.style.color = "green";
+    }
+    else {
+        notificacao.style.color = "red";
+    }
+
+    // Mostra
+    notificacao.classList.add('show');
+
+    // Esconde depois de 3 segundos
+    setTimeout(() => {
+        notificacao.classList.remove('show');
+    }, 3000);
 }
