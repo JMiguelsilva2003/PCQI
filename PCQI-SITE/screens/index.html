@@ -10,29 +10,6 @@
 
   <body>
     <main class="main flex">
-      <form id="formCadastro">
-        <section class="register">
-          <div class="container flex col">
-            <div class="signuptxt">Cadastro</div>
-            <div class="textboxes flex col">
-              <input
-                id="nomeCadastro"
-                class="textbox name"
-                type="text"
-                placeholder="Name"
-              />
-              <input
-                id="senhaCadastro"
-                class="textbox password"
-                type="password"
-                placeholder="Password"
-              />
-            </div>
-            <button class="signupbtn" type="submit">SIGN UP</button>
-          </div>
-        </section>
-      </form>
-
       <form id="formLogin">
         <section class="login">
           <div class="container flex col">
@@ -42,19 +19,47 @@
                 id="nomeLogin"
                 class="textbox name"
                 type="text"
-                placeholder="Name"
+                placeholder="Nome"
               />
               <input
                 id="senhaLogin"
                 class="textbox password"
                 type="password"
-                placeholder="Password"
+                placeholder="Senha"
               />
             </div>
-            <button class="signinbtn" type="submit">SIGN IN</button>
+            <button class="signinbtn" type="submit">Entrar</button>
           </div>
         </section>
       </form>
+
+      <form id="formCadastro">
+        <section class="register">
+          <div class="container flex col">
+            <div class="signuptxt">Cadastro</div>
+            <div class="textboxes flex col">
+              <input
+                id="nomeCadastro"
+                class="textbox name"
+                type="text"
+                placeholder="Nome"
+              />
+              <input
+                id="senhaCadastro"
+                class="textbox password"
+                type="password"
+                placeholder="Senha"
+              />
+            </div>
+            <button class="signupbtn" type="submit">Cadastre-se</button>
+          </div>
+        </section>
+      </form>
+
+      <section class="pager flex col" id="pager">
+        <div class="titulo" id="pagerTitulo">Ainda não tem uma conta?</div>
+        <button class="swapbtn" id="pagerBtn" onclick="trocarMetodo()">Crie uma conta agora!</button>
+      </section>
     </main>
 
     <div id="notificacao" class="notificacao"></div>

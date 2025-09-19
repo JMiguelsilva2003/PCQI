@@ -39,8 +39,6 @@ form2.addEventListener("submit", async function (event) {
     if (response.ok) {
       // Uma notificação de sucesso aparece.
       mostrarNotificacao("teste", true);
-
-      // Faz o slide pra cadastro
     } else {
       // Mensagem de erro.
       mostrarNotificacao(
@@ -70,4 +68,18 @@ function mostrarNotificacao(mensagem, sucess = false) {
   setTimeout(() => {
     notificacao.classList.remove("show");
   }, 3000);
+}
+
+function trocarMetodo() {
+  const pager = document.getElementById("pager");
+  pager.classList.toggle("cadastro");
+  const titulo = document.getElementById("pagerTitulo");
+  const btn = document.getElementById("pagerBtn");
+  if (pager.classList.contains("cadastro")) {
+    titulo.textContent = "Já está cadastrado?";
+    btn.textContent = "Faça login aqui!";
+  } else {
+    titulo.textContent = "Ainda não tem uma conta?";
+    btn.textContent = "Crie uma conta agora!";
+  }
 }

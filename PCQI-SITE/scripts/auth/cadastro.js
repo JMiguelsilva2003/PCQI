@@ -40,10 +40,9 @@ form.addEventListener("submit", async function (event) {
     const APIresponse = await response.json();
     if (response.ok) {
       // popa notificacao de sucesso
-      //mostrarNotificacao(APIresponse.message, true);
+      // mostrarNotificacao(APIresponse.message, true);
+      trocarMetodo();
       mostrarNotificacao("teste", true);
-
-      // faz o slide para login
     } else {
       // mensagem de erro
       mostrarNotificacao(
