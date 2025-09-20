@@ -3,13 +3,14 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from app.security import create_access_token
 
+SENDER_EMAIL = os.environ.get('MAIL_FROM_EMAIL')
+
 def send_verification_email(email: str):
     verification_token = create_access_token(data={"sub": email})
-    
     verification_url = f"https://pcqi.onrender.com/verify-email?token={verification_token}"
 
     message = Mail(
-        from_email='email@pcqi.com',
+        from_email=SENDER_EMAIL,
         to_emails=email,
         subject='PCQI - Verifique seu endereço de email',
         html_content=f"""
