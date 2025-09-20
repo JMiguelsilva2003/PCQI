@@ -26,3 +26,16 @@ async function loginUser(email, password) {
     }
     return data;
 }
+
+async function verifyEmailToken(token) {
+    const response = await fetch(`${API_BASE_URL}/api/v1/auth/verify-email?token=${token}`, {
+        method: 'GET',
+    });
+    
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.detail || 'Erro na verificação do token.');
+    }
+    return data;
+}
