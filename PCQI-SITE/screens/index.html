@@ -1,69 +1,24 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cadastro</title>
-
+    <title>PCQI - Autenticação</title>
     <link rel="stylesheet" href="../styles/cadastro.css" />
-  </head>
-
-  <body>
+</head>
+<body>
     <main class="main flex">
-      <form id="formLogin">
-        <section class="login">
-          <div class="container flex col">
-            <div class="signintxt">Login</div>
-            <div class="textboxes flex col">
-              <input
-                id="nomeLogin"
-                class="textbox name"
-                type="text"
-                placeholder="Nome"
-              />
-              <input
-                id="senhaLogin"
-                class="textbox password"
-                type="password"
-                placeholder="Senha"
-              />
-            </div>
-            <button class="signinbtn" type="submit">Entrar</button>
-          </div>
-        </section>
-      </form>
-
-      <form id="formCadastro">
-        <section class="register">
-          <div class="container flex col">
-            <div class="signuptxt">Cadastro</div>
-            <div class="textboxes flex col">
-              <input
-                id="nomeCadastro"
-                class="textbox name"
-                type="text"
-                placeholder="Nome"
-              />
-              <input
-                id="senhaCadastro"
-                class="textbox password"
-                type="password"
-                placeholder="Senha"
-              />
-            </div>
-            <button class="signupbtn" type="submit">Cadastre-se</button>
-          </div>
-        </section>
-      </form>
-
-      <section class="pager flex col" id="pager">
-        <div class="titulo" id="pagerTitulo">Ainda não tem uma conta?</div>
-        <button class="swapbtn" id="pagerBtn" onclick="trocarMetodo()">Crie uma conta agora!</button>
-      </section>
+        <div id="login-container"></div>
+        <div id="register-container"></div>
+        <div id="pager-container"></div>
     </main>
 
     <div id="notificacao" class="notificacao"></div>
-    <script src="../scripts/auth/cadastro.js" defer></script>
-    <script src="../scripts/auth/login.js" defer></script>
-  </body>
+
+    <script src="../js/config/config.js"></script> 
+    <script src="../js/services/User_api.js"></script>
+    <script src="../js/utils/htmlLoader.js"></script>
+    <script src="../js/utils/notification.js"></script>
+    <script src="../js/auth.js"></script>
+</body>
 </html>

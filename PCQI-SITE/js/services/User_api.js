@@ -1,0 +1,28 @@
+async function registerUser(name, email, password) {
+    const response = await fetch(`${API_BASE_URL}/api/v1/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password })
+    });
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.detail || 'Erro no cadastro.');
+    }
+    return data;
+}
+
+async function loginUser(email, password) {
+    const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+            'username': email,
+            'password': password
+        })
+    });
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.detail || 'Erro no login.');
+    }
+    return data;
+}

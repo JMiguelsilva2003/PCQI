@@ -1,182 +1,125 @@
-* {
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
+
+* { padding: 0; margin: 0; box-sizing: border-box; }
+html { font-size: 62.5%; }
+body { font-family: "Montserrat", sans-serif; font-size: 1.6rem; line-height: 1.2; color: #303030; }
+.flex { display: flex; }
+.flex.col { flex-flow: column; }
+
+.main {
+  width: 100vw;
+  overflow: hidden;
 }
 
-html {
-  font-size: 62.5%;
+.auth-form {
+  position: relative;
+  z-index: 0;
 }
 
-body {
-  font-family: "Montserrat", sans-serif;
-  font-size: 1.6rem;
-  line-height: 1.2;
+.auth-form .container {
+  height: 100vh;
+  width: 50vw;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+}
+
+.auth-form .title-txt {
+  font-size: 4rem;
+  font-weight: 700;
+}
+
+.auth-form .textboxes {
+  gap: 1.5rem;
+  width: 27rem;
+}
+
+.auth-form .textbox {
+  height: 3.5rem;
+  padding-left: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #f7f7f7;
+  font-size: 1.4rem;
+}
+
+.auth-form .submit-btn {
+  padding: 1rem 5rem;
+  border-radius: 15rem;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  background-color: #303030;
+  color: white;
+  margin-top: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.auth-form .submit-btn:hover {
+  background-color: #505050;
+}
+
+.pager {
+  position: fixed;
+  left: 50%;
+  z-index: 5;
+  height: 100%;
+  width: 50%;
+  justify-content: center;
+  align-items: center;
+  gap: 3rem;
+  background-color: #303030;
+  color: white;
+  transition: left 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.pager.cadastro {
+  left: 0%;
+}
+
+.pager .titulo {
+  font-weight: 700;
+  font-size: 3.5rem;
+  width: 40rem;
+  text-align: center;
+}
+
+.pager .swap-btn {
+  border: 2px solid #ffffff;
+  border-radius: 15rem;
+  background-color: transparent;
+  color: white;
+  padding: 1rem 5rem;
+  font-size: 1.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pager .swap-btn:hover {
+  background-color: white;
   color: #303030;
 }
 
-.flex {
-  display: flex;
-
-  &.wrap {
-    flex-flow: row wrap;
-  }
-
-  &.col {
-    flex-flow: column;
-
-    &.wrap {
-      flex-flow: column wrap;
-    }
-  }
-}
-
-/* Aqui começam as especificações do style da página de login e cadastro. */
-.main {
-  width: 100vw;
-
-  .register {
-    position: relative;
-    z-index: 0;
-    .container /* Flex Container */ {
-      height: 100vh;
-      width: 50vw;
-      justify-content: center;
-      align-items: center;
-      gap: 2rem;
-    }
-
-    .signuptxt {
-      font-size: 4rem;
-      font-weight: 700;
-    }
-
-    .textboxes {
-      gap: 1.5rem;
-      width: 27rem;
-      .textbox {
-        height: 3rem;
-        padding-left: 1rem;
-        border: rgb(0, 0, 0, 0);
-        box-shadow: 0px 1px rgb(0, 0, 0, 0.1);
-        background-color: rgb(247, 247, 247);
-      }
-    }
-
-    .signupbtn {
-      padding: 1rem 5rem;
-      border-radius: 15rem;
-      border: rgb(0, 0, 0, 0);
-      font-size: 2rem;
-
-      &:hover {
-        cursor: pointer;
-        background-color: rgb(0, 0, 0, 0.8);
-        color: white;
-      }
-    }
-  }
-  .login {
-    position: relative;
-    z-index: 0;
-    .container /* Flex Container */ {
-      height: 100vh;
-      width: 50vw;
-      justify-content: center;
-      align-items: center;
-      gap: 2rem;
-    }
-
-    .signintxt {
-      font-size: 4rem;
-      font-weight: 700;
-    }
-
-    .textboxes {
-      gap: 1.5rem;
-      width: 27rem;
-      .textbox {
-        height: 3rem;
-        padding-left: 1rem;
-        border: rgb(0, 0, 0, 0);
-        box-shadow: 0px 1px rgb(0, 0, 0, 0.1);
-        background-color: rgb(247, 247, 247);
-      }
-    }
-
-    .signinbtn {
-      padding: 1rem 5rem;
-      border-radius: 15rem;
-      border: rgb(0, 0, 0, 0);
-      font-size: 2rem;
-
-      &:hover {
-        cursor: pointer;
-        background-color: rgb(0, 0, 0, 0.8);
-        color: white;
-      }
-    }
-  }
-  .pager {
-    position: fixed;
-    left: 50%;
-    z-index: 5;
-    height: 100%;
-    width: 50%;
-
-    justify-content: center;
-    align-items: center;
-    gap: 3rem;
-
-    background-color: rgb(247, 247, 247);
-
-    transition: left 0.5s ease; /* animação suave */
-
-    &.cadastro {
-      left: 0%;
-    }
-
-    .titulo {
-      font-weight: 700;
-      font-size: 4rem;
-      width: 40rem;
-      text-align: center;
-    }
-
-    .swapbtn {
-      border: 3px solid #ffffff;
-      border-radius: 15rem;
-      background-color: #ffffff;
-      padding: 1rem 5rem;
-      font-size: 2rem;
-
-      &:hover {
-        cursor: pointer;
-        background-color: rgb(0, 0, 0, 0.8);
-        color: white;
-      }
-    }
-  }
-}
-
-/* Estilo da notificação */
 .notificacao {
   position: fixed;
   top: 20px;
-  right: 40vw;
-
-  background: #6fff00;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #28a745;
   color: #ffffff;
   padding: 15px 20px;
   border-radius: 8px;
-
-  pointer-events: none;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.5s, top 0.5s;
   display: none;
+}
 
-  z-index: 10;
+.notificacao.show {
+  display: block;
+  top: 40px;
+  opacity: 1;
+}
 
-  &.show {
-    display: block;
-    pointer-events: auto;
-  }
+.notificacao.error {
+  background: #dc3545;
 }

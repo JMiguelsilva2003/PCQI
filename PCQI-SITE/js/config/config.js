@@ -1,7 +1,8 @@
-const url = 'https://pcqi-api.onrender.com/';
+const API_BASE_URL = 'https://pcqi-api.onrender.com';
+
 
 function callApi(){
-  return fetch(url)
+  return fetch(API_BASE_URL)
     .then(response => {
       if (response.ok) {
         return response.json();
