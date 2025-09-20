@@ -11,11 +11,17 @@ def get_user_by_email(db: Session, email: str):
 
 def create_user(db: Session, user: schemas.UserCreate):
     hashed_pass = hash_password(user.password)
-    db_user = models.User(email=user.email, hashed_password=hashed_pass)
+    db_user = models.User(email=user.email, name=user.name, hashed_password=hashed_pass)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     return db_user
+
+def activate_user(db: Session, user: models.User):
+    user.is_active = True
+    db.commit()
+    db.refresh(user)
+    return user
 
 def get_user(db: Session, user_id: int):
     """Busca um usuário pelo seu ID."""
