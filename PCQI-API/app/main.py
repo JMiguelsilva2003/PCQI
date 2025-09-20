@@ -12,13 +12,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-origins = [
-    "https://pcqi.onrender.com",
-    "http://localhost",
-    "http://localhost:8080",
-    "http://127.0.0.1",
-    "http://127.0.0.1:8080",
-]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
