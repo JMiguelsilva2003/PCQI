@@ -127,3 +127,6 @@ __pycache__/
 .env
 
 .vscode/
+
+**/PCQI-IA/treino/dataset/branco
+**/PCQI-IA/treino/dataset/preto
