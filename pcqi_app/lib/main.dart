@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pcqi_app/pages/cadastro/cadastro.dart';
-import 'package:pcqi_app/pages/landing_page/landing_page.dart';
+import 'package:pcqi_app/screens/cadastro.dart';
+import 'package:pcqi_app/screens/landing_page.dart';
 
 void main() {
   runApp(const MyApp());

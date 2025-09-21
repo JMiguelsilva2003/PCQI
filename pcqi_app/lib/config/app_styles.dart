@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:loading_icon_button/loading_icon_button.dart';
-import 'package:pcqi_app/styles/app_colors.dart';
+import 'package:pcqi_app/config/app_colors.dart';
 
 class AppStyles {
   /* ----- Títulos ----- */
