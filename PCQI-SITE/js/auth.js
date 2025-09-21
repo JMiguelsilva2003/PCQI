@@ -10,6 +10,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const pagerTitulo = document.getElementById('pagerTitulo');
     const formLogin = document.getElementById('formLogin');
     const formCadastro = document.getElementById('formCadastro');
+    const loaderOverlay = document.getElementById('loader-overlay');
+
+    const showLoader = () => loaderOverlay.classList.remove('hidden');
+    const hideLoader = () => loaderOverlay.classList.add('hidden');
 
     const trocarMetodo = () => {
         pager.classList.toggle('cadastro');
@@ -26,6 +30,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     formCadastro.addEventListener('submit', async (e) => {
         e.preventDefault();
+        showLoader();
+        
         const nome = document.getElementById('nomeCadastro').value;
         const email = document.getElementById('emailCadastro').value;
         const senha = document.getElementById('senhaCadastro').value;
@@ -33,6 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (senha !== confirmSenha) {
             showNotification('As senhas não coincidem!', true);
+            hideLoader();
             return;
         }
 
@@ -40,15 +47,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             await registerUser(nome, email, senha);
             showNotification('Cadastro realizado com sucesso! Verifique seu email.');
             trocarMetodo();
-            formLogin.reset();
             formCadastro.reset();
         } catch (error) {
             showNotification(error.message, true);
+        } finally {
+            hideLoader();
         }
     });
 
     formLogin.addEventListener('submit', async (e) => {
         e.preventDefault();
+        showLoader();
+
         const email = document.getElementById('emailLogin').value;
         const senha = document.getElementById('senhaLogin').value;
 
@@ -57,8 +67,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             showNotification('Login realizado com sucesso!');
             localStorage.setItem('accessToken', data.access_token);
             localStorage.setItem('refreshToken', data.refresh_token);
+            window.location.href = '/dashboard.html';
         } catch (error) {
             showNotification(error.message, true);
+        } finally {
+            hideLoader();
         }
     });
 });
