@@ -1,12 +1,69 @@
 import 'package:flutter/material.dart';
+import 'package:loading_icon_button/loading_icon_button.dart';
+import 'package:pcqi_app/styles/app_colors.dart';
 
-class AppColors {
-  static final preto = Colors.black;
-  static final branco = Colors.white;
-  static final cinza = Colors.grey;
-  static final cinzaClaro = Colors.grey.shade200;
-  static final cinzaEscuro = Colors.grey.shade700;
-  static final azulEscuro = const Color.fromRGBO(62, 90, 157, 1);
-  static final azulBebe = const Color.fromRGBO(211, 235, 255, 1);
-  static final vermelho = Colors.red;
+class AppStyles {
+  /* ----- Títulos ----- */
+  static final TextStyle textStyleTitulo = TextStyle(
+    fontSize: 40,
+    color: AppColors.azulEscuro,
+    fontWeight: FontWeight.bold,
+  );
+
+  static final TextStyle textStyleTituloSecundario = TextStyle(
+    fontSize: 20,
+    color: AppColors.cinza,
+  );
+
+  /* ----- Campos de texto ----- */
+  static const TextStyle textFieldTextStyle = TextStyle(
+    color: Colors.black,
+    fontSize: 16,
+  );
+
+  static InputDecoration textFieldDecoration(String hintText) {
+    return InputDecoration(
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: BorderSide(color: AppColors.azulEscuro, width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: BorderSide(color: AppColors.vermelho, width: 2),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: BorderSide(color: AppColors.vermelho, width: 2),
+      ),
+      filled: true,
+      fillColor: AppColors.cinzaClaro,
+      hintText: hintText,
+      hintStyle: TextStyle(color: AppColors.cinzaEscuro),
+      contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+    );
+  }
+
+  /* ----- Estilos específicos para a biblioteca LoadingIconButton ----- */
+  static final LoadingButtonStyle loadingButtonStyle = LoadingButtonStyle(
+    backgroundColor: AppColors.azulEscuro,
+    foregroundColor: AppColors.azulEscuro,
+    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+    borderRadius: 15,
+    elevation: 0,
+  );
+
+  // A propriedade "textstyle" do objeto LoadingButtonStyle não parece funcionar, então o estilo do texto do botão é definido logo abaixo.
+  static final TextStyle loadingButtonTextStyle = TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.bold,
+    color: AppColors.branco,
+  );
 }

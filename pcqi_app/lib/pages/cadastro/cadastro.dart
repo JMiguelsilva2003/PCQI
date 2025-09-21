@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:loading_icon_button/loading_icon_button.dart';
 import 'package:pcqi_app/styles/app_colors.dart';
+import 'package:pcqi_app/styles/app_styles.dart';
 
 class Cadastro extends StatefulWidget {
   const Cadastro({super.key});
@@ -19,6 +20,7 @@ class _CadastroState extends State<Cadastro> {
   final FocusNode focusNodeEmail = FocusNode();
   final FocusNode focusNodeSenha = FocusNode();
   final FocusNode focusNodeSenhaConfirmacao = FocusNode();
+  bool visibilidadeSenha = true; // utilizado para trocar exibir/ocultar a senha
   bool mostrarErroFormInput = false; // exibe o erro de validação de input
 
   @override
@@ -35,7 +37,7 @@ class _CadastroState extends State<Cadastro> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Título
-                  Text("Cadastre-se"),
+                  Text("Cadastre-se", style: AppStyles.textStyleTitulo),
 
                   // Espaço
                   const SizedBox(height: 40),
@@ -81,6 +83,7 @@ class _CadastroState extends State<Cadastro> {
 
   /* ----- Widgets ----- */
 
+  // Widget do input de email
   Widget construirEmail() => TextFormField(
     keyboardType: TextInputType.emailAddress,
     autofillHints: [AutofillHints.email],
@@ -99,6 +102,9 @@ class _CadastroState extends State<Cadastro> {
     onFieldSubmitted: (_) {
       FocusScope.of(context).requestFocus(focusNodeSenha);
     },
+    decoration: AppStyles.textFieldDecoration(
+      'Endereço de e-mail',
+    ).copyWith(prefixIcon: Icon(Icons.mail, color: AppColors.cinza)),
     validator: (value) {
       return verificarCampoEmail(value);
     },
@@ -107,12 +113,14 @@ class _CadastroState extends State<Cadastro> {
         formKeyCadastro.currentState!.validate();
       }
     },
+    style: AppStyles.textFieldTextStyle,
   );
 
   Widget construirSenha() => TextFormField(
     keyboardType: TextInputType.visiblePassword,
     autofillHints: [AutofillHints.password],
     inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'\s'))],
+    obscureText: visibilidadeSenha,
     controller: inputControllerSenha,
     focusNode: focusNodeSenha,
     textInputAction: TextInputAction.next,
@@ -127,6 +135,18 @@ class _CadastroState extends State<Cadastro> {
     onFieldSubmitted: (_) {
       FocusScope.of(context).requestFocus(focusNodeSenhaConfirmacao);
     },
+    decoration: AppStyles.textFieldDecoration('Senha').copyWith(
+      prefixIcon: Icon(Icons.lock, color: AppColors.cinza),
+
+      // Exibe/oculta senha
+      suffixIcon: IconButton(
+        icon: visibilidadeSenha
+            ? Icon(Icons.visibility_off)
+            : Icon(Icons.visibility),
+        onPressed: () => setState(() => visibilidadeSenha = !visibilidadeSenha),
+      ),
+    ),
+    style: AppStyles.textFieldTextStyle,
     validator: (value) {
       return verificarCampoSenha(value);
     },
@@ -137,7 +157,9 @@ class _CadastroState extends State<Cadastro> {
     },
   );
 
+  // Widget de confirmação de senha
   Widget construirConfirmacaoSenha() => TextFormField(
+    obscureText: visibilidadeSenha,
     keyboardType: TextInputType.visiblePassword,
     autofillHints: [AutofillHints.password],
     inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'\s'))],
@@ -155,6 +177,9 @@ class _CadastroState extends State<Cadastro> {
     onFieldSubmitted: (_) {
       ();
     },
+    decoration: AppStyles.textFieldDecoration(
+      'Confirme sua senha',
+    ).copyWith(prefixIcon: Icon(Icons.lock_outline, color: AppColors.cinza)),
     validator: (value) {
       return verificarCampoSenhaConfirmacao(value);
     },
@@ -163,21 +188,25 @@ class _CadastroState extends State<Cadastro> {
         formKeyCadastro.currentState!.validate();
       }
     },
+    style: AppStyles.textFieldTextStyle,
   );
 
+  // Widget do botão de cadastro
   Widget construirBotaoCadastro() => SizedBox(
     width: double.infinity,
     child: LoadingButton(
       type: ButtonType.elevated,
       onPressed: () async {
+        // método para enviar cadastro aqui
         verificaCamposValidos();
-        // (método para enviar cadastro vai aqui)
       },
       successDuration: Duration(seconds: 0),
-      child: Text("Cadastrar"),
+      style: AppStyles.loadingButtonStyle,
+      child: Text("Cadastrar", style: AppStyles.loadingButtonTextStyle),
     ),
   );
 
+  // Widget de seta para voltar à tela anterior
   Widget voltarTelaAnterior() => Align(
     alignment: Alignment.topLeft,
     child: Padding(
@@ -258,5 +287,5 @@ class _CadastroState extends State<Cadastro> {
   // Verifica se todos os campos de texto necessários para o cadastro estão preenchidos
   bool verificaCamposValidos() {
     return formKeyCadastro.currentState!.validate();
-  }
+  }
 }
