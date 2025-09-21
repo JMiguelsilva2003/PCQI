@@ -10,10 +10,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const pagerTitulo = document.getElementById('pagerTitulo');
     const formLogin = document.getElementById('formLogin');
     const formCadastro = document.getElementById('formCadastro');
-    const loaderOverlay = document.getElementById('loader-overlay');
 
-    const showLoader = () => loaderOverlay.classList.remove('hidden');
-    const hideLoader = () => loaderOverlay.classList.add('hidden');
+    const showButtonLoader = (button) => {
+        button.disabled = true;
+        button.classList.add('loading');
+    };
+    const hideButtonLoader = (button) => {
+        button.disabled = false;
+        button.classList.remove('loading');
+    };
 
     const trocarMetodo = () => {
         pager.classList.toggle('cadastro');
@@ -30,7 +35,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     formCadastro.addEventListener('submit', async (e) => {
         e.preventDefault();
-        showLoader();
+        const submitButton = formCadastro.querySelector('.submit-btn');
+        showButtonLoader(submitButton);
         
         const nome = document.getElementById('nomeCadastro').value;
         const email = document.getElementById('emailCadastro').value;
@@ -39,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (senha !== confirmSenha) {
             showNotification('As senhas não coincidem!', true);
-            hideLoader();
+            hideButtonLoader(submitButton);
             return;
         }
 
@@ -51,13 +57,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             showNotification(error.message, true);
         } finally {
-            hideLoader();
+            hideButtonLoader(submitButton);
         }
     });
 
     formLogin.addEventListener('submit', async (e) => {
         e.preventDefault();
-        showLoader();
+        const submitButton = formLogin.querySelector('.submit-btn');
+        showButtonLoader(submitButton);
 
         const email = document.getElementById('emailLogin').value;
         const senha = document.getElementById('senhaLogin').value;
@@ -71,7 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             showNotification(error.message, true);
         } finally {
-            hideLoader();
+            hideButtonLoader(submitButton);
         }
     });
 });
