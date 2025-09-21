@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:loading_icon_button/loading_icon_button.dart';
-import 'package:pcqi_app/styles/app_colors.dart';
 import 'package:pcqi_app/styles/app_styles.dart';
+import 'package:pcqi_app/styles/app_colors.dart';
 
 class Cadastro extends StatefulWidget {
   const Cadastro({super.key});
@@ -287,5 +287,5 @@ class _CadastroState extends State<Cadastro> {
   // Verifica se todos os campos de texto necessários para o cadastro estão preenchidos
   bool verificaCamposValidos() {
     return formKeyCadastro.currentState!.validate();
-  }
+    }
 }
