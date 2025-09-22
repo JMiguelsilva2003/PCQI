@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const pagerTitulo = document.getElementById('pagerTitulo');
     const formLogin = document.getElementById('formLogin');
     const formCadastro = document.getElementById('formCadastro');
+    const botoesVisualizar = document.querySelectorAll('.eye-button');
 
     const showButtonLoader = (button) => {
         button.disabled = true;
@@ -30,6 +31,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             pagerBtn.textContent = 'Crie uma conta agora!';
         }
     };
+
+    botoesVisualizar.forEach(botao => {
+        const campoSenha = botao.previousElementSibling;
+        const icon = botao.querySelector('i');
+
+        botao.addEventListener('click', function() {
+            if (campoSenha.type === 'password') {
+            campoSenha.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+            } else {
+            campoSenha.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+            }
+        });
+    });
 
     pagerBtn.addEventListener('click', trocarMetodo);
 
