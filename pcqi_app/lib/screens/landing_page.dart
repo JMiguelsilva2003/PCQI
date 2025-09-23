@@ -9,10 +9,10 @@ class LandingPage extends StatelessWidget {
       body: Center(
         child: Column(
           children: [
-            /*ElevatedButton(
+            ElevatedButton(
               onPressed: () => {Navigator.pushNamed(context, '/login')},
               child: Text("Entrar"),
-            ),*/
+            ),
             ElevatedButton(
               onPressed: () => {Navigator.pushNamed(context, '/cadastro')},
               child: Text("Cadastrar"),

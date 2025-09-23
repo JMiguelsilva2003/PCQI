@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pcqi_app/screens/cadastro.dart';
+import 'package:pcqi_app/screens/homepage.dart';
 import 'package:pcqi_app/screens/landing_page.dart';
+import 'package:pcqi_app/screens/login.dart';
 import 'package:pcqi_app/services/shared_preferences_helper.dart';
 
 Future main() async {
@@ -20,8 +22,9 @@ class MyApp extends StatelessWidget {
       home: LandingPage(),
       routes: {
         // '/': (context) => LandingPage(),
-        // '/login': (context) => Login(),
+        '/login': (context) => Login(),
         '/cadastro': (context) => Cadastro(),
+        '/homepage': (context) => Homepage(),
       },
     );
   }

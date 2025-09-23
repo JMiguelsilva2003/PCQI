@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:pcqi_app/config/app_colors.dart';
 import 'package:pcqi_app/services/http_request.dart';
 import 'package:pcqi_app/models/user_model.dart';
+import 'package:pcqi_app/services/shared_preferences_helper.dart';
 
 class RequestMethods {
   final BuildContext context;
@@ -30,7 +31,7 @@ class RequestMethods {
         );
 
         if (userModelResponse.detail!.startsWith("Email already")) {
-          awesomeDialogInfo(
+          awesomeDialogWarning(
             "Este endereço de e-mail já está associado à uma conta. Por favor, tente outro endereço de e-mail.",
           );
         } else if (userModelResponse.createdAt!.isNotEmpty) {
@@ -40,7 +41,7 @@ class RequestMethods {
             animType: AnimType.topSlide,
             title: "Info",
             desc:
-                "Conta foi criada com sucesso. Por favor, verifique sua caixa de entrada para a verificação de e-mail.",
+                "Sua conta foi criada com sucesso. Por favor, verifique o link enviado à caixa de entrada para a verificação de e-mail.",
             btnOkColor: AppColors.azulEscuro,
             btnOkText: "OK",
             btnOkOnPress: () {
@@ -49,6 +50,41 @@ class RequestMethods {
             dismissOnTouchOutside: false,
             dismissOnBackKeyPress: false,
           ).show();
+        }
+      } catch (e) {}
+      return response;
+    } catch (e) {}
+  }
+
+  Future<void> login(String email, String password) async {
+    try {
+      final requestData = {"username": email, "password": password};
+
+      final response = await HttpRequest.postFormUrlEncoded(
+        'auth/login',
+        requestData,
+      );
+
+      try {
+        UserModel userModelResponse = UserModel.fromJson(
+          jsonDecode(response.body),
+        );
+        if (userModelResponse.accessToken!.isNotEmpty) {
+          await SharedPreferencesHelper.setAccessToken(
+            userModelResponse.accessToken!,
+          );
+          await SharedPreferencesHelper.setRefreshToken(
+            userModelResponse.refreshToken!,
+          );
+          Navigator.popAndPushNamed(context, '/homepage');
+        } else if (userModelResponse.detail!.startsWith("Incorrect")) {
+          awesomeDialogError(
+            "O usuário não foi encontrado ou a senha é inválida",
+          );
+        } else if (userModelResponse.detail!.startsWith("Email has not")) {
+          awesomeDialogInfo(
+            "Conta ainda não verificada. Por favor, verifique-a através do link enviado à sua caixa de entrada.",
+          );
         }
       } catch (e) {}
       return response;
@@ -77,7 +113,7 @@ class RequestMethods {
       animType: AnimType.topSlide,
       title: "Erro",
       desc: description,
-      btnOkColor: AppColors.azulEscuro,
+      btnOkColor: AppColors.vermelho,
       btnOkText: "OK",
       btnOkOnPress: () {},
       dismissOnTouchOutside: false,

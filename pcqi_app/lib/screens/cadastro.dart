@@ -110,6 +110,9 @@ class _CadastroState extends State<Cadastro> {
                                     int? maxLength,
                                     bool? isFocused,
                                   }) => null,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                              ],
                               style: AppStyles.textFieldTextStyle,
                               decoration:
                                   AppStyles.textFieldDecoration(
@@ -147,6 +150,9 @@ class _CadastroState extends State<Cadastro> {
                                     int? maxLength,
                                     bool? isFocused,
                                   }) => null,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                              ],
                               maxLength: 20,
                               decoration: AppStyles.textFieldDecoration('Senha')
                                   .copyWith(
@@ -243,9 +249,9 @@ class _CadastroState extends State<Cadastro> {
         // método para enviar cadastro aqui
         if (verificaCamposValidos(formKeyCadastro)) {
           await sendRegisterRequest(
-            inputControllerNome.text,
-            inputControllerEmail.text,
-            inputControllerSenha.text,
+            inputControllerNome.text.trim(),
+            inputControllerEmail.text.trim(),
+            inputControllerSenha.text.trim(),
           );
         }
       },

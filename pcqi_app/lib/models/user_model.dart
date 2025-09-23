@@ -7,6 +7,9 @@ class UserModel {
   String? role;
   // Machine? machines;
   String? detail;
+  String? accessToken;
+  String? refreshToken;
+  String tokenType;
 
   UserModel({
     this.email = "",
@@ -16,6 +19,9 @@ class UserModel {
     this.createdAt = "",
     this.role = "",
     this.detail = "",
+    this.accessToken = "",
+    this.refreshToken = "",
+    this.tokenType = "",
   });
 
   // Converts a map to an object of this class
@@ -27,6 +33,9 @@ class UserModel {
     role: json['role'] ?? '',
     detail: json['detail'] ?? '',
     createdAt: json['created_at'] ?? '',
+    accessToken: json['access_token'] ?? '',
+    refreshToken: json['refresh_token'] ?? '',
+    tokenType: json['token_type'] ?? '',
   );
 
   // Converts an object of this class to a map
@@ -39,6 +48,9 @@ class UserModel {
       'role': role,
       'detail': detail,
       'created_at': createdAt,
+      'access_token': accessToken,
+      'refresh_token': refreshToken,
+      'token_type': tokenType,
     };
   }
 }
