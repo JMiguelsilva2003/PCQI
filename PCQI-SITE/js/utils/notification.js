@@ -12,5 +12,5 @@ function showNotification(message, isError = false) {
 
     setTimeout(() => {
         notificacaoDiv.classList.remove('show');
-    }, 3000);
+    }, 5000);
 }

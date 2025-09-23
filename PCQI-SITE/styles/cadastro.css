@@ -1,9 +1,23 @@
-
-* { padding: 0; margin: 0; box-sizing: border-box; }
-html { font-size: 62.5%; }
-body { font-family: "Montserrat", sans-serif; font-size: 1.6rem; line-height: 1.2; color: #303030; }
-.flex { display: flex; }
-.flex.col { flex-flow: column; }
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+html {
+  font-size: 62.5%;
+}
+body {
+  font-family: "Montserrat", sans-serif;
+  font-size: 1.6rem;
+  line-height: 1.2;
+  color: #303030;
+}
+.flex {
+  display: flex;
+}
+.flex.col {
+  flex-flow: column;
+}
 
 .main {
   width: 100vw;
@@ -27,7 +41,6 @@ body { font-family: "Montserrat", sans-serif; font-size: 1.6rem; line-height: 1.
   font-size: 4rem;
   font-weight: 700;
   color: #3399e6;
-;
 }
 
 .auth-form .textboxes {
@@ -70,7 +83,7 @@ body { font-family: "Montserrat", sans-serif; font-size: 1.6rem; line-height: 1.
 }
 
 .campo-senha {
-  position: relative
+  position: relative;
 }
 
 .campo-senha .textbox-senha {
@@ -101,10 +114,65 @@ body { font-family: "Montserrat", sans-serif; font-size: 1.6rem; line-height: 1.
   background-color: #3399e6;
   color: rgb(255, 255, 255);
   transition: left 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0rem 0rem 1rem rgba(0, 0, 0, 0.195);
+
+  .forma {
+    z-index: 6;
+    position: absolute;
+    transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+    &.quadrada {
+      box-shadow: 0rem 0rem 1rem rgba(0, 0, 0, 0.195);
+      top: 5rem;
+      left: 7rem;
+      height: 10rem;
+      width: 10rem;
+      background-color: #68b3f1;
+    }
+
+    &.triangular {
+      filter: drop-shadow(0.3rem 0rem 1rem rgba(0, 0, 0, 0.195));
+      height: 0rem;
+      width: 0rem;
+    }
+
+    &#triangle1 {
+      border-left: 12rem solid transparent;
+      border-right: 12rem solid transparent;
+      border-bottom: 20.78rem solid #68b3f1;
+      top: 4rem;
+      right: -2rem;
+      rotate: -90deg;
+    }
+
+    &#triangle2 {
+      border-left: 5rem solid transparent;
+      border-right: 5rem solid transparent;
+      border-bottom: 8.66rem solid #68b3f1;
+      left: 30rem;
+      rotate: 32deg;
+    }
+
+    &.retangular {
+      box-shadow: 0rem 0rem 1rem rgba(0, 0, 0, 0.195);
+      bottom: 10rem;
+      background-color: #68b3f1;
+      height: 10rem;
+      width: 20rem;
+      rotate: 10deg;
+    }
+  }
+  .text {
+    z-index: 10;
+    gap: inherit;
+  }
 }
 
 .pager.cadastro {
   left: 0%;
+  .forma {
+    transform: rotate(45deg);
+  }
 }
 
 .pager .titulo {
