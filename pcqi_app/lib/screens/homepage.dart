@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pcqi_app/services/shared_preferences_helper.dart';
+import 'package:pcqi_app/config/app_styles.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -13,11 +13,9 @@ class _HomepageState extends State<Homepage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            print(SharedPreferencesHelper.getAccessToken());
-          },
-          child: Text("Access Token"),
+        child: Text(
+          "Usuário logado",
+          style: AppStyles.textStyleTituloSecundario,
         ),
       ),
     );

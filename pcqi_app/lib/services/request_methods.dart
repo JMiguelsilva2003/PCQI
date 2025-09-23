@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
+//import 'package:logger/logger.dart';
 import 'package:pcqi_app/config/app_colors.dart';
 import 'package:pcqi_app/services/http_request.dart';
 import 'package:pcqi_app/models/user_model.dart';
@@ -9,6 +10,7 @@ import 'package:pcqi_app/services/shared_preferences_helper.dart';
 
 class RequestMethods {
   final BuildContext context;
+  //Logger logger = Logger();
 
   RequestMethods({required this.context});
 
@@ -45,7 +47,7 @@ class RequestMethods {
             btnOkColor: AppColors.azulEscuro,
             btnOkText: "OK",
             btnOkOnPress: () {
-              Navigator.popAndPushNamed(context, '/');
+              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
             },
             dismissOnTouchOutside: false,
             dismissOnBackKeyPress: false,
@@ -75,6 +77,7 @@ class RequestMethods {
         UserModel userModelResponse = UserModel.fromJson(
           jsonDecode(response.body),
         );
+        //logger.d(response.body);
         if (userModelResponse.accessToken!.isNotEmpty) {
           await SharedPreferencesHelper.setAccessToken(
             userModelResponse.accessToken!,
@@ -82,7 +85,11 @@ class RequestMethods {
           await SharedPreferencesHelper.setRefreshToken(
             userModelResponse.refreshToken!,
           );
-          Navigator.popAndPushNamed(context, '/homepage');
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/homepage',
+            (route) => false,
+          );
         } else if (userModelResponse.detail!.startsWith("Incorrect")) {
           awesomeDialogError(
             "O usuário não foi encontrado ou a senha é inválida",
