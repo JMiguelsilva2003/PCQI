@@ -127,3 +127,5 @@ __pycache__/
 .env
 test.db
 .vscode/
+
+**/PCQI-IA/treino/dataset
