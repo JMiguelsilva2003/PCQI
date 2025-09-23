@@ -50,10 +50,16 @@ class RequestMethods {
             dismissOnTouchOutside: false,
             dismissOnBackKeyPress: false,
           ).show();
+        } else {
+          awesomeDialogError("Falha na conexão. Por favor, tente novamente.");
         }
-      } catch (e) {}
+      } catch (e) {
+        awesomeDialogError("Falha na conexão. Por favor, tente novamente.");
+      }
       return response;
-    } catch (e) {}
+    } catch (e) {
+      awesomeDialogError("Falha na conexão. Por favor, tente novamente.");
+    }
   }
 
   Future<void> login(String email, String password) async {
@@ -85,10 +91,16 @@ class RequestMethods {
           awesomeDialogInfo(
             "Conta ainda não verificada. Por favor, verifique-a através do link enviado à sua caixa de entrada.",
           );
+        } else {
+          awesomeDialogError("Falha na conexão. Por favor, tente novamente.");
         }
-      } catch (e) {}
+      } catch (e) {
+        awesomeDialogError("Falha na conexão. Por favor, tente novamente.");
+      }
       return response;
-    } catch (e) {}
+    } catch (e) {
+      awesomeDialogError("Falha na conexão. Por favor, tente novamente.");
+    }
   }
 
   void awesomeDialogInfo(String description) {
