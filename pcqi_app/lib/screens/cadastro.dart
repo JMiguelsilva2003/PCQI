@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:loading_icon_button/loading_icon_button.dart';
 import 'package:pcqi_app/config/app_styles.dart';
 import 'package:pcqi_app/config/app_colors.dart';
+import 'package:pcqi_app/services/request_methods.dart';
 
 class Cadastro extends StatefulWidget {
   const Cadastro({super.key});
@@ -24,6 +25,13 @@ class _CadastroState extends State<Cadastro> {
   final FocusNode focusNodeSenhaConfirmacao = FocusNode();
   bool visibilidadeSenha = true; // utilizado para trocar exibir/ocultar a senha
   bool mostrarErroFormInput = false; // exibe o erro de validação de input
+  late RequestMethods requestMethods;
+
+  @override
+  void initState() {
+    super.initState();
+    requestMethods = RequestMethods(context: context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -233,9 +241,15 @@ class _CadastroState extends State<Cadastro> {
       type: ButtonType.elevated,
       onPressed: () async {
         // método para enviar cadastro aqui
-        verificaCamposValidos(formKeyCadastro);
+        if (verificaCamposValidos(formKeyCadastro)) {
+          await sendRegisterRequest(
+            inputControllerNome.text,
+            inputControllerEmail.text,
+            inputControllerSenha.text,
+          );
+        }
       },
-      successDuration: Duration(seconds: 0),
+      successDuration: Duration(milliseconds: 0),
       style: AppStyles.loadingButtonStyle,
       child: Text("Cadastrar", style: AppStyles.loadingButtonTextStyle),
     ),
@@ -257,7 +271,7 @@ class _CadastroState extends State<Cadastro> {
 
   String? verificarCampoNome(String? value) {
     // Verifica se o campo não está vazio
-    if (value!.isEmpty) {
+    if (value!.trim().isEmpty) {
       mostrarErroFormInput = true;
       return "O campo não deve estar vazio";
     }
@@ -286,7 +300,7 @@ class _CadastroState extends State<Cadastro> {
     // Verifica se o campo não está vazio
     if (value!.isEmpty) {
       mostrarErroFormInput = true;
-      return "O campo não pode estar vazio";
+      return "O campo não deve estar vazio";
     }
     // Verifica se a senha possui ao menos 8 caracteres
     else if (value.length < 8) {
@@ -335,5 +349,13 @@ class _CadastroState extends State<Cadastro> {
     if (mostrarErroFormInput) {
       formKeyCadastro.currentState!.validate();
     }
+  }
+
+  Future<void> sendRegisterRequest(
+    String name,
+    String email,
+    String password,
+  ) async {
+    await requestMethods.register(name, email, password);
   }
 }

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:pcqi_app/screens/cadastro.dart';
 import 'package:pcqi_app/screens/landing_page.dart';
+import 'package:pcqi_app/services/shared_preferences_helper.dart';
 
-void main() {
+Future main() async {
+  // Configuring SharedPreferences
+  WidgetsFlutterBinding.ensureInitialized();
+  await SharedPreferencesHelper.init();
   runApp(const MyApp());
 }
 
