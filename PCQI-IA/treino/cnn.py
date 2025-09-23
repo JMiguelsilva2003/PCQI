@@ -7,7 +7,6 @@ from PIL import Image
 import os
 
 # CONFIGURAÇÕES
-
 DATA_DIR = 'dataset'
 MODEL_SAVE_PATH = 'modelo_bw.pth'
 
@@ -18,7 +17,7 @@ LEARNING_RATE = 0.001 # Taxa de aprendizado do otimizador
 IMG_SIZE = 128        # Todas as imagens serão redimensionadas para 128x128 pixels
 
 class BrancoPretoDataset(Dataset):
-    def _init_(self, root_dir, transform=None):
+    def __init__(self, root_dir, transform=None):
         self.root_dir = root_dir
         self.transform = transform
         self.classes = sorted(os.listdir(root_dir))
@@ -35,10 +34,10 @@ class BrancoPretoDataset(Dataset):
                     paths.append((os.path.join(class_dir, img_name), self.class_to_idx[cls_name]))
         return paths
 
-    def _len_(self):
+    def __len__(self):
         return len(self.image_paths)
 
-    def _getitem_(self, idx):
+    def __getitem__(self, idx):
         img_path, label = self.image_paths[idx]
         image = Image.open(img_path).convert('RGB')
         
@@ -48,10 +47,9 @@ class BrancoPretoDataset(Dataset):
         return image, label
 
 # ARQUITETURA DA CNN 
-
 class SimpleCNN(nn.Module):
-    def _init_(self, num_classes=2):
-        super(SimpleCNN, self)._init_()
+    def __init__(self, num_classes=2):
+        super(SimpleCNN, self).__init__()
         self.conv1 = nn.Conv2d(in_channels=3, out_channels=16, kernel_size=3, padding=1)
         self.relu1 = nn.ReLU()
         self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
@@ -74,7 +72,7 @@ class SimpleCNN(nn.Module):
         x = self.fc2(x)
         return x
 
-if _name_ == '_main_':
+if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Usando dispositivo: {device}")
 
@@ -99,9 +97,8 @@ if _name_ == '_main_':
 
     print("\n--- Iniciando o Treinamento ---")
     
-    # Loop de treinamento
     for epoch in range(NUM_EPOCHS):
-        model.train() # Coloca o modelo em modo de treinamento
+        model.train()
         running_loss = 0.0
         for i, (images, labels) in enumerate(train_loader):
             images, labels = images.to(device), labels.to(device)
@@ -117,7 +114,7 @@ if _name_ == '_main_':
             
             running_loss += loss.item()
 
-        model.eval() # Coloca o modelo em modo de avaliação
+        model.eval()
         correct = 0
         total = 0
         with torch.no_grad():
@@ -133,6 +130,5 @@ if _name_ == '_main_':
 
     print("--- Treinamento Concluído ---")
 
-    # Salva o modelo treinado
     torch.save(model.state_dict(), MODEL_SAVE_PATH)
     print(f"Modelo salvo com sucesso em: {MODEL_SAVE_PATH}")
