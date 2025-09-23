@@ -1,6 +1,6 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Annotated
 
 # schemas dos users
 class UserBase(BaseModel):
@@ -8,7 +8,7 @@ class UserBase(BaseModel):
     name: str 
 
 class UserCreate(UserBase):
-    password: str
+    password: Annotated[str, Field(..., min_length=8)]
 
 class User(UserBase):
     id: int
