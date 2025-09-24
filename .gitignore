@@ -127,3 +127,16 @@ __pycache__/
 .env
 
 .vscode/
+
+.env
+test.db
+.vscode/
+
+**/PCQI-IA/treino/dataset
+**/PCQI-IA/treino/dataset/branco
+**/PCQI-IA/treino/dataset/preto
+**/PCQI-IA/treino/dataset/
+**/PCQI-SITE/cypress/e2e
+**/PCQI-SITE/cypress.config.js
+**/PCQI-SITE/cypress/
+**/PCQI-SITE/node_modules/
