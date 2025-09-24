@@ -25,6 +25,13 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     email: Optional[str] = None
 
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: Annotated[str, Field(..., min_length=8)]
+
 # schemas das maquinas
 class MachineBase(BaseModel):
     name: str

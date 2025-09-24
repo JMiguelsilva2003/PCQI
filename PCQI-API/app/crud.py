@@ -38,6 +38,14 @@ def update_user_role(db: Session, user: models.User, role: str):
     db.refresh(user)
     return user
 
+def update_user_password(db: Session, user: models.User, new_password: str):
+    """Atualiza a senha de um usuário"""
+    hashed_pass = hash_password(new_password)
+    user.hashed_password = hashed_pass
+    db.commit()
+    db.refresh(user)
+    return user
+
 # Funções CRUD para Máquinas
 def get_machine(db: Session, machine_id: int):
     """Busca uma única máquina pelo seu ID."""

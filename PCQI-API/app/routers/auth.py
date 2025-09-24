@@ -12,7 +12,7 @@ from app.security import (
     create_refresh_token
 )
 from app.routers import descriptions as desc
-from app.services.email_service import send_verification_email
+from app.services.email_service import send_verification_email, send_password_reset_email
 from app.auth import get_current_user
 
 router = APIRouter()
@@ -110,3 +110,44 @@ def refresh_access_token(current_user: models.User = Depends(get_current_user)):
         "refresh_token": refresh_token,
         "token_type": "bearer"
     }
+
+@router.post("/forgot-password", summary="Solicita a redefinição de senha")
+def forgot_password(
+    request: schemas.ForgotPasswordRequest,
+    db: Session = Depends(get_db)
+):
+    user = crud.get_user_by_email(db, email=request.email)
+    
+    if user:
+        try:
+            send_password_reset_email(email=user.email)
+        except Exception:
+            pass 
+            
+    return {"message": "Se um usuário com este email existir, um link de redefinição foi enviado."}
+
+
+@router.post("/reset-password", summary="Realiza a redefinição de senha")
+def reset_password(
+    request: schemas.ResetPasswordRequest,
+    db: Session = Depends(get_db)
+):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired token"
+    )
+    try:
+        payload = jwt.decode(request.token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+        
+        user = crud.get_user_by_email(db, email=email)
+        if user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        crud.update_user_password(db=db, user=user, new_password=request.new_password)
+        
+        return {"message": "Password has been reset successfully."}
+        
+    except JWTError:
+        raise credentials_exception
