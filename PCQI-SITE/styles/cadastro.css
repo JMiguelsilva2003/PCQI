@@ -93,8 +93,8 @@ body {
 
 #btn-visualizar {
   position: absolute;
-  right: 10px;
-  top: 50%;
+  right: 3%;
+  top: 36%;
   transform: translateY(-50%);
   background: none;
   border: none;
