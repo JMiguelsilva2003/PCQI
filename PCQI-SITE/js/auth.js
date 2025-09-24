@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             showNotification('Login realizado com sucesso!');
             localStorage.setItem('accessToken', data.access_token);
             localStorage.setItem('refreshToken', data.refresh_token);
-            window.location.href = '/dashboard.html';
+            window.location.href = '../screens/dashboard.html';
         } catch (error) {
             showNotification(error.message, true);
         } finally {
