@@ -14,6 +14,7 @@ class User(UserBase):
     id: int
     created_at: datetime
     role: str
+    is_active: bool
 
     model_config = ConfigDict(from_attributes=True)
 
