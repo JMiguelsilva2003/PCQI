@@ -91,15 +91,18 @@ body {
   padding-right: 40px;
 }
 
-#btn-visualizar {
+.eye-button {
   position: absolute;
-  right: 3%;
-  top: 36%;
+  top: 50%;
+  right: 0.75rem;
   transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
   color: #888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .pager {
