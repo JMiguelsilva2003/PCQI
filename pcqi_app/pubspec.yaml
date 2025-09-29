@@ -33,6 +33,9 @@ dependencies:
   awesome_dialog: ^3.2.1
   loading_icon_button: ^1.0.2
   logger: ^2.6.1
+  camera: ^0.11.2
+  permission_handler: ^12.0.1
+  marquee: ^2.3.0
   flutter:
     sdk: flutter
 

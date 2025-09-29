@@ -15,6 +15,11 @@ class AppStyles {
     color: AppColors.cinza,
   );
 
+  static final TextStyle textStyleMarqueeLib = TextStyle(
+    fontSize: 30,
+    color: AppColors.preto,
+  );
+
   /* ----- Campos de texto ----- */
   static const TextStyle textFieldTextStyle = TextStyle(
     color: Colors.black,
