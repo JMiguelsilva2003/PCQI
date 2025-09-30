@@ -56,6 +56,21 @@ class AppStyles {
     );
   }
 
+  static ButtonStyle buttonStyle(Color textColor, Color backgroundColor) {
+    return ElevatedButton.styleFrom(
+      elevation: 0,
+      backgroundColor: backgroundColor,
+      foregroundColor: textColor,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      textStyle: const TextStyle(fontWeight: FontWeight.bold),
+    );
+  }
+
+  static final TextStyle textStyleCameraOptions = TextStyle(
+    fontWeight: FontWeight.bold,
+    fontSize: 15,
+  );
+
   /* ----- Estilos específicos para a biblioteca LoadingIconButton ----- */
   static final LoadingButtonStyle loadingButtonStyle = LoadingButtonStyle(
     backgroundColor: AppColors.azulEscuro,

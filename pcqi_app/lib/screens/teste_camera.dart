@@ -137,15 +137,38 @@ class _TesteCameraState extends State<TesteCamera> {
                 flex: 1,
                 child: Column(
                   children: [
+                    SizedBox(height: 20),
                     buildMachineTitle(
                       "Nome da máquina nome da máquina nome da máquina",
                     ),
-                    SizedBox(height: 50),
-                    changeToFrontCamera(),
-                    SizedBox(height: 20),
-                    buildDropdownMenu(
-                      getCameraListFromCurrentLensDirection(selectedCamera!),
+                    SizedBox(height: 30),
+
+                    Container(
+                      padding: EdgeInsets.all(8),
+                      margin: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.cinzaClaro,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            "Opções de câmera",
+                            style: AppStyles.textStyleCameraOptions,
+                          ),
+                          SizedBox(height: 20),
+                          buildDropdownMenu(
+                            getCameraListFromCurrentLensDirection(
+                              selectedCamera!,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          changeToFrontCamera(),
+                        ],
+                      ),
                     ),
+
+                    Spacer(),
                     goBackButton(),
                   ],
                 ),
@@ -178,7 +201,8 @@ class _TesteCameraState extends State<TesteCamera> {
   Widget buildDropdownMenu(List<CameraDescription> camerasList) {
     return Row(
       children: [
-        Text("Selecionar câmera:"),
+        Text("Câmera:", style: AppStyles.textStyleCameraOptions),
+        SizedBox(width: 10),
         DropdownButton<CameraDescription>(
           borderRadius: BorderRadius.circular(8),
           elevation: 0,
@@ -201,25 +225,28 @@ class _TesteCameraState extends State<TesteCamera> {
 
   Widget goBackButton() {
     return SizedBox(
-      height: 30,
+      height: 50,
       width: double.infinity,
-      child: ElevatedButton(
-        style: ButtonStyle(elevation: WidgetStateProperty.all(0)),
-        child: Text("Voltar"),
-
-        onPressed: () => AwesomeDialog(
-          context: context,
-          dialogType: DialogType.info,
-          animType: AnimType.scale,
-          title: "Aviso",
-          desc: "Deseja voltar a tela anterior? A transmissão será encerrada.",
-          btnOkColor: AppColors.vermelho,
-          btnOkText: "Voltar",
-          btnCancelText: "Cancelar",
-          btnCancelColor: AppColors.azulEscuro,
-          btnCancelOnPress: () {},
-          btnOkOnPress: () {},
-        ).show(),
+      child: Container(
+        margin: const EdgeInsets.only(left: 15, right: 15, bottom: 10),
+        child: ElevatedButton(
+          style: AppStyles.buttonStyle(AppColors.branco, AppColors.vermelho),
+          child: Text("Voltar"),
+          onPressed: () => AwesomeDialog(
+            context: context,
+            dialogType: DialogType.info,
+            animType: AnimType.scale,
+            title: "Aviso",
+            desc:
+                "Deseja voltar a tela anterior? A transmissão será encerrada.",
+            btnOkColor: AppColors.vermelho,
+            btnOkText: "Voltar",
+            btnCancelText: "Cancelar",
+            btnCancelColor: AppColors.azulEscuro,
+            btnCancelOnPress: () {},
+            btnOkOnPress: () {},
+          ).show(),
+        ),
       ),
     );
   }
@@ -231,45 +258,6 @@ class _TesteCameraState extends State<TesteCamera> {
       return backCameras;
     }
     return frontCameras;
-  }
-
-  Widget cameraElement() {
-    if (_permissionStatus == PermissionStatus.granted) {
-      if (isCameraInitialized == false) {
-        startCamera(backCameras, selectedCamera!);
-        return const Center(child: Text('Starting Camera...'));
-      } else {
-        return Stack(
-          children: [
-            Center(child: CameraPreview(cameraController)),
-            changeToFrontCamera(),
-            Align(
-              alignment: Alignment.topLeft,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 35, right: 20),
-                child: DropdownButton<CameraDescription>(
-                  value: selectedCamera,
-                  items: backCameras.map((camera) {
-                    return DropdownMenuItem<CameraDescription>(
-                      value: camera,
-                      child: Text(camera.name),
-                    );
-                  }).toList(),
-                  onChanged: (camera) {
-                    setState(() {
-                      selectedCamera = camera;
-                    });
-                  },
-                  hint: const Text('Selecione a câmera'),
-                ),
-              ),
-            ),
-          ],
-        );
-      }
-    } else {
-      return cameraNotAllowed();
-    }
   }
 
   Widget cameraNotAllowed() {
@@ -309,18 +297,23 @@ class _TesteCameraState extends State<TesteCamera> {
   }
 
   Widget changeToFrontCamera() {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          if (selectedCamera!.lensDirection == CameraLensDirection.back) {
-            selectedCamera = frontCameras.first;
-          } else {
-            selectedCamera = backCameras.first;
-          }
-          startCamera(frontCameras, selectedCamera!);
-        });
-      },
-      child: const Icon(Icons.flip_camera_ios_outlined),
+    return SizedBox(
+      height: 50,
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: () {
+          setState(() {
+            if (selectedCamera!.lensDirection == CameraLensDirection.back) {
+              selectedCamera = frontCameras.first;
+            } else {
+              selectedCamera = backCameras.first;
+            }
+            startCamera(frontCameras, selectedCamera!);
+          });
+        },
+        style: AppStyles.buttonStyle(AppColors.branco, AppColors.azulEscuro),
+        child: Text("Inverter câmera"),
+      ),
     );
   }
 }
