@@ -113,14 +113,25 @@ class _TesteCameraState extends State<TesteCamera> {
     if (_permissionStatus == PermissionStatus.granted) {
       if (!isCameraInitialized) {
         return Scaffold(
+          backgroundColor: AppColors.azulBebe,
           body: FutureBuilder<void>(
             future: listThenStartCamera(),
             builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const CircularProgressIndicator();
-              } else {
-                return Center(child: CameraPreview(cameraController));
-              }
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(color: AppColors.azulEscuro),
+                    SizedBox(height: 20),
+                    Text(
+                      "Inicializando câmera...",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 40),
+                    ),
+                  ],
+                ),
+              );
             },
           ),
         );
@@ -153,6 +164,7 @@ class _TesteCameraState extends State<TesteCamera> {
                       child: Column(
                         children: [
                           Text(
+                            textAlign: TextAlign.center,
                             "Opções de câmera",
                             style: AppStyles.textStyleCameraOptions,
                           ),
@@ -178,7 +190,10 @@ class _TesteCameraState extends State<TesteCamera> {
         );
       }
     } else {
-      return cameraNotAllowed();
+      if (_permissionStatus == PermissionStatus.denied) {
+        return cameraDenied();
+      }
+      return cameraPermanentlyDenied();
     }
   }
 
@@ -260,36 +275,103 @@ class _TesteCameraState extends State<TesteCamera> {
     return frontCameras;
   }
 
-  Widget cameraNotAllowed() {
+  Widget cameraDenied() {
     return Scaffold(
+      backgroundColor: AppColors.azulBebe,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Icon(Icons.camera_alt_outlined, size: 150),
+            SizedBox(height: 10),
             Text(
-              'Camera Permission Status: $_permissionStatus',
-              style: const TextStyle(fontSize: 18),
+              'Por favor, permita o acesso à câmera para continuar.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 25),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: requestPermission,
-              child: const Text('Request Camera Permission'),
-            ),
-            if (_permissionStatus == PermissionStatus.permanentlyDenied)
-              Column(
-                children: [
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Please allow camera access to use this feature.',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: _openAppSettings,
-                    child: const Text('Open App Settings'),
-                  ),
-                ],
+            SizedBox(height: 30),
+            SizedBox(
+              height: 50,
+              width: 400,
+              child: ElevatedButton(
+                onPressed: requestPermission,
+                style: AppStyles.buttonStyle(
+                  AppColors.branco,
+                  AppColors.azulEscuro,
+                ),
+                child: Text(
+                  textAlign: TextAlign.center,
+                  'Permitir acesso à câmera',
+                  style: TextStyle(fontSize: 20),
+                ),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget cameraPermanentlyDenied() {
+    return Scaffold(
+      backgroundColor: AppColors.azulBebe,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(Icons.warning_amber_rounded, size: 150),
+            SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 50.0),
+              child: Text(
+                'Por favor, permita o acesso à câmera nas configurações do aplicativo em seu dispositivo e depois tente novamente.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 25),
+              ),
+            ),
+            SizedBox(height: 30),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  height: 50,
+                  width: 300,
+                  child: ElevatedButton(
+                    onPressed: _openAppSettings,
+                    style: AppStyles.buttonStyle(
+                      AppColors.branco,
+                      AppColors.azulEscuro,
+                    ),
+                    child: Text(
+                      'Abrir configurações',
+                      style: TextStyle(fontSize: 20),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+
+                SizedBox(width: 30),
+
+                SizedBox(
+                  height: 50,
+                  width: 300,
+                  child: ElevatedButton(
+                    onPressed: requestPermission,
+                    style: AppStyles.buttonStyle(
+                      AppColors.branco,
+                      AppColors.azulEscuro,
+                    ),
+                    child: Text(
+                      'Tentar novamente',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
