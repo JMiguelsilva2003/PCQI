@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:pcqi_app/screens/bottom_navigation_bar_widget.dart';
 import 'package:pcqi_app/screens/cadastro.dart';
 import 'package:pcqi_app/screens/homepage.dart';
 import 'package:pcqi_app/screens/landing_page.dart';
@@ -10,6 +12,7 @@ Future main() async {
   // Configuring SharedPreferences
   WidgetsFlutterBinding.ensureInitialized();
   await SharedPreferencesHelper.init();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   runApp(const MyApp());
 }
 
@@ -20,12 +23,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: TesteCamera(),
+      home: BottomNavigationBarWidget(),
       routes: {
-        // '/': (context) => LandingPage(),
+        //'/': (context) => LandingPage(),
         '/login': (context) => Login(),
         '/cadastro': (context) => Cadastro(),
         '/homepage': (context) => Homepage(),
+        '/camera': (context) => TesteCamera(),
       },
     );
   }
