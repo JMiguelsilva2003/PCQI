@@ -15,13 +15,13 @@ class TesteCamera extends StatefulWidget {
 }
 
 class _TesteCameraState extends State<TesteCamera> {
-  late List<CameraDescription> allAvailableCameras = [];
-  late List<CameraDescription> frontCameras = [];
-  late List<CameraDescription> backCameras = [];
-  late List<CameraDescription> externalCameras = [];
+  List<CameraDescription> allAvailableCameras = [];
+  List<CameraDescription> frontCameras = [];
+  List<CameraDescription> backCameras = [];
+  List<CameraDescription> externalCameras = [];
   late CameraController cameraController;
   PermissionStatus _permissionStatus = PermissionStatus.denied;
-  bool isCameraInitialized = false;
+  bool isCameraInitializationComplete = false;
   ResolutionPreset resolutionPreset = ResolutionPreset.high;
   CameraDescription? selectedCamera;
 
@@ -75,11 +75,8 @@ class _TesteCameraState extends State<TesteCamera> {
     }
   }
 
-  void startCamera(
-    List<CameraDescription> cameraType,
-    CameraDescription chosenCamera,
-  ) async {
-    if (cameraType.isNotEmpty) {
+  startCamera(CameraDescription? chosenCamera) async {
+    if (chosenCamera != null) {
       cameraController = CameraController(
         chosenCamera,
         resolutionPreset,
@@ -93,25 +90,28 @@ class _TesteCameraState extends State<TesteCamera> {
           ),*/
           },
         );
+      } catch (e) {
         if (!mounted) return;
         setState(() {
-          isCameraInitialized = true;
+          isCameraInitializationComplete = true;
         });
-      } catch (e) {
-        print(e);
       }
-    } else {}
+    }
+    if (!mounted) return;
+    setState(() {
+      isCameraInitializationComplete = true;
+    });
   }
 
   listThenStartCamera() async {
     await listAllCameras();
-    startCamera(backCameras, selectedCamera!);
+    await startCamera(selectedCamera);
   }
 
   @override
   Widget build(BuildContext context) {
     if (_permissionStatus == PermissionStatus.granted) {
-      if (!isCameraInitialized) {
+      if (!isCameraInitializationComplete) {
         return Scaffold(
           backgroundColor: AppColors.azulBebe,
           body: FutureBuilder<void>(
@@ -136,58 +136,68 @@ class _TesteCameraState extends State<TesteCamera> {
           ),
         );
       } else {
-        return Scaffold(
-          backgroundColor: AppColors.azulBebe,
-          body: Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: Center(child: CameraPreview(cameraController)),
-              ),
-              Expanded(
-                flex: 1,
-                child: Column(
-                  children: [
-                    SizedBox(height: 20),
-                    buildMachineTitle(
-                      "Nome da máquina nome da máquina nome da máquina",
-                    ),
-                    SizedBox(height: 30),
+        if (selectedCamera != null) {
+          return Scaffold(
+            backgroundColor: AppColors.azulBebe,
+            body: PopScope(
+              canPop: false,
+              onPopInvokedWithResult: (bool didPop, Object? result) {
+                closeScreen();
+              },
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Center(child: CameraPreview(cameraController)),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Column(
+                      children: [
+                        SizedBox(height: 20),
+                        buildMachineTitle(
+                          "Nome da máquina nome da máquina nome da máquina",
+                        ),
+                        SizedBox(height: 30),
 
-                    Container(
-                      padding: EdgeInsets.all(8),
-                      margin: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppColors.cinzaClaro,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            textAlign: TextAlign.center,
-                            "Opções de câmera",
-                            style: AppStyles.textStyleCameraOptions,
+                        Container(
+                          padding: EdgeInsets.all(8),
+                          margin: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.cinzaClaro,
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          SizedBox(height: 20),
-                          buildDropdownMenu(
-                            getCameraListFromCurrentLensDirection(
-                              selectedCamera!,
-                            ),
+                          child: Column(
+                            children: [
+                              Text(
+                                textAlign: TextAlign.center,
+                                "Opções de câmera",
+                                style: AppStyles.textStyleCameraOptions,
+                              ),
+                              SizedBox(height: 20),
+                              buildDropdownMenu(
+                                getCameraListFromCurrentLensDirection(
+                                  selectedCamera!,
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              changeToFrontCamera(),
+                            ],
                           ),
-                          SizedBox(height: 10),
-                          changeToFrontCamera(),
-                        ],
-                      ),
-                    ),
+                        ),
 
-                    Spacer(),
-                    goBackButton(),
-                  ],
-                ),
+                        Spacer(),
+                        goBackButton(),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        );
+            ),
+          );
+        } else {
+          return noCameraAvailable();
+        }
       }
     } else {
       if (_permissionStatus == PermissionStatus.denied) {
@@ -247,23 +257,26 @@ class _TesteCameraState extends State<TesteCamera> {
         child: ElevatedButton(
           style: AppStyles.buttonStyle(AppColors.branco, AppColors.vermelho),
           child: Text("Voltar"),
-          onPressed: () => AwesomeDialog(
-            context: context,
-            dialogType: DialogType.info,
-            animType: AnimType.scale,
-            title: "Aviso",
-            desc:
-                "Deseja voltar a tela anterior? A transmissão será encerrada.",
-            btnOkColor: AppColors.vermelho,
-            btnOkText: "Voltar",
-            btnCancelText: "Cancelar",
-            btnCancelColor: AppColors.azulEscuro,
-            btnCancelOnPress: () {},
-            btnOkOnPress: () {},
-          ).show(),
+          onPressed: () => closeScreen(),
         ),
       ),
     );
+  }
+
+  void closeScreen() {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.info,
+      animType: AnimType.scale,
+      title: "Aviso",
+      desc: "Deseja voltar a tela anterior? A transmissão será encerrada.",
+      btnOkColor: AppColors.vermelho,
+      btnOkText: "Voltar",
+      btnCancelText: "Cancelar",
+      btnCancelColor: AppColors.azulEscuro,
+      btnCancelOnPress: () {},
+      btnOkOnPress: () {},
+    ).show();
   }
 
   List<CameraDescription> getCameraListFromCurrentLensDirection(
@@ -378,6 +391,45 @@ class _TesteCameraState extends State<TesteCamera> {
     );
   }
 
+  Widget noCameraAvailable() {
+    return Scaffold(
+      backgroundColor: AppColors.azulBebe,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline_rounded, size: 150),
+            SizedBox(height: 10),
+            Text(
+              'Não foi possível identificar câmeras disponíveis neste dispositivo.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 25),
+            ),
+            SizedBox(height: 30),
+            SizedBox(
+              height: 50,
+              width: 400,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                style: AppStyles.buttonStyle(
+                  AppColors.branco,
+                  AppColors.azulEscuro,
+                ),
+                child: Text(
+                  textAlign: TextAlign.center,
+                  'Voltar',
+                  style: TextStyle(fontSize: 20),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget changeToFrontCamera() {
     return SizedBox(
       height: 50,
@@ -390,7 +442,7 @@ class _TesteCameraState extends State<TesteCamera> {
             } else {
               selectedCamera = backCameras.first;
             }
-            startCamera(frontCameras, selectedCamera!);
+            startCamera(selectedCamera!);
           });
         },
         style: AppStyles.buttonStyle(AppColors.branco, AppColors.azulEscuro),

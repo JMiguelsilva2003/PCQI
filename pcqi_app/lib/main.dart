@@ -23,13 +23,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: BottomNavigationBarWidget(),
+      home: TesteCamera(),
       routes: {
         //'/': (context) => LandingPage(),
         '/login': (context) => Login(),
         '/cadastro': (context) => Cadastro(),
         '/homepage': (context) => Homepage(),
-        '/camera': (context) => TesteCamera(),
+        //'/camera': (context) => TesteCamera(),
       },
     );
   }
