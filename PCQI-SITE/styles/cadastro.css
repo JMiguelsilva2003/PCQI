@@ -14,9 +14,18 @@ body {
 }
 .flex {
   display: flex;
-}
-.flex.col {
-  flex-flow: column;
+
+  &.wrap {
+    flex-flow: row wrap;
+  }
+
+  &.col {
+    flex-flow: column;
+
+    &.wrap {
+      flex-flow: column wrap;
+    }
+  }
 }
 
 .main {
