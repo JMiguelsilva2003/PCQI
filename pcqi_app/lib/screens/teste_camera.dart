@@ -19,10 +19,15 @@ class _TesteCameraState extends State<TesteCamera> {
   List<CameraDescription> frontCameras = [];
   List<CameraDescription> backCameras = [];
   List<CameraDescription> externalCameras = [];
+  List<ResolutionPreset> resolutionPresetList = [
+    ResolutionPreset.low,
+    ResolutionPreset.medium,
+    ResolutionPreset.high,
+  ];
   late CameraController cameraController;
   PermissionStatus _permissionStatus = PermissionStatus.denied;
   bool isCameraInitializationComplete = false;
-  ResolutionPreset resolutionPreset = ResolutionPreset.high;
+  ResolutionPreset currentResolution = ResolutionPreset.high;
   CameraDescription? selectedCamera;
 
   @override
@@ -79,7 +84,7 @@ class _TesteCameraState extends State<TesteCamera> {
     if (chosenCamera != null) {
       cameraController = CameraController(
         chosenCamera,
-        resolutionPreset,
+        currentResolution,
         enableAudio: false,
       );
       try {
@@ -181,6 +186,8 @@ class _TesteCameraState extends State<TesteCamera> {
                                 ),
                               ),
                               SizedBox(height: 10),
+                              buildResolutionDropdownMenu(resolutionPresetList),
+                              SizedBox(height: 10),
                               if (backCameras.isNotEmpty &&
                                   frontCameras.isNotEmpty)
                                 changeToFrontCamera(),
@@ -241,8 +248,39 @@ class _TesteCameraState extends State<TesteCamera> {
             );
           }).toList(),
           onChanged: (camera) {
-            setState(() {
+            setState(() async {
+              await cameraController.dispose();
+              await startCamera(selectedCamera);
               selectedCamera = camera;
+            });
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget buildResolutionDropdownMenu(
+    List<ResolutionPreset> resolutionPresetList,
+  ) {
+    return Row(
+      children: [
+        Text("Resolução:", style: AppStyles.textStyleCameraOptions),
+        SizedBox(width: 10),
+        DropdownButton<ResolutionPreset>(
+          borderRadius: BorderRadius.circular(8),
+          elevation: 0,
+          value: currentResolution,
+          items: resolutionPresetList.map((resolution) {
+            return DropdownMenuItem<ResolutionPreset>(
+              value: resolution,
+              child: Text(resolution.name),
+            );
+          }).toList(),
+          onChanged: (resolution) {
+            setState(() async {
+              currentResolution = resolution!;
+              await cameraController.dispose();
+              await startCamera(selectedCamera);
             });
           },
         ),
