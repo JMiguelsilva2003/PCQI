@@ -68,11 +68,11 @@ class _TesteCameraState extends State<TesteCamera> {
     }
     if (backCameras.isNotEmpty) {
       selectedCamera = backCameras.first;
-    } else if (frontCameras.isNotEmpty) {
+    } else /*if (frontCameras.isNotEmpty)*/ {
       selectedCamera = frontCameras.first;
-    } else {
+    } /*else {
       selectedCamera = externalCameras.first;
-    }
+    }*/
   }
 
   startCamera(CameraDescription? chosenCamera) async {
@@ -181,7 +181,9 @@ class _TesteCameraState extends State<TesteCamera> {
                                 ),
                               ),
                               SizedBox(height: 10),
-                              changeToFrontCamera(),
+                              if (backCameras.isNotEmpty &&
+                                  frontCameras.isNotEmpty)
+                                changeToFrontCamera(),
                             ],
                           ),
                         ),
