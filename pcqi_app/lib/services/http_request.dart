@@ -1,4 +1,5 @@
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'dart:convert';
 
 import 'package:pcqi_app/services/shared_preferences_helper.dart';
@@ -56,5 +57,29 @@ class HttpRequest {
     var urlSend = Uri.parse("$url/$method/$additionalInfo");
     var response = await http.get(urlSend).timeout(timeoutSeconds);
     return response;
+  }
+
+  static Future<void> sendImageBytes(List<int> imageBytes) async {
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('https://seu-servidor.com/upload'),
+    );
+
+    request.files.add(
+      http.MultipartFile.fromBytes(
+        'image',
+        imageBytes,
+        filename: 'frame_${DateTime.now().millisecondsSinceEpoch}.jpg',
+        contentType: MediaType('image', 'jpeg'),
+      ),
+    );
+
+    final response = await request.send();
+
+    if (response.statusCode == 200) {
+      print('Imagem enviada com sucesso - Tamanho: ${imageBytes.length} bytes');
+    } else {
+      print('Erro no envio: ${response.statusCode}');
+    }
   }
 }

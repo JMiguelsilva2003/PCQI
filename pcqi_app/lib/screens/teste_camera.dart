@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:marquee/marquee.dart';
 import 'package:pcqi_app/config/app_colors.dart';
 import 'package:pcqi_app/config/app_styles.dart';
+import 'package:pcqi_app/services/camera_image_converter.dart';
+import 'package:pcqi_app/services/http_image_request.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class TesteCamera extends StatefulWidget {
@@ -29,6 +31,8 @@ class _TesteCameraState extends State<TesteCamera> {
   bool isCameraInitializationComplete = false;
   ResolutionPreset currentResolution = ResolutionPreset.high;
   CameraDescription? selectedCamera;
+  CameraImageConverter cameraImageConverter = CameraImageConverter();
+  HttpImageRequest httpImageRequest = HttpImageRequest();
 
   @override
   void initState() {
@@ -191,6 +195,7 @@ class _TesteCameraState extends State<TesteCamera> {
                               if (backCameras.isNotEmpty &&
                                   frontCameras.isNotEmpty)
                                 changeToFrontCamera(),
+                              buildStartStreamButton(),
                             ],
                           ),
                         ),
@@ -288,7 +293,25 @@ class _TesteCameraState extends State<TesteCamera> {
     );
   }
 
-  Widget goBackButton() {
+  Widget buildStartStreamButton() {
+    return SizedBox(
+      height: 50,
+      width: double.infinity,
+      child: Container(
+        margin: const EdgeInsets.only(left: 15, right: 15, bottom: 10),
+        child: ElevatedButton(
+          style: AppStyles.buttonStyle(AppColors.branco, AppColors.vermelho),
+          child: Text("Iniciar stream"),
+          onPressed: () async {
+            String? ip = await askForIp(context);
+            if (ip != null) {}
+          },
+        ),
+      ),
+    );
+  }
+
+    Widget goBackButton() {
     return SizedBox(
       height: 50,
       width: double.infinity,
@@ -301,6 +324,44 @@ class _TesteCameraState extends State<TesteCamera> {
         ),
       ),
     );
+  }
+
+  Future<String?> askForIp(BuildContext context) async {
+    TextEditingController controller = TextEditingController();
+
+    return showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Digite o IP do servidor'),
+          content: TextField(
+            controller: controller,
+            decoration: InputDecoration(hintText: 'Ex: 192.168.0.15'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(controller.text);
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  sendImageStream() async {
+    cameraController.startImageStream((_) {
+      (image) {};
+    });
   }
 
   void closeScreen() {

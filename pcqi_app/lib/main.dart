@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:pcqi_app/screens/register.dart';
 import 'package:pcqi_app/screens/landing_page.dart';
 import 'package:pcqi_app/screens/login.dart';
+import 'package:pcqi_app/screens/teste_camera.dart';
 import 'package:pcqi_app/services/shared_preferences_helper.dart';
 
 Future main() async {
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: LandingPage(),
+      home: TesteCamera(),
       routes: {
         //'/': (context) => LandingPage(),
         '/login': (context) => Login(),
