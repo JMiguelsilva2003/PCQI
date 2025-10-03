@@ -17,11 +17,11 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final GlobalKey<FormState> formKeyLogin = GlobalKey<FormState>();
   final TextEditingController inputControllerEmail = TextEditingController();
-  final TextEditingController inputControllerSenha = TextEditingController();
+  final TextEditingController inputControllerPassword = TextEditingController();
   final FocusNode focusNodeEmail = FocusNode();
-  final FocusNode focusNodeSenha = FocusNode();
-  bool visibilidadeSenha = true; // utilizado para trocar exibir/ocultar a senha
-  bool mostrarErroFormInput = false; // exibe o erro de validação de input
+  final FocusNode focusNodePassword = FocusNode();
+  bool passwordVisibility = true; // toggles password visibility
+  bool showFormValidationError = false;
   late RequestMethods requestMethods;
 
   @override
@@ -44,122 +44,31 @@ class _LoginState extends State<Login> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Título
+                  // Title
                   Text("Entrar", style: AppStyles.textStyleTitulo),
 
-                  // Espaço
+                  // Gap
                   const SizedBox(height: 40),
 
-                  // Formulário
+                  // Form
                   Form(
                     key: formKeyLogin,
                     child: Column(
                       children: [
                         // Email widget
-                        TextFormField(
-                          controller: inputControllerEmail,
-                          focusNode: focusNodeEmail,
-                          autofillHints: [AutofillHints.email],
-                          keyboardType: TextInputType.emailAddress,
-                          buildCounter:
-                              (
-                                BuildContext context, {
-                                int? currentLength,
-                                int? maxLength,
-                                bool? isFocused,
-                              }) => null,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.deny(RegExp(r'\s')),
-                          ],
-                          style: AppStyles.textFieldTextStyle,
-                          decoration:
-                              AppStyles.textFieldDecoration(
-                                "Endereço de e-mail",
-                              ).copyWith(
-                                prefixIcon: Icon(
-                                  Icons.mail,
-                                  color: AppColors.cinza,
-                                ),
-                              ),
-                          textInputAction: TextInputAction.next,
-                          validator: (value) {
-                            ValidationResult emailValidation =
-                                Validators.checkEmailField(value);
-                            if (emailValidation.shouldThrowValidationError &&
-                                !mostrarErroFormInput) {
-                              setState(() {
-                                mostrarErroFormInput = true;
-                              });
-                            }
-                            return emailValidation.message;
-                          },
-                          onChanged: onChangedForm,
-                          onFieldSubmitted: (_) {
-                            FocusScope.of(context).requestFocus(focusNodeSenha);
-                          },
-                        ),
+                        buildEmailFormField(),
 
-                        // Espaço
+                        // Gap
                         const SizedBox(height: 15),
 
-                        // Widget de senha
-                        TextFormField(
-                          controller: inputControllerSenha,
-                          focusNode: focusNodeSenha,
-                          obscureText: visibilidadeSenha,
-                          autofillHints: [AutofillHints.password],
-                          keyboardType: TextInputType.visiblePassword,
-                          buildCounter:
-                              (
-                                BuildContext context, {
-                                int? currentLength,
-                                int? maxLength,
-                                bool? isFocused,
-                              }) => null,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.deny(RegExp(r'\s')),
-                          ],
-                          maxLength: 20,
-                          decoration: AppStyles.textFieldDecoration('Senha')
-                              .copyWith(
-                                prefixIcon: Icon(
-                                  Icons.lock,
-                                  color: AppColors.cinza,
-                                ),
+                        // Password widget
+                        buildPasswordFormField(),
 
-                                // Exibe/oculta senha
-                                suffixIcon: IconButton(
-                                  icon: visibilidadeSenha
-                                      ? Icon(Icons.visibility_off)
-                                      : Icon(Icons.visibility),
-                                  onPressed: () => setState(
-                                    () =>
-                                        visibilidadeSenha = !visibilidadeSenha,
-                                  ),
-                                ),
-                              ),
-                          style: AppStyles.textFieldTextStyle,
-                          textInputAction: TextInputAction.done,
-                          validator: (value) {
-                            ValidationResult passwordValidation =
-                                Validators.checkPasswordField(value);
-                            if (passwordValidation.shouldThrowValidationError &&
-                                !mostrarErroFormInput) {
-                              setState(() {
-                                mostrarErroFormInput = true;
-                              });
-                            }
-                            return passwordValidation.message;
-                          },
-                          onChanged: onChangedForm,
-                          onFieldSubmitted: (_) {},
-                        ),
-
-                        // Espaço
+                        // Gap
                         const SizedBox(height: 15),
 
-                        // Widget do botão de cadastro
-                        construirBotaoEntrar(),
+                        // Login button widget
+                        buildLoginButton(),
                       ],
                     ),
                   ),
@@ -167,24 +76,99 @@ class _LoginState extends State<Login> {
               ),
             ),
           ),
-          // Seta para voltar à tela anterior
-          voltarTelaAnterior(),
+          // Go back arrow
+          buildGoBackButton(),
         ],
       ),
     );
   }
 
-  // Widget do botão de cadastro
-  Widget construirBotaoEntrar() => SizedBox(
+  Widget buildEmailFormField() => TextFormField(
+    controller: inputControllerEmail,
+    focusNode: focusNodeEmail,
+    autofillHints: [AutofillHints.email],
+    keyboardType: TextInputType.emailAddress,
+    buildCounter:
+        (
+          BuildContext context, {
+          int? currentLength,
+          int? maxLength,
+          bool? isFocused,
+        }) => null,
+    inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'\s'))],
+    style: AppStyles.textFieldTextStyle,
+    decoration: AppStyles.textFieldDecoration(
+      "Endereço de e-mail",
+    ).copyWith(prefixIcon: Icon(Icons.mail, color: AppColors.cinza)),
+    textInputAction: TextInputAction.next,
+    validator: (value) {
+      ValidationResult emailValidation = Validators.checkEmailField(value);
+      if (emailValidation.shouldThrowValidationError &&
+          !showFormValidationError) {
+        setState(() {
+          showFormValidationError = true;
+        });
+      }
+      return emailValidation.message;
+    },
+    onChanged: onChangedForm,
+    onFieldSubmitted: (_) {
+      FocusScope.of(context).requestFocus(focusNodePassword);
+    },
+  );
+
+  Widget buildPasswordFormField() => TextFormField(
+    controller: inputControllerPassword,
+    focusNode: focusNodePassword,
+    obscureText: passwordVisibility,
+    autofillHints: [AutofillHints.password],
+    keyboardType: TextInputType.visiblePassword,
+    buildCounter:
+        (
+          BuildContext context, {
+          int? currentLength,
+          int? maxLength,
+          bool? isFocused,
+        }) => null,
+    inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'\s'))],
+    maxLength: 20,
+    decoration: AppStyles.textFieldDecoration('Senha').copyWith(
+      prefixIcon: Icon(Icons.lock, color: AppColors.cinza),
+      suffixIcon: IconButton(
+        icon: passwordVisibility
+            ? Icon(Icons.visibility_off)
+            : Icon(Icons.visibility),
+        onPressed: () =>
+            setState(() => passwordVisibility = !passwordVisibility),
+      ),
+    ),
+    style: AppStyles.textFieldTextStyle,
+    textInputAction: TextInputAction.done,
+    validator: (value) {
+      ValidationResult passwordValidation = Validators.checkPasswordField(
+        value,
+      );
+      if (passwordValidation.shouldThrowValidationError &&
+          !showFormValidationError) {
+        setState(() {
+          showFormValidationError = true;
+        });
+      }
+      return passwordValidation.message;
+    },
+    onChanged: onChangedForm,
+    onFieldSubmitted: (_) {},
+  );
+
+  Widget buildLoginButton() => SizedBox(
     width: double.infinity,
     child: LoadingButton(
       type: ButtonType.elevated,
       onPressed: () async {
-        // método para enviar login aqui
-        if (verificaCamposValidos(formKeyLogin)) {
+        if (checkFormValidation(formKeyLogin)) {
           await sendLoginRequest(
             inputControllerEmail.text.trim(),
-            inputControllerSenha.text.trim(),
+            inputControllerPassword.text.trim(),
           );
         }
       },
@@ -194,8 +178,7 @@ class _LoginState extends State<Login> {
     ),
   );
 
-  // Widget de seta para voltar à tela anterior
-  Widget voltarTelaAnterior() => Align(
+  Widget buildGoBackButton() => Align(
     alignment: Alignment.topLeft,
     child: Padding(
       padding: const EdgeInsets.only(top: 35, left: 20),
@@ -208,13 +191,12 @@ class _LoginState extends State<Login> {
     ),
   );
 
-  // Verifica se todos os campos de texto necessários para o cadastro estão preenchidos
-  bool verificaCamposValidos(formKey) {
+  bool checkFormValidation(formKey) {
     return formKey.currentState!.validate();
   }
 
   void onChangedForm(String value) {
-    if (mostrarErroFormInput) {
+    if (showFormValidationError) {
       formKeyLogin.currentState!.validate();
     }
   }

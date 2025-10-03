@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pcqi_app/screens/homepage_widget.dart';
-import 'package:pcqi_app/screens/cadastro.dart';
+import 'package:pcqi_app/screens/register.dart';
 import 'package:pcqi_app/screens/homescreen.dart';
 import 'package:pcqi_app/screens/landing_page.dart';
 import 'package:pcqi_app/screens/login.dart';
@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
       routes: {
         //'/': (context) => LandingPage(),
         '/login': (context) => Login(),
-        '/cadastro': (context) => Cadastro(),
+        '/cadastro': (context) => Register(),
         //'/homepage': (context) => HomepageWidget(),
         //'/camera': (context) => TesteCamera(),
       },
