@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:loading_icon_button/loading_icon_button.dart';
 import 'package:pcqi_app/config/app_styles.dart';
 import 'package:pcqi_app/config/app_colors.dart';
+import 'package:pcqi_app/models/validation_result.dart';
 import 'package:pcqi_app/services/request_methods.dart';
+import 'package:pcqi_app/utils/validators.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -80,7 +82,17 @@ class _LoginState extends State<Login> {
                                 ),
                               ),
                           textInputAction: TextInputAction.next,
-                          validator: verificarCampoEmail,
+                          validator: (value) {
+                            ValidationResult emailValidation =
+                                Validators.checkEmailField(value);
+                            if (emailValidation.shouldThrowValidationError &&
+                                !mostrarErroFormInput) {
+                              setState(() {
+                                mostrarErroFormInput = true;
+                              });
+                            }
+                            return emailValidation.message;
+                          },
                           onChanged: onChangedForm,
                           onFieldSubmitted: (_) {
                             FocusScope.of(context).requestFocus(focusNodeSenha);
@@ -128,7 +140,17 @@ class _LoginState extends State<Login> {
                               ),
                           style: AppStyles.textFieldTextStyle,
                           textInputAction: TextInputAction.done,
-                          validator: verificarCampoSenha,
+                          validator: (value) {
+                            ValidationResult passwordValidation =
+                                Validators.checkPasswordField(value);
+                            if (passwordValidation.shouldThrowValidationError &&
+                                !mostrarErroFormInput) {
+                              setState(() {
+                                mostrarErroFormInput = true;
+                              });
+                            }
+                            return passwordValidation.message;
+                          },
                           onChanged: onChangedForm,
                           onFieldSubmitted: (_) {},
                         ),
@@ -185,38 +207,6 @@ class _LoginState extends State<Login> {
       ),
     ),
   );
-
-  String? verificarCampoEmail(String? value) {
-    final pattern =
-        r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$';
-    final emailRegExp = RegExp(pattern);
-    // Verifica se o campo não está vazio
-    if (value!.isEmpty) {
-      mostrarErroFormInput = true;
-      return "O campo não deve estar vazio";
-    }
-    // Se não está vazio, verifica se o e-mail é válido
-    else if (!emailRegExp.hasMatch(value)) {
-      mostrarErroFormInput = true;
-      return "Insira um endereço de e-mail válido";
-    } else {
-      return null;
-    }
-  }
-
-  String? verificarCampoSenha(String? value) {
-    // Verifica se o campo não está vazio
-    if (value!.isEmpty) {
-      mostrarErroFormInput = true;
-      return "O campo não pode estar vazio";
-    }
-    // Verifica se a senha possui ao menos 8 caracteres
-    else if (value.length < 8) {
-      mostrarErroFormInput = true;
-      return "Sua senha possui ao menos 8 caracteres";
-    }
-    return null;
-  }
 
   // Verifica se todos os campos de texto necessários para o cadastro estão preenchidos
   bool verificaCamposValidos(formKey) {

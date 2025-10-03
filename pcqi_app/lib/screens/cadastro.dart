@@ -4,6 +4,7 @@ import 'package:loading_icon_button/loading_icon_button.dart';
 import 'package:pcqi_app/config/app_styles.dart';
 import 'package:pcqi_app/config/app_colors.dart';
 import 'package:pcqi_app/services/request_methods.dart';
+import 'package:pcqi_app/utils/validators.dart';
 
 class Cadastro extends StatefulWidget {
   const Cadastro({super.key});
@@ -75,6 +76,11 @@ class _CadastroState extends State<Cadastro> {
                                     int? maxLength,
                                     bool? isFocused,
                                   }) => null,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'[A-Za-zÀ-ÖØ-öø-ÿ ]+'),
+                                ),
+                              ],
                               maxLength: 80,
                               decoration: AppStyles.textFieldDecoration('Nome')
                                   .copyWith(
@@ -83,7 +89,17 @@ class _CadastroState extends State<Cadastro> {
                                       color: AppColors.cinza,
                                     ),
                                   ),
-                              validator: verificarCampoNome,
+                              validator: (value) {
+                                final nameValidation =
+                                    Validators.checkNameField(value);
+                                if (nameValidation.shouldThrowValidationError &&
+                                    !mostrarErroFormInput) {
+                                  setState(() {
+                                    mostrarErroFormInput = true;
+                                  });
+                                }
+                                return nameValidation.message;
+                              },
                               onChanged: onChangedForm,
                               style: AppStyles.textFieldTextStyle,
                               textInputAction: TextInputAction.next,
@@ -124,7 +140,18 @@ class _CadastroState extends State<Cadastro> {
                                     ),
                                   ),
                               textInputAction: TextInputAction.next,
-                              validator: verificarCampoEmail,
+                              validator: (value) {
+                                final emailValidation =
+                                    Validators.checkEmailField(value);
+                                if (emailValidation
+                                        .shouldThrowValidationError &&
+                                    !mostrarErroFormInput) {
+                                  setState(() {
+                                    mostrarErroFormInput = true;
+                                  });
+                                }
+                                return emailValidation.message;
+                              },
                               onChanged: onChangedForm,
                               onFieldSubmitted: (_) {
                                 FocusScope.of(
@@ -174,7 +201,18 @@ class _CadastroState extends State<Cadastro> {
                                   ),
                               style: AppStyles.textFieldTextStyle,
                               textInputAction: TextInputAction.next,
-                              validator: verificarCampoSenha,
+                              validator: (value) {
+                                final passwordValidation =
+                                    Validators.checkPasswordField(value);
+                                if (passwordValidation
+                                        .shouldThrowValidationError &&
+                                    !mostrarErroFormInput) {
+                                  setState(() {
+                                    mostrarErroFormInput = true;
+                                  });
+                                }
+                                return passwordValidation.message;
+                              },
                               onChanged: onChangedForm,
                               onFieldSubmitted: (_) {
                                 FocusScope.of(
@@ -215,7 +253,22 @@ class _CadastroState extends State<Cadastro> {
                                   ),
                               textInputAction: TextInputAction.done,
                               style: AppStyles.textFieldTextStyle,
-                              validator: verificarCampoSenhaConfirmacao,
+                              validator: (value) {
+                                final passwordConfirmationValidation =
+                                    Validators.checkPasswordConfirmationField(
+                                      value,
+                                      inputControllerSenha.text,
+                                      inputControllerSenhaConfirmacao.text,
+                                    );
+                                if (passwordConfirmationValidation
+                                        .shouldThrowValidationError &&
+                                    !mostrarErroFormInput) {
+                                  setState(() {
+                                    mostrarErroFormInput = true;
+                                  });
+                                }
+                                return passwordConfirmationValidation.message;
+                              },
                               onChanged: onChangedForm,
                             ),
 
@@ -274,77 +327,6 @@ class _CadastroState extends State<Cadastro> {
       ),
     ),
   );
-
-  String? verificarCampoNome(String? value) {
-    // Verifica se o campo não está vazio
-    if (value!.trim().isEmpty) {
-      mostrarErroFormInput = true;
-      return "O campo não deve estar vazio";
-    }
-    return null;
-  }
-
-  String? verificarCampoEmail(String? value) {
-    final pattern =
-        r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$';
-    final emailRegExp = RegExp(pattern);
-    // Verifica se o campo não está vazio
-    if (value!.isEmpty) {
-      mostrarErroFormInput = true;
-      return "O campo não deve estar vazio";
-    }
-    // Se não está vazio, verifica se o e-mail é válido
-    else if (!emailRegExp.hasMatch(value)) {
-      mostrarErroFormInput = true;
-      return "Insira um endereço de e-mail válido";
-    } else {
-      return null;
-    }
-  }
-
-  String? verificarCampoSenha(String? value) {
-    // Verifica se o campo não está vazio
-    if (value!.isEmpty) {
-      mostrarErroFormInput = true;
-      return "O campo não deve estar vazio";
-    }
-    // Verifica se a senha possui ao menos 8 caracteres
-    else if (value.length < 8) {
-      mostrarErroFormInput = true;
-      return "A senha deve possuir ao menos 8 caracteres";
-    }
-    // Verifica se a senha e a senha de confirmação coincidem
-    else if (!senhasCoincidem(
-      inputControllerSenha.text,
-      inputControllerSenhaConfirmacao.text,
-    )) {
-      mostrarErroFormInput = true;
-      return "As senhas não coincidem";
-    } else {
-      return null;
-    }
-  }
-
-  String? verificarCampoSenhaConfirmacao(String? value) {
-    // Verifica se o campo não está vazio
-    if (value!.isEmpty) {
-      mostrarErroFormInput = true;
-      return "O campo não deve estar vazio";
-    }
-    // Verifica se a senha e a senha de confirmação coincidem
-    else if (!senhasCoincidem(
-      inputControllerSenha.text,
-      inputControllerSenhaConfirmacao.text,
-    )) {
-      return "As senhas não coincidem";
-    } else {
-      return null;
-    }
-  }
-
-  bool senhasCoincidem(String senha, String senhaConfirmacao) {
-    return senha == senhaConfirmacao;
-  }
 
   // Verifica se todos os campos de texto necessários para o cadastro estão preenchidos
   bool verificaCamposValidos(formKey) {
