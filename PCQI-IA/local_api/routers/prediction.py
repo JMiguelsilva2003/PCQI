@@ -19,4 +19,4 @@ async def handle_prediction(file: UploadFile = File(...)):
 @router.get("/", summary="Verifica o status da API")
 def read_root():
     """Endpoint de 'health check' para saber se a API está online."""
-    return {"status": "PCQI Local AI API está online e pronta!"}
+    return {"status": "PCQI Local AI API está online e pronta!"}
