@@ -1,3 +1,5 @@
+import 'package:pcqi_app/models/machine_model.dart';
+
 class UserModel {
   String? email;
   String? password;
@@ -5,7 +7,7 @@ class UserModel {
   int? id;
   String? createdAt;
   String? role;
-  // Machine? machines;
+  List<MachineModel> machines;
   String? detail;
   String? accessToken;
   String? refreshToken;
@@ -18,6 +20,7 @@ class UserModel {
     this.id = -2,
     this.createdAt = "",
     this.role = "",
+    this.machines = const [],
     this.detail = "",
     this.accessToken = "",
     this.refreshToken = "",
@@ -31,6 +34,7 @@ class UserModel {
     email: json['email'] ?? '',
     name: json['name'] ?? '',
     role: json['role'] ?? '',
+    machines: json['machines'] ?? [],
     detail: json['detail'] ?? '',
     createdAt: json['created_at'] ?? '',
     accessToken: json['access_token'] ?? '',
@@ -46,6 +50,7 @@ class UserModel {
       'email': email,
       'name': name,
       'role': role,
+      // machine field is missing by now
       'detail': detail,
       'created_at': createdAt,
       'access_token': accessToken,

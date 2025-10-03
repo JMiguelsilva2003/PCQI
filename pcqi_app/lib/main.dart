@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pcqi_app/screens/bottom_navigation_bar_widget.dart';
+import 'package:pcqi_app/screens/homepage_widget.dart';
 import 'package:pcqi_app/screens/cadastro.dart';
-import 'package:pcqi_app/screens/homepage.dart';
+import 'package:pcqi_app/screens/homescreen.dart';
 import 'package:pcqi_app/screens/landing_page.dart';
 import 'package:pcqi_app/screens/login.dart';
 import 'package:pcqi_app/screens/teste_camera.dart';
@@ -23,12 +23,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: TesteCamera(),
+      home: HomepageWidget(),
       routes: {
         //'/': (context) => LandingPage(),
         '/login': (context) => Login(),
         '/cadastro': (context) => Cadastro(),
-        '/homepage': (context) => Homepage(),
+        //'/homepage': (context) => HomepageWidget(),
         //'/camera': (context) => TesteCamera(),
       },
     );

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pcqi_app/screens/homepage.dart';
+import 'package:pcqi_app/screens/homescreen.dart';
 import 'package:pcqi_app/screens/lista_maquinas.dart';
 import 'package:pcqi_app/screens/perfil.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
 
-class BottomNavigationBarWidget extends StatelessWidget {
-  const BottomNavigationBarWidget({super.key});
+class HomepageWidget extends StatelessWidget {
+  const HomepageWidget({super.key});
 
   List<PersistentTabConfig> _tabs() => [
     PersistentTabConfig(
-      screen: Homepage(),
+      screen: Homescreen(),
       item: ItemConfig(
         icon: const Icon(Icons.home_rounded),
         title: "Início",

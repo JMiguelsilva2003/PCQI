@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:pcqi_app/config/app_styles.dart';
 
-class Homepage extends StatefulWidget {
-  const Homepage({super.key});
+class Homescreen extends StatefulWidget {
+  const Homescreen({super.key});
 
   @override
-  State<Homepage> createState() => _HomepageState();
+  State<Homescreen> createState() => _HomescreenState();
 }
 
-class _HomepageState extends State<Homepage> {
+class _HomescreenState extends State<Homescreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

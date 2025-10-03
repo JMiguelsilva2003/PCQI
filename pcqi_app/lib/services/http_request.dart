@@ -1,6 +1,8 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:pcqi_app/services/shared_preferences_helper.dart';
+
 class HttpRequest {
   static final url = "https://pcqi-api.onrender.com/api/v1";
   static final timeoutSeconds = Duration(seconds: 20);
@@ -34,6 +36,17 @@ class HttpRequest {
           headers: {"Content-Type": "application/x-www-form-urlencoded"},
           body: encodedBody,
         )
+        .timeout(timeoutSeconds);
+
+    return response;
+  }
+
+  static getWithAuthorization(String method) async {
+    var urlSend = Uri.parse("$url/$method");
+    final token = SharedPreferencesHelper.getAccessToken();
+
+    var response = await http
+        .get(urlSend, headers: {"Authorization": "Bearer $token"})
         .timeout(timeoutSeconds);
 
     return response;

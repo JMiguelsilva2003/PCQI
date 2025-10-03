@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pcqi_app/models/machine_model.dart';
+import 'package:pcqi_app/services/request_methods.dart';
 
 class ListaMaquinas extends StatefulWidget {
   const ListaMaquinas({super.key});
@@ -8,26 +10,33 @@ class ListaMaquinas extends StatefulWidget {
 }
 
 class _ListaMaquinasState extends State<ListaMaquinas> {
-  List<String> a = [];
+  List machineList = [];
+  late RequestMethods requestMethods;
+
+  @override
+  void initState() {
+    super.initState();
+    requestMethods = RequestMethods(context: context);
+  }
+
   @override
   Widget build(BuildContext context) {
-    for (int i = 0; i < 30; i++) {
-      a.add(i.toString());
-    }
     return Scaffold(
-      body: Center(
-        child: ListView.builder(
-          itemCount: a.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Card(
-              child: ListTile(
-                title: Text(a[index]),
-                onTap: () {
-                  //pushScreenWithoutNavBar(context, TesteCamera());
-                },
-              ),
-            );
-          },
+      body: RefreshIndicator(
+        onRefresh: () => requestMethods.getMachineList(),
+        child: Center(
+          child: ListView.builder(
+            itemBuilder: (BuildContext context, int index) {
+              return Card(
+                child: ListTile(
+                  title: Text("teste"),
+                  onTap: () {
+                    //pushScreenWithoutNavBar(context, TesteCamera());
+                  },
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

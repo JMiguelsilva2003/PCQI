@@ -4,6 +4,7 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 //import 'package:logger/logger.dart';
 import 'package:pcqi_app/config/app_colors.dart';
+import 'package:pcqi_app/models/machine_model.dart';
 import 'package:pcqi_app/services/http_request.dart';
 import 'package:pcqi_app/models/user_model.dart';
 import 'package:pcqi_app/services/shared_preferences_helper.dart';
@@ -108,6 +109,16 @@ class RequestMethods {
     } catch (e) {
       awesomeDialogError("Falha na conexão. Por favor, tente novamente.");
     }
+  }
+
+  Future<void> getMachineList() async {
+    try {
+      final response = await HttpRequest.getWithAuthorization('machines');
+      try {
+        String a = "s";
+        return response;
+      } catch (e) {}
+    } catch (e) {}
   }
 
   void awesomeDialogInfo(String description) {
