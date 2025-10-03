@@ -33,6 +33,10 @@ class ResetPasswordRequest(BaseModel):
     token: str
     new_password: Annotated[str, Field(..., min_length=8)]
 
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    password: Optional[Annotated[str, Field(..., min_length=8)]] = None
+
 # schemas das maquinas
 class MachineBase(BaseModel):
     name: str

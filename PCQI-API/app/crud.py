@@ -46,6 +46,24 @@ def update_user_password(db: Session, user: models.User, new_password: str):
     db.refresh(user)
     return user
 
+def update_user(db: Session, user: models.User, user_update: schemas.UserUpdate):
+    """Atualiza os dados de um usuário no banco de dados."""
+    
+    update_data = user_update.model_dump(exclude_unset=True)
+    
+    if "password" in update_data:
+        hashed_pass = hash_password(update_data["password"])
+        update_data["hashed_password"] = hashed_pass
+        del update_data["password"]
+
+    for key, value in update_data.items():
+        setattr(user, key, value)
+        
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
 # Funções CRUD para Máquinas
 def get_machine(db: Session, machine_id: int):
     """Busca uma única máquina pelo seu ID."""
