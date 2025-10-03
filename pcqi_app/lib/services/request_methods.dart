@@ -1,13 +1,10 @@
-import 'dart:convert';
-
-import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 //import 'package:logger/logger.dart';
-import 'package:pcqi_app/config/app_colors.dart';
-import 'package:pcqi_app/models/machine_model.dart';
 import 'package:pcqi_app/services/http_request.dart';
 import 'package:pcqi_app/models/user_model.dart';
-import 'package:pcqi_app/services/shared_preferences_helper.dart';
+import 'package:pcqi_app/utils/login_response_handler.dart';
+import 'package:pcqi_app/utils/register_response_handler.dart';
+import 'package:pcqi_app/widgets/simple_awesome_dialog.dart';
 
 class RequestMethods {
   final BuildContext context;
@@ -27,41 +24,14 @@ class RequestMethods {
         'auth/register',
         request.toJson(),
       );
-
-      try {
-        UserModel userModelResponse = UserModel.fromJson(
-          jsonDecode(response.body),
-        );
-
-        if (userModelResponse.detail!.startsWith("Email already")) {
-          awesomeDialogWarning(
-            "Este endereço de e-mail já está associado à uma conta. Por favor, tente outro endereço de e-mail.",
-          );
-        } else if (userModelResponse.createdAt!.isNotEmpty) {
-          AwesomeDialog(
-            context: context,
-            dialogType: DialogType.info,
-            animType: AnimType.topSlide,
-            title: "Info",
-            desc:
-                "Sua conta foi criada com sucesso. Por favor, verifique o link enviado à caixa de entrada para a verificação de e-mail.",
-            btnOkColor: AppColors.azulEscuro,
-            btnOkText: "OK",
-            btnOkOnPress: () {
-              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-            },
-            dismissOnTouchOutside: false,
-            dismissOnBackKeyPress: false,
-          ).show();
-        } else {
-          awesomeDialogError("Falha na conexão. Por favor, tente novamente.");
-        }
-      } catch (e) {
-        awesomeDialogError("Falha na conexão. Por favor, tente novamente.");
-      }
-      return response;
+      if (!context.mounted) return;
+      await RegisterResponseHandler.handleRegisterResponse(response, context);
     } catch (e) {
-      awesomeDialogError("Falha na conexão. Por favor, tente novamente.");
+      if (!context.mounted) return;
+      SimpleAwesomeDialog.error(
+        "Falha na conexão. Por favor, tente novamente.",
+        context,
+      );
     }
   }
 
@@ -73,96 +43,16 @@ class RequestMethods {
         'auth/login',
         requestData,
       );
-
-      try {
-        UserModel userModelResponse = UserModel.fromJson(
-          jsonDecode(response.body),
-        );
-        //logger.d(response.body);
-        if (userModelResponse.accessToken!.isNotEmpty) {
-          await SharedPreferencesHelper.setAccessToken(
-            userModelResponse.accessToken!,
-          );
-          await SharedPreferencesHelper.setRefreshToken(
-            userModelResponse.refreshToken!,
-          );
-          Navigator.pushNamedAndRemoveUntil(
-            context,
-            '/homepage',
-            (route) => false,
-          );
-        } else if (userModelResponse.detail!.startsWith("Incorrect")) {
-          awesomeDialogError(
-            "O usuário não foi encontrado ou a senha é inválida",
-          );
-        } else if (userModelResponse.detail!.startsWith("Email has not")) {
-          awesomeDialogInfo(
-            "Conta ainda não verificada. Por favor, verifique-a através do link enviado à sua caixa de entrada.",
-          );
-        } else {
-          awesomeDialogError("Falha na conexão. Por favor, tente novamente.");
-        }
-      } catch (e) {
-        awesomeDialogError("Falha na conexão. Por favor, tente novamente.");
-      }
-      return response;
+      if (!context.mounted) return;
+      await LoginResponseHandler.handleLoginResponse(response, context);
     } catch (e) {
-      awesomeDialogError("Falha na conexão. Por favor, tente novamente.");
+      if (!context.mounted) return;
+      SimpleAwesomeDialog.error(
+        "Falha na conexão. Por favor, tente novamente.",
+        context,
+      );
     }
   }
-
-  Future<void> getMachineList() async {
-    try {
-      final response = await HttpRequest.getWithAuthorization('machines');
-      try {
-        String a = "s";
-        return response;
-      } catch (e) {}
-    } catch (e) {}
-  }
-
-  void awesomeDialogInfo(String description) {
-    AwesomeDialog(
-      context: context,
-      dialogType: DialogType.info,
-      animType: AnimType.topSlide,
-      title: "Info",
-      desc: description,
-      btnOkColor: AppColors.azulEscuro,
-      btnOkText: "OK",
-      btnOkOnPress: () {},
-      dismissOnTouchOutside: false,
-      dismissOnBackKeyPress: false,
-    ).show();
-  }
-
-  void awesomeDialogError(String description) {
-    AwesomeDialog(
-      context: context,
-      dialogType: DialogType.error,
-      animType: AnimType.topSlide,
-      title: "Erro",
-      desc: description,
-      btnOkColor: AppColors.vermelho,
-      btnOkText: "OK",
-      btnOkOnPress: () {},
-      dismissOnTouchOutside: false,
-      dismissOnBackKeyPress: false,
-    ).show();
-  }
-
-  void awesomeDialogWarning(String description) {
-    AwesomeDialog(
-      context: context,
-      dialogType: DialogType.warning,
-      animType: AnimType.topSlide,
-      title: "Aviso",
-      desc: description,
-      btnOkColor: AppColors.azulEscuro,
-      btnOkText: "OK",
-      btnOkOnPress: () {},
-      dismissOnTouchOutside: false,
-      dismissOnBackKeyPress: false,
-    ).show();
-  }
 }
+
+void getMachineList() {}

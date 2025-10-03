@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pcqi_app/models/machine_model.dart';
 import 'package:pcqi_app/services/request_methods.dart';
 
 class ListaMaquinas extends StatefulWidget {
@@ -22,23 +21,23 @@ class _ListaMaquinasState extends State<ListaMaquinas> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: RefreshIndicator(
+      body: /*RefreshIndicator(
         onRefresh: () => requestMethods.getMachineList(),
-        child: Center(
-          child: ListView.builder(
-            itemBuilder: (BuildContext context, int index) {
-              return Card(
-                child: ListTile(
-                  title: Text("teste"),
-                  onTap: () {
-                    //pushScreenWithoutNavBar(context, TesteCamera());
-                  },
-                ),
-              );
-            },
-          ),
+        child:*/ Center(
+        child: ListView.builder(
+          itemBuilder: (BuildContext context, int index) {
+            return Card(
+              child: ListTile(
+                title: Text("aa"),
+                onTap: () {
+                  //pushScreenWithoutNavBar(context, TesteCamera());
+                },
+              ),
+            );
+          },
         ),
       ),
-    );
+    ) /*,
+    )*/;
   }
 }

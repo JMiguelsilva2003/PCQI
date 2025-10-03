@@ -20,7 +20,7 @@ class _LoginState extends State<Login> {
   final TextEditingController inputControllerPassword = TextEditingController();
   final FocusNode focusNodeEmail = FocusNode();
   final FocusNode focusNodePassword = FocusNode();
-  bool passwordVisibility = true; // toggles password visibility
+  bool passwordVisibility = true; // toggle password visibility
   bool showFormValidationError = false;
   late RequestMethods requestMethods;
 
@@ -134,6 +134,8 @@ class _LoginState extends State<Login> {
     maxLength: 20,
     decoration: AppStyles.textFieldDecoration('Senha').copyWith(
       prefixIcon: Icon(Icons.lock, color: AppColors.cinza),
+
+      // Exibe/oculta senha
       suffixIcon: IconButton(
         icon: passwordVisibility
             ? Icon(Icons.visibility_off)
@@ -165,7 +167,7 @@ class _LoginState extends State<Login> {
     child: LoadingButton(
       type: ButtonType.elevated,
       onPressed: () async {
-        if (checkFormValidation(formKeyLogin)) {
+        if (checkFormFieldValidation(formKeyLogin)) {
           await sendLoginRequest(
             inputControllerEmail.text.trim(),
             inputControllerPassword.text.trim(),
@@ -191,7 +193,7 @@ class _LoginState extends State<Login> {
     ),
   );
 
-  bool checkFormValidation(formKey) {
+  bool checkFormFieldValidation(formKey) {
     return formKey.currentState!.validate();
   }
 
