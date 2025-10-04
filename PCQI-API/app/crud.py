@@ -64,6 +64,30 @@ def update_user(db: Session, user: models.User, user_update: schemas.UserUpdate)
     db.refresh(user)
     return user
 
+# --- Funções CRUD para Setor ---
+
+def get_sector(db: Session, sector_id: int):
+    return db.query(models.Sector).filter(models.Sector.id == sector_id).first()
+
+def get_sector_by_name(db: Session, name: str):
+    return db.query(models.Sector).filter(models.Sector.name == name).first()
+
+def get_all_sectors(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Sector).offset(skip).limit(limit).all()
+
+def create_sector(db: Session, sector: schemas.SectorCreate):
+    db_sector = models.Sector(**sector.model_dump())
+    db.add(db_sector)
+    db.commit()
+    db.refresh(db_sector)
+    return db_sector
+
+def add_user_to_sector(db: Session, user: models.User, sector: models.Sector):
+    sector.members.append(user)
+    db.commit()
+    db.refresh(sector)
+    return sector
+
 # Funções CRUD para Máquinas
 def get_machine(db: Session, machine_id: int):
     """Busca uma única máquina pelo seu ID."""
