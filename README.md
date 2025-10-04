@@ -1,2 +1,3 @@
 # PCQI
 O projeto PCQI (Plataforma de Controle de Qualidade Inteligente) visa desenvolver um protótipo funcional de uma esteira de inspeção automatizada para a Indústria 4.0. O sistema utilizará uma câmera para capturar imagens de produtos, uma Inteligência Artificial pré-treinada para classificá-los como "Aprovado" ou "Reprovado", e um mecanismo para ejetar os itens defeituosos.  O diferencial do projeto é sua integração completa com uma plataforma web e um aplicativo móvel, permitindo o monitoramento e controle remoto da linha de produção, com foco principal no controle de velocidade da esteira e na gestão de alertas.
+![img.png](img.png)
