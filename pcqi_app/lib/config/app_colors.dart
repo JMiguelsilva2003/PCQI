@@ -9,4 +9,5 @@ class AppColors {
   static final azulEscuro = const Color.fromRGBO(50, 152, 230, 1);
   static final azulBebe = const Color.fromRGBO(211, 235, 255, 1);
   static final vermelho = Colors.red;
+  static final danger = const Color.fromRGBO(255, 210, 74, 1);
 }
