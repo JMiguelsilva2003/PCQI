@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pcqi_app/screens/homescreen.dart';
-import 'package:pcqi_app/screens/lista_maquinas.dart';
+import 'package:pcqi_app/screens/sectors.dart';
 import 'package:pcqi_app/screens/perfil.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
 
@@ -18,10 +18,10 @@ class HomepageWidget extends StatelessWidget {
       ),
     ),
     PersistentTabConfig(
-      screen: ListaMaquinas(),
+      screen: Sectors(),
       item: ItemConfig(
-        icon: const Icon(Icons.computer_rounded),
-        title: "Máquinas",
+        icon: const Icon(Icons.factory_rounded),
+        title: "Setores",
         iconSize: 30,
       ),
     ),

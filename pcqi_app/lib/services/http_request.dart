@@ -42,8 +42,13 @@ class HttpRequest {
     return response;
   }
 
-  static getWithAuthorization(String method) async {
-    var urlSend = Uri.parse("$url/$method");
+  static getWithAuthorization(String method, [String? additionalInfo]) async {
+    var urlSend = Uri();
+    if (additionalInfo != null) {
+      urlSend = Uri.parse("$url/$method/$additionalInfo/");
+    } else {
+      urlSend = Uri.parse("$url/$method/");
+    }
     final token = SharedPreferencesHelper.getAccessToken();
 
     var response = await http

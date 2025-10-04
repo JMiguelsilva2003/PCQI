@@ -25,6 +25,7 @@ class LoginResponseHandler {
           '/homepage',
           (route) => false,
         );
+        return;
       }
 
       if (!context.mounted) {

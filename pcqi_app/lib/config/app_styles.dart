@@ -20,6 +20,8 @@ class AppStyles {
     color: AppColors.preto,
   );
 
+  static final TextStyle textStyleCustomListViewCard = TextStyle(fontSize: 20);
+
   /* ----- Campos de texto ----- */
   static const TextStyle textFieldTextStyle = TextStyle(
     color: Colors.black,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pcqi_app/models/machine_model.dart';
 //import 'package:logger/logger.dart';
 import 'package:pcqi_app/services/http_request.dart';
 import 'package:pcqi_app/models/user_model.dart';
@@ -53,6 +54,32 @@ class RequestMethods {
       );
     }
   }
-}
 
-void getMachineList() {}
+  Future<List<MachineModel>?> getMachineList() async {
+    try {
+      final response = await HttpRequest.getWithAuthorization("machines");
+      // if response is sucessfull, do >>>
+      List<Map<String, dynamic>> machinesListTest = [
+        {
+          'name': 'Máquinaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+          'id': 0,
+          'owner_id': 0,
+          'current_speed_ppm': 0,
+        },
+        {'name': 'Máquina 2', 'id': 0, 'owner_id': 0, 'current_speed_ppm': 0},
+        {'name': 'Máquina 3', 'id': 0, 'owner_id': 0, 'current_speed_ppm': 0},
+        {'name': 'Máquina 4', 'id': 0, 'owner_id': 0, 'current_speed_ppm': 0},
+      ];
+
+      List<Map<String, dynamic>> machinesListEmpty = [];
+
+      List<MachineModel> machines = [];
+      for (var machine in machinesListTest) {
+        machines.add(MachineModel.fromJson(machine));
+      }
+      return machines;
+    } catch (e) {
+      print(e);
+    }
+  }
+}

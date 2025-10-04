@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pcqi_app/screens/homepage_widget.dart';
 import 'package:pcqi_app/screens/register.dart';
 import 'package:pcqi_app/screens/landing_page.dart';
 import 'package:pcqi_app/screens/login.dart';
@@ -21,13 +22,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: TesteCamera(),
+      home: HomepageWidget(),
       routes: {
         //'/': (context) => LandingPage(),
         '/login': (context) => Login(),
         '/cadastro': (context) => Register(),
         //'/homepage': (context) => HomepageWidget(),
-        //'/camera': (context) => TesteCamera(),
+        '/camera': (context) => TesteCamera(),
       },
     );
   }
