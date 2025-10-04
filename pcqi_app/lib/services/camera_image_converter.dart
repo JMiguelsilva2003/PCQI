@@ -17,7 +17,7 @@ class CameraImageConverter {
       );
 
       // Converte para JPEG em memória
-      final Uint8List jpegBytes = img.encodeJpg(resizedImage, quality: 70);
+      final jpegBytes = img.encodeJpg(resizedImage, quality: 70);
 
       return jpegBytes;
     } catch (e) {

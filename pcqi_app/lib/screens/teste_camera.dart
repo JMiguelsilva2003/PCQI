@@ -311,7 +311,7 @@ class _TesteCameraState extends State<TesteCamera> {
     );
   }
 
-    Widget goBackButton() {
+  Widget goBackButton() {
     return SizedBox(
       height: 50,
       width: double.infinity,
@@ -342,13 +342,14 @@ class _TesteCameraState extends State<TesteCamera> {
           actions: [
             TextButton(
               onPressed: () {
+                cameraController.stopImageStream();
                 Navigator.of(context).pop();
               },
               child: Text('Cancelar'),
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(controller.text);
+                sendImageStream(controller.text);
               },
               child: Text('OK'),
             ),
@@ -358,9 +359,15 @@ class _TesteCameraState extends State<TesteCamera> {
     );
   }
 
-  sendImageStream() async {
+  sendImageStream(String ip) {
     cameraController.startImageStream((_) {
-      (image) {};
+      (image) async {
+        var convertedImage = await cameraImageConverter.convertImage(image);
+        print("imagem convertida");
+        if (convertedImage != null) {
+          httpImageRequest.sendImageBytes(convertedImage, ip.trim());
+        }
+      };
     });
   }
 
