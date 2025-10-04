@@ -37,6 +37,11 @@ class UserUpdate(BaseModel):
     name: Optional[str] = None
     password: Optional[Annotated[str, Field(..., min_length=8)]] = None
 
+# schemas dos setores
+
+class MemberAddRequest(BaseModel):
+    user_id: int
+
 # schemas das maquinas
 class MachineBase(BaseModel):
     name: str
