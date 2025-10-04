@@ -9,6 +9,7 @@ class UserModel {
   String? role;
   List<MachineModel> machines;
   String? detail;
+  String? message;
   String? accessToken;
   String? refreshToken;
   String tokenType;
@@ -22,6 +23,7 @@ class UserModel {
     this.role = "",
     this.machines = const [],
     this.detail = "",
+    this.message = "",
     this.accessToken = "",
     this.refreshToken = "",
     this.tokenType = "",
@@ -36,6 +38,7 @@ class UserModel {
     role: json['role'] ?? '',
     machines: json['machines'] ?? [],
     detail: json['detail'] ?? '',
+    message: json['message'] ?? '',
     createdAt: json['created_at'] ?? '',
     accessToken: json['access_token'] ?? '',
     refreshToken: json['refresh_token'] ?? '',
@@ -52,6 +55,7 @@ class UserModel {
       'role': role,
       // machine field is missing by now
       'detail': detail,
+      'message': message,
       'created_at': createdAt,
       'access_token': accessToken,
       'refresh_token': refreshToken,

@@ -69,6 +69,12 @@ class _LoginState extends State<Login> {
 
                         // Login button widget
                         buildLoginButton(),
+
+                        // Gap
+                        const SizedBox(height: 30),
+
+                        // Password reset button widget
+                        buildPasswordResetButton(),
                       ],
                     ),
                   ),
@@ -191,6 +197,22 @@ class _LoginState extends State<Login> {
         child: const Icon(Icons.arrow_back_ios_rounded),
       ),
     ),
+  );
+
+  Widget buildPasswordResetButton() => Row(
+    mainAxisAlignment: MainAxisAlignment.end,
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      GestureDetector(
+        child: Text(
+          "Esqueceu a senha?",
+          style: AppStyles.textStyleForgotPassword,
+        ),
+        onTap: () {
+          Navigator.pushNamed(context, '/forgot-password');
+        },
+      ),
+    ],
   );
 
   bool checkFormFieldValidation(formKey) {

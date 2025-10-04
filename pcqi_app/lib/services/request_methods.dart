@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:pcqi_app/models/machine_model.dart';
 //import 'package:logger/logger.dart';
 import 'package:pcqi_app/services/http_request.dart';
 import 'package:pcqi_app/models/user_model.dart';
+import 'package:pcqi_app/utils/forgot_password_response_handler.dart';
 import 'package:pcqi_app/utils/login_response_handler.dart';
 import 'package:pcqi_app/utils/register_response_handler.dart';
 import 'package:pcqi_app/widgets/simple_awesome_dialog.dart';
@@ -46,6 +49,27 @@ class RequestMethods {
       );
       if (!context.mounted) return;
       await LoginResponseHandler.handleLoginResponse(response, context);
+    } catch (e) {
+      if (!context.mounted) return;
+      SimpleAwesomeDialog.error(
+        "Falha na conexão. Por favor, tente novamente.",
+        context,
+      );
+    }
+  }
+
+  Future<void> forgotPasswordRequest(String email) async {
+    try {
+      UserModel userRequest = UserModel(email: email);
+      final response = await HttpRequest.post(
+        "auth/forgot-password",
+        userRequest.toJson(),
+      );
+      if (!context.mounted) return;
+      await ForgotPasswordResponseHandler.handleForgotPasswordResponse(
+        response,
+        context,
+      );
     } catch (e) {
       if (!context.mounted) return;
       SimpleAwesomeDialog.error(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pcqi_app/screens/forgot_password.dart';
 import 'package:pcqi_app/screens/homepage_widget.dart';
 import 'package:pcqi_app/screens/register.dart';
 import 'package:pcqi_app/screens/landing_page.dart';
@@ -22,10 +23,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: HomepageWidget(),
+      home: LandingPage(),
       routes: {
         //'/': (context) => LandingPage(),
         '/login': (context) => Login(),
+        '/forgot-password': (context) => ForgotPassword(),
         '/cadastro': (context) => Register(),
         //'/homepage': (context) => HomepageWidget(),
         '/camera': (context) => TesteCamera(),

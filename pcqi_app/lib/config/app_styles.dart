@@ -22,6 +22,12 @@ class AppStyles {
 
   static final TextStyle textStyleCustomListViewCard = TextStyle(fontSize: 20);
 
+  static final TextStyle textStyleForgotPassword = TextStyle(
+    fontWeight: FontWeight.bold,
+    fontSize: 20,
+    color: AppColors.azulEscuro,
+  );
+
   /* ----- Campos de texto ----- */
   static const TextStyle textFieldTextStyle = TextStyle(
     color: Colors.black,
