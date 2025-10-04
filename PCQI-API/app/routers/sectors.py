@@ -60,7 +60,7 @@ def add_member_to_sector(
     admin_user: models.User = Depends(get_current_admin_user)
 ):
     """
-    Adiciona um usuário como membro de um setor.
+    Adiciona um usuário existente como membro de um setor.
     """
     user_to_add = crud.get_user(db, user_id=member_request.user_id)
     if not user_to_add:
@@ -69,5 +69,8 @@ def add_member_to_sector(
     sector = crud.get_sector(db, sector_id=sector_id)
     if not sector:
         raise HTTPException(status_code=404, detail="Sector not found")
+
+    if user_to_add in sector.members:
+        raise HTTPException(status_code=400, detail="User is already a member of this sector")
 
     return crud.add_user_to_sector(db=db, user=user_to_add, sector=sector)

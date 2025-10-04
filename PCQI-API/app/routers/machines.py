@@ -13,15 +13,25 @@ router = APIRouter()
     "/",
     response_model=schemas.Machine,
     status_code=status.HTTP_201_CREATED,
-    summary="Cria uma nova máquina",
+    summary="Cria uma nova máquina em um setor",
     description=desc.CREATE_MACHINE_DESCRIPTION
 )
-def create_machine_for_current_user(
+def create_machine(
     machine: schemas.MachineCreate,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    return crud.create_user_machine(db=db, machine=machine, user_id=current_user.id)
+    sector = crud.get_sector(db, sector_id=machine.sector_id)
+    if not sector:
+        raise HTTPException(status_code=404, detail="Sector not found")
+    
+    if current_user.role != "admin" and sector not in current_user.sectors:
+        raise HTTPException(
+            status_code=403, 
+            detail="Not authorized to add machines to this sector"
+        )
+
+    return crud.create_machine_in_sector(db=db, machine=machine, user_id=current_user.id)
 
 
 @router.get(
@@ -34,8 +44,7 @@ def read_user_machines(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    machines = crud.get_machines_by_user(db, user_id=current_user.id)
-    return machines
+    return crud.get_machines_for_user(db=db, user=current_user)
 
 
 @router.get(
@@ -53,7 +62,10 @@ def read_specific_machine(
     if db_machine is None:
         raise HTTPException(status_code=404, detail="Machine not found")
     
-    if db_machine.owner_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized to access this machine")
+    if current_user.role != "admin" and db_machine.sector not in current_user.sectors:
+        raise HTTPException(
+            status_code=403, 
+            detail="Not authorized to access this machine"
+        )
         
     return db_machine

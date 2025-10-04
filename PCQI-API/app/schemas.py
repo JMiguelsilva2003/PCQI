@@ -1,8 +1,9 @@
-from pydantic import BaseModel, ConfigDict, Field
 from datetime import datetime
-from typing import Optional, Annotated
+from typing import Optional, List, Annotated
+from pydantic import BaseModel, ConfigDict, Field
 
-# schemas dos users
+# Schemas de Usuário e Autenticação
+
 class UserBase(BaseModel):
     email: str
     name: str 
@@ -15,8 +16,11 @@ class User(UserBase):
     created_at: datetime
     role: str
     is_active: bool
-
     model_config = ConfigDict(from_attributes=True)
+
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    password: Optional[Annotated[str, Field(..., min_length=8)]] = None
 
 class Token(BaseModel):
     access_token: str
@@ -33,25 +37,32 @@ class ResetPasswordRequest(BaseModel):
     token: str
     new_password: Annotated[str, Field(..., min_length=8)]
 
-class UserUpdate(BaseModel):
-    name: Optional[str] = None
-    password: Optional[Annotated[str, Field(..., min_length=8)]] = None
+# Schemas para Setor
 
-# schemas dos setores
+class SectorBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+
+class SectorCreate(SectorBase):
+    pass
+
+class Sector(SectorBase):
+    id: int
+    model_config = ConfigDict(from_attributes=True)
 
 class MemberAddRequest(BaseModel):
     user_id: int
 
-# schemas das maquinas
+# Schemas para Máquina
+
 class MachineBase(BaseModel):
     name: str
 
 class MachineCreate(MachineBase):
-    pass
+    sector_id: int
 
 class Machine(MachineBase):
     id: int
-    owner_id: int
-    current_speed_ppm: int
-
+    sector_id: int
+    creator_id: int
     model_config = ConfigDict(from_attributes=True)

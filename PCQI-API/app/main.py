@@ -1,10 +1,6 @@
 from fastapi import FastAPI, Depends
-from app import models
-from app.database import engine
-from app.routers import auth, machines
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import auth, machines, admin, users, sectors 
-from app.auth import get_current_admin_user, get_current_user
+from app.routers import auth, machines, admin, users, sectors
 
 app = FastAPI(
     title="PCQI API",
@@ -27,14 +23,12 @@ app.add_middleware(
 )
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
-app.include_router(machines.router, prefix="/api/v1/machines", tags=["Machines"],)
-app.include_router(admin.router, prefix="/api/v1/admin", tags=["Admin"], dependencies=[Depends(get_current_admin_user)])
-app.include_router(users.router, prefix="/api/v1/users", tags=["Users"], dependencies=[Depends(get_current_user)])
-app.include_router(sectors.router, prefix="/api/v1/sectors", tags=["Sectors"], dependencies=[Depends(get_current_user)])
+app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
+app.include_router(machines.router, prefix="/api/v1/machines", tags=["Machines"])
+app.include_router(admin.router, prefix="/api/v1/admin", tags=["Admin"])
+app.include_router(sectors.router, prefix="/api/v1/sectors", tags=["Sectors"])
+
 
 @app.get("/")
 def read_root():
-    return {"message": "Bem-vindo à API do PCQI v1!"}
-
-# from app.routers import machines
-# app.include_router(machines.router, prefix="/api/v1/machines", tags=["Machines"])
+    return {"message": "Bem-vindo à API do PCQI v2!"}

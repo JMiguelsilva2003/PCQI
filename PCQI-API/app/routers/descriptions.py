@@ -14,26 +14,24 @@ Verifica as credenciais do usuário. Se estiverem corretas, gera e retorna um to
 - **Como usar**: O frontend deve salvar este token e enviá-lo no cabeçalho `Authorization` de requisições futuras (ex: `Authorization: Bearer <token>`).
 """
 
-# --- Descrições para o Módulo de Máquinas
-
 CREATE_MACHINE_DESCRIPTION = """
-Cria uma nova máquina para o usuário atualmente autenticado.
+Cria uma nova máquina e a associa a um setor específico.
 
-- **Segurança**: Rota protegida. Requer um token JWT válido.
-- **Recebe**: O nome da nova máquina.
+- **Segurança**: Rota protegida. O usuário deve ser membro do setor informado.
+- **Recebe**: O nome da nova máquina e o ID do setor.
 - **Retorna**: Os detalhes da máquina recém-criada.
 """
 
 READ_USER_MACHINES_DESCRIPTION = """
-Retorna uma lista de todas as máquinas pertencentes ao usuário autenticado.
+Retorna uma lista de todas as máquinas de todos os setores dos quais o usuário é membro.
 
 - **Segurança**: Rota protegida. Requer um token JWT válido.
-- **Retorna**: Uma lista contendo os detalhes de cada máquina do usuário.
+- **Retorna**: Uma lista contendo os detalhes de cada máquina.
 """
 
 READ_SPECIFIC_MACHINE_DESCRIPTION = """
 Retorna os detalhes de uma máquina específica pelo seu ID.
 
 - **Segurança**: Rota protegida. Requer um token JWT válido.
-- A API verifica se a máquina solicitada pertence de fato ao usuário autenticado antes de retornar os dados, prevenindo que um usuário acesse os dados de outro.
+- A API verifica se o usuário é membro do setor ao qual a máquina pertence antes de retornar os dados.
 """

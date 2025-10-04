@@ -41,14 +41,17 @@ def get_current_admin_user(
     current_user: models.User = Depends(get_current_user)
 ) -> models.User:
     """
-    Uma dependência que pode ser usada em rotas que só podem ser
-    acessadas por administradores. Primeiro, ela verifica se o usuário
-    está logado (usando get_current_user), e depois verifica se ele
-    tem a role 'admin'.
+    Uma dependência que verifica se o usuário atual é um admin.
     """
+    print(f"\n[DEBUG] Verificando permissão de admin para: {current_user.email}")
+    print(f"[DEBUG] Role do usuário no banco: '{current_user.role}'")
+
     if current_user.role != "admin":
+        print("[DEBUG] ACESSO NEGADO! Role não é 'admin'.")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
             detail="The user does not have enough privileges"
         )
+    
+    print("[DEBUG] ACESSO PERMITIDO! Role é 'admin'.")
     return current_user
