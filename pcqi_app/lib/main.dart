@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: LandingPage(),
+      home: TesteCamera(),
       routes: {
         //'/': (context) => LandingPage(),
         '/login': (context) => Login(),

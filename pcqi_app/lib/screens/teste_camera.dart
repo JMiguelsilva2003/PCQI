@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:marquee/marquee.dart';
 import 'package:pcqi_app/config/app_colors.dart';
 import 'package:pcqi_app/config/app_styles.dart';
+import 'package:pcqi_app/models/image_request_response_model.dart';
 import 'package:pcqi_app/services/camera_image_converter.dart';
 import 'package:pcqi_app/services/http_image_request.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -33,6 +34,7 @@ class _TesteCameraState extends State<TesteCamera> {
   CameraDescription? selectedCamera;
   CameraImageConverter cameraImageConverter = CameraImageConverter();
   HttpImageRequest httpImageRequest = HttpImageRequest();
+  bool isSendingImage = false;
 
   @override
   void initState() {
@@ -92,13 +94,7 @@ class _TesteCameraState extends State<TesteCamera> {
         enableAudio: false,
       );
       try {
-        await cameraController.initialize().then(
-          (_) => {
-            /*cameraController.startImageStream(
-            (image) => print(DateTime.now().second),
-          ),*/
-          },
-        );
+        await cameraController.initialize();
       } catch (e) {
         if (!mounted) return;
         setState(() {
@@ -359,15 +355,20 @@ class _TesteCameraState extends State<TesteCamera> {
     );
   }
 
-  sendImageStream(String ip) {
-    cameraController.startImageStream((_) {
-      (image) async {
-        var convertedImage = await cameraImageConverter.convertImage(image);
-        print("imagem convertida");
-        if (convertedImage != null) {
-          httpImageRequest.sendImageBytes(convertedImage, ip.trim());
+  sendImageStream(String ip) async {
+    await cameraController.startImageStream((image) async {
+      if (isSendingImage) return;
+      isSendingImage = true;
+      var convertedImage = await cameraImageConverter.convertImage(image);
+
+      if (convertedImage != null) {
+        ImageRequestResponseModel? responseFromServer = await httpImageRequest
+            .sendImage(convertedImage, ip.trim());
+        if (responseFromServer != null) {
+          print(responseFromServer.prediction);
         }
-      };
+      }
+      isSendingImage = false;
     });
   }
 

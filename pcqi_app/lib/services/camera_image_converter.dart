@@ -8,7 +8,6 @@ class CameraImageConverter {
     try {
       final image = convertCameraImage(cameraImage);
 
-      // Redimensiona e comprime
       final resizedImage = img.copyResize(
         image,
         width: 640,
@@ -16,12 +15,11 @@ class CameraImageConverter {
         maintainAspect: true,
       );
 
-      // Converte para JPEG em memória
       final jpegBytes = img.encodeJpg(resizedImage, quality: 70);
 
       return jpegBytes;
     } catch (e) {
-      print('Erro ao processar imagem: $e');
+      print('Error while processing image: $e');
       return null;
     }
   }
@@ -37,7 +35,7 @@ class CameraImageConverter {
     throw Exception('Image type not supported');
   }
 
-  // Conversão para YUV420 (formato comum em Android)
+  // YUV420 to image converter (Android)
   img.Image _convertYUV420ToImage(CameraImage cameraImage) {
     final width = cameraImage.width;
     final height = cameraImage.height;
@@ -48,16 +46,22 @@ class CameraImageConverter {
 
     final image = img.Image(width: width, height: height);
 
-    for (var y = 0; y < height; y++) {
-      for (var x = 0; x < width; x++) {
+    final effectiveHeight = (yPlane.bytes.length / yPlane.bytesPerRow)
+        .floor()
+        .clamp(0, height);
+    final effectiveWidth = (yPlane.bytesPerRow).clamp(0, width);
+
+    for (var y = 0; y < effectiveHeight; y++) {
+      for (var x = 0; x < effectiveWidth; x++) {
         final yIndex = y * yPlane.bytesPerRow + x;
-        final uvIndex = (y ~/ 2) * uPlane.bytesPerRow + (x ~/ 2) * 2;
+        final uvX = x ~/ 2;
+        final uvY = y ~/ 2;
+        final uvIndex = uvY * uPlane.bytesPerRow + uvX;
 
         final yValue = yPlane.bytes[yIndex].toDouble();
         final uValue = uPlane.bytes[uvIndex].toDouble() - 128;
-        final vValue = vPlane.bytes[uvIndex + 1].toDouble() - 128;
+        final vValue = vPlane.bytes[uvIndex].toDouble() - 128;
 
-        // Conversão YUV para RGB
         final r = (yValue + 1.402 * vValue).clamp(0, 255).toInt();
         final g = (yValue - 0.344136 * uValue - 0.714136 * vValue)
             .clamp(0, 255)
@@ -71,7 +75,49 @@ class CameraImageConverter {
     return image;
   }
 
-  // Conversão para BGRA8888 (formato comum em iOS)
+  /* // Testing conversion
+  img.Image _convertYUV420ToImage(CameraImage cameraImage) {
+    final width = cameraImage.width;
+    final height = cameraImage.height;
+
+    final yPlane = cameraImage.planes[0];
+    final uPlane = cameraImage.planes[1];
+    final vPlane = cameraImage.planes[2];
+
+    final image = img.Image(width: width, height: height);
+
+    for (var y = 0; y < height; y++) {
+      for (var x = 0; x < width; x++) {
+        final yIndex = (y * yPlane.bytesPerRow) + x;
+        final uvX = x ~/ 2;
+        final uvY = y ~/ 2;
+        final uvIndex = (uvY * uPlane.bytesPerRow) + uvX;
+
+        
+        if (yIndex >= yPlane.bytes.length ||
+            uvIndex >= uPlane.bytes.length ||
+            uvIndex >= vPlane.bytes.length) {
+          continue; 
+        }
+
+        final yPixel = yPlane.bytes[yIndex].toDouble();
+        final uPixel = uPlane.bytes[uvIndex].toDouble() - 128.0;
+        final vPixel = vPlane.bytes[uvIndex].toDouble() - 128.0;
+
+        final r = (yPixel + 1.370705 * vPixel).clamp(0, 255).toInt();
+        final g = (yPixel - 0.337633 * uPixel - 0.698001 * vPixel)
+            .clamp(0, 255)
+            .toInt();
+        final b = (yPixel + 1.732446 * uPixel).clamp(0, 255).toInt();
+
+        image.setPixelRgba(x, y, r, g, b, 255);
+      }
+    }
+
+    return image;
+  }*/
+
+  // BGRA8888 to image converter (iOS)
   img.Image _convertBGRA8888ToImage(CameraImage cameraImage) {
     final width = cameraImage.width;
     final height = cameraImage.height;
