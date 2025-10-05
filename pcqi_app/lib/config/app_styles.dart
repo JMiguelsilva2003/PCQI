@@ -81,7 +81,7 @@ class AppStyles {
 
   static final TextStyle textStyleStreamingState = TextStyle(
     fontWeight: FontWeight.bold,
-    fontSize: 20,
+    fontSize: 13,
     color: AppColors.preto,
   );
 
