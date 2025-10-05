@@ -157,7 +157,8 @@ class _TesteCameraState extends State<TesteCamera> {
                   ),
                   Expanded(
                     flex: 1,
-                    child: Column(
+                    child: ListView(
+                      padding: EdgeInsets.zero,
                       children: [
                         SizedBox(height: 20),
                         buildMachineTitle(
@@ -249,11 +250,13 @@ class _TesteCameraState extends State<TesteCamera> {
             );
           }).toList(),
           onChanged: (camera) {
-            setState(() async {
-              await cameraController.dispose();
-              await startCamera(selectedCamera);
-              selectedCamera = camera;
-            });
+            if (camera!.name != selectedCamera!.name) {
+              setState(() async {
+                selectedCamera = camera;
+                await cameraController.dispose();
+                await startCamera(selectedCamera);
+              });
+            }
           },
         ),
       ],
@@ -278,11 +281,13 @@ class _TesteCameraState extends State<TesteCamera> {
             );
           }).toList(),
           onChanged: (resolution) {
-            setState(() async {
-              currentResolution = resolution!;
-              await cameraController.dispose();
-              await startCamera(selectedCamera);
-            });
+            if (resolution != currentResolution) {
+              setState(() async {
+                currentResolution = resolution!;
+                await cameraController.dispose();
+                await startCamera(selectedCamera);
+              });
+            }
           },
         ),
       ],
