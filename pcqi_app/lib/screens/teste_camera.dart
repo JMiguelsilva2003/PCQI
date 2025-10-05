@@ -42,9 +42,7 @@ class _TesteCameraState extends State<TesteCamera> {
 
   final GlobalKey<FormState> formKeyServerAddress = GlobalKey<FormState>();
   final TextEditingController inputIp = TextEditingController();
-  final TextEditingController inputPort = TextEditingController();
   final FocusNode focusNodeIp = FocusNode();
-  final FocusNode focusNodePort = FocusNode();
   bool showFormValidationError = false;
 
   @override
@@ -226,14 +224,14 @@ class _TesteCameraState extends State<TesteCamera> {
       collapsed: Spacer(),
       expanded: Column(
         children: [
-          buildDropdownMenu(
+          buildCameraSelectionDropdownMenu(
             getCameraListFromCurrentLensDirection(selectedCamera!),
           ),
           SizedBox(height: 10),
-          buildResolutionDropdownMenu(resolutionPresetList),
+          buildResolutionSelectionDropdownMenu(resolutionPresetList),
           SizedBox(height: 10),
           if (backCameras.isNotEmpty && frontCameras.isNotEmpty)
-            changeToFrontCamera(),
+            buildChangeCameraFacingButton(),
         ],
       ),
     ),
@@ -283,7 +281,7 @@ class _TesteCameraState extends State<TesteCamera> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(Icons.verified_rounded),
+            Icon(Icons.task_alt_rounded),
             SizedBox(width: 5),
             Text(
               "Status: transmitindo frames",
@@ -349,9 +347,6 @@ class _TesteCameraState extends State<TesteCamera> {
         return serverIpValidation.message;
       },
       onChanged: onChangedForm,
-      onFieldSubmitted: (_) {
-        FocusScope.of(context).requestFocus(focusNodePort);
-      },
     ),
   );
 
@@ -377,7 +372,7 @@ class _TesteCameraState extends State<TesteCamera> {
     );
   }
 
-  Widget buildDropdownMenu(List<CameraDescription> camerasList) {
+  Widget buildCameraSelectionDropdownMenu(List<CameraDescription> camerasList) {
     return Row(
       children: [
         Text("Câmera:", style: AppStyles.textStyleCameraOptions),
@@ -392,13 +387,17 @@ class _TesteCameraState extends State<TesteCamera> {
               child: Text(camera.name),
             );
           }).toList(),
-          onChanged: (camera) {
-            if (camera!.name != selectedCamera!.name) {
-              setState(() async {
+          onChanged: (camera) async {
+            if (camera != null && camera.name != selectedCamera!.name) {
+              if (isStreamRunning) {
+                await cameraController.stopImageStream();
+              }
+
+              setState(() {
+                isStreamRunning = false;
                 selectedCamera = camera;
-                await cameraController.dispose();
-                await startCamera(selectedCamera);
               });
+              await startCamera(selectedCamera);
             }
           },
         ),
@@ -406,7 +405,7 @@ class _TesteCameraState extends State<TesteCamera> {
     );
   }
 
-  Widget buildResolutionDropdownMenu(
+  Widget buildResolutionSelectionDropdownMenu(
     List<ResolutionPreset> resolutionPresetList,
   ) {
     return Row(
@@ -423,13 +422,16 @@ class _TesteCameraState extends State<TesteCamera> {
               child: Text(resolution.name),
             );
           }).toList(),
-          onChanged: (resolution) {
-            if (resolution != currentResolution) {
-              setState(() async {
-                currentResolution = resolution!;
-                await cameraController.dispose();
-                await startCamera(selectedCamera);
+          onChanged: (resolution) async {
+            if (resolution != null && resolution != currentResolution) {
+              if (isStreamRunning) {
+                await cameraController.stopImageStream();
+              }
+              setState(() {
+                isStreamRunning = false;
+                currentResolution = resolution;
               });
+              await startCamera(selectedCamera);
             }
           },
         ),
@@ -453,6 +455,7 @@ class _TesteCameraState extends State<TesteCamera> {
             onPressed: () async {
               bool isValid = checkFormFieldValidation(formKeyServerAddress);
               if (isValid) {
+                sendImageStream(inputIp.text);
                 setState(() {
                   isStreamRunning = true;
                 });
@@ -475,6 +478,7 @@ class _TesteCameraState extends State<TesteCamera> {
               setState(() {
                 isStreamRunning = false;
               });
+              await cameraController.stopImageStream();
             }
           },
         ),
@@ -494,39 +498,6 @@ class _TesteCameraState extends State<TesteCamera> {
           onPressed: () => closeScreen(),
         ),
       ),
-    );
-  }
-
-  Future<String?> askForIp(BuildContext context) async {
-    TextEditingController controller = TextEditingController();
-
-    return showDialog<String>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Digite o IP do servidor'),
-          content: TextField(
-            controller: controller,
-            decoration: InputDecoration(hintText: 'Ex: 192.168.0.15'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                cameraController.stopImageStream();
-                Navigator.of(context).pop();
-              },
-              child: Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: () {
-                sendImageStream(controller.text);
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
     );
   }
 
@@ -718,18 +689,24 @@ class _TesteCameraState extends State<TesteCamera> {
     );
   }
 
-  Widget changeToFrontCamera() {
+  Widget buildChangeCameraFacingButton() {
     return SizedBox(
       height: 50,
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () {
+        onPressed: () async {
+          if (isStreamRunning) {
+            await cameraController.stopImageStream();
+          }
+
           setState(() {
+            isStreamRunning = false;
             if (selectedCamera!.lensDirection == CameraLensDirection.back) {
               selectedCamera = frontCameras.first;
             } else {
               selectedCamera = backCameras.first;
             }
+
             startCamera(selectedCamera!);
           });
         },
