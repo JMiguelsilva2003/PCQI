@@ -9,6 +9,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const newTabBtn = document.getElementById("newtab");
   const tabsContainer = document.querySelector(".tabs");
 
+  const homeLogo = document.getElementById("homeLogo");
+  const perfilDisplay = document.getElementById("perfil-display");
+
   let tabCount = 0;
 
   newTabBtn.addEventListener("click", () => {
@@ -37,4 +40,57 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Ativa a aba automaticamente ao criá-la
     activateTab();
   });
+  
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const homeLogo = document.getElementById("homeLogo");
+    const perfilDisplay = document.getElementById("perfil-display");
+
+    if (homeLogo) {
+      homeLogo.addEventListener("click", () => {
+        window.location.href = "../screens/dashboard.html";
+      });
+    }
+
+    if (!perfilDisplay) return;
+
+    const userName = localStorage.getItem("userName");
+    const accessToken = localStorage.getItem("accessToken");
+
+    if (userName) {
+      perfilDisplay.textContent = userName;
+      perfilDisplay.style.cursor = "pointer";
+      perfilDisplay.addEventListener("click", () => {
+        window.location.href = "../screens/user-board.html";
+      });
+
+    } else if (accessToken) {
+      perfilDisplay.textContent = "Carregando perfil...";
+      perfilDisplay.style.cursor = "wait";
+
+      try {
+        const userData = await getUserData(accessToken);
+        const newUserName = userData.name;
+        localStorage.setItem("userName", newUserName);
+
+        perfilDisplay.textContent = newUserName;
+        perfilDisplay.style.cursor = "pointer";
+        perfilDisplay.addEventListener("click", () => {
+          window.location.href = "../screens/user-board.html";
+        });
+
+      } catch (error) {
+        alert("Sua sessão expirou. Faça login novamente.");
+        localStorage.clear();
+        window.location.href = "../screens/login.html";
+      }
+
+    } else {
+      window.location.href = "../screens/login.html";
+    }
+  } catch (err) {
+    console.error("Erro no header:", err);
+  }
+});
+
 });

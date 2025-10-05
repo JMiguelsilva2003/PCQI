@@ -65,3 +65,15 @@ async function resetPassword(token, newPassword) {
     }
     return data;
 }
+
+async function getUserData(token) {
+    const response = await fetch(`${API_BASE_URL}/api/v1/users/me`, {
+        method: 'GET',
+        headers: {'Authorization': `Bearer ${token}`}
+    });
+    const data= await response.json();
+    if (!response.ok){
+        throw new Error(data.detail || 'Erro ao redefinir a senha.');
+    }
+    return data
+}
