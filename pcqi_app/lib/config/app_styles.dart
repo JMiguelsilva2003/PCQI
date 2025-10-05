@@ -74,7 +74,7 @@ class AppStyles {
     );
   }
 
-  static final TextStyle textStyleCameraOptions = TextStyle(
+  static final TextStyle textStyleOptionsTab = TextStyle(
     fontWeight: FontWeight.bold,
     fontSize: 15,
   );

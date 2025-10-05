@@ -45,6 +45,9 @@ class _TesteCameraState extends State<TesteCamera> {
   final FocusNode focusNodeIp = FocusNode();
   bool showFormValidationError = false;
 
+  String resultTextPrediction = "";
+  String resultTextConfidence = "";
+
   @override
   void initState() {
     super.initState();
@@ -204,7 +207,7 @@ class _TesteCameraState extends State<TesteCamera> {
   }
 
   Widget buildCameraOptions() => Container(
-    padding: EdgeInsets.all(5),
+    padding: EdgeInsets.all(10),
     margin: EdgeInsets.all(8),
     decoration: BoxDecoration(
       color: AppColors.cinzaClaro,
@@ -217,7 +220,7 @@ class _TesteCameraState extends State<TesteCamera> {
           title: Text(
             "Opções de câmera",
             textAlign: TextAlign.center,
-            style: AppStyles.textStyleCameraOptions,
+            style: AppStyles.textStyleOptionsTab,
           ),
         ),
       ),
@@ -251,7 +254,7 @@ class _TesteCameraState extends State<TesteCamera> {
           title: Text(
             "Opções de transmissão",
             textAlign: TextAlign.center,
-            style: AppStyles.textStyleCameraOptions,
+            style: AppStyles.textStyleOptionsTab,
           ),
         ),
       ),
@@ -261,6 +264,8 @@ class _TesteCameraState extends State<TesteCamera> {
           buildStreamingStatus(),
           SizedBox(height: 10),
           Form(key: formKeyServerAddress, child: buildTextFormServerAddress()),
+          SizedBox(height: 10),
+          buildRequestResults(),
           SizedBox(height: 10),
           buildStartStopStreamButton(),
         ],
@@ -302,7 +307,7 @@ class _TesteCameraState extends State<TesteCamera> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(Icons.cancel_outlined),
+          Icon(Icons.pause_circle_outline_rounded),
           SizedBox(width: 5),
           Text(
             "Status: não está transmitindo",
@@ -375,7 +380,7 @@ class _TesteCameraState extends State<TesteCamera> {
   Widget buildCameraSelectionDropdownMenu(List<CameraDescription> camerasList) {
     return Row(
       children: [
-        Text("Câmera:", style: AppStyles.textStyleCameraOptions),
+        Text("Câmera:", style: AppStyles.textStyleOptionsTab),
         SizedBox(width: 10),
         DropdownButton<CameraDescription>(
           borderRadius: BorderRadius.circular(8),
@@ -410,7 +415,7 @@ class _TesteCameraState extends State<TesteCamera> {
   ) {
     return Row(
       children: [
-        Text("Resolução:", style: AppStyles.textStyleCameraOptions),
+        Text("Resolução:", style: AppStyles.textStyleOptionsTab),
         SizedBox(width: 10),
         DropdownButton<ResolutionPreset>(
           borderRadius: BorderRadius.circular(8),
@@ -515,12 +520,33 @@ class _TesteCameraState extends State<TesteCamera> {
         ImageRequestResponseModel? responseFromServer = await httpImageRequest
             .sendImage(convertedImage, ip.trim());
         if (responseFromServer != null) {
-          print(responseFromServer.prediction);
+          setState(() {
+            resultTextPrediction = responseFromServer.prediction!;
+            resultTextConfidence = responseFromServer.confidence!;
+          });
         }
       }
       isCurrentlySendingImage = false;
     });
   }
+
+  Widget buildRequestResults() => Container(
+    margin: EdgeInsets.symmetric(horizontal: 8),
+    padding: EdgeInsets.all(4),
+    width: double.infinity,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(10),
+      border: Border.all(color: AppColors.preto, width: 1),
+    ),
+
+    child: Column(
+      children: [
+        Text("Resultado", style: AppStyles.textStyleOptionsTab),
+        Text("prediction: $resultTextPrediction"),
+        Text("confidence: $resultTextConfidence"),
+      ],
+    ),
+  );
 
   void closeScreen() {
     AwesomeDialog(
@@ -534,7 +560,9 @@ class _TesteCameraState extends State<TesteCamera> {
       btnCancelText: "Cancelar",
       btnCancelColor: AppColors.azulEscuro,
       btnCancelOnPress: () {},
-      btnOkOnPress: () {},
+      btnOkOnPress: () {
+        Navigator.pop(context);
+      },
     ).show();
   }
 
