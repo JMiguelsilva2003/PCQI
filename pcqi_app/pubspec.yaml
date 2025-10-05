@@ -41,6 +41,7 @@ dependencies:
   network_info_plus: ^7.0.0
   image: ^4.0.17
   http_parser: ^4.1.2
+  expandable: ^5.0.1
   
   flutter:
     sdk: flutter

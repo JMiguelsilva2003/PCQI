@@ -1,13 +1,16 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:camera/camera.dart';
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:marquee/marquee.dart';
 import 'package:pcqi_app/config/app_colors.dart';
 import 'package:pcqi_app/config/app_styles.dart';
 import 'package:pcqi_app/models/image_request_response_model.dart';
+import 'package:pcqi_app/models/validation_result.dart';
 import 'package:pcqi_app/services/camera_image_converter.dart';
 import 'package:pcqi_app/services/http_image_request.dart';
+import 'package:pcqi_app/utils/validators.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class TesteCamera extends StatefulWidget {
@@ -34,7 +37,15 @@ class _TesteCameraState extends State<TesteCamera> {
   CameraDescription? selectedCamera;
   CameraImageConverter cameraImageConverter = CameraImageConverter();
   HttpImageRequest httpImageRequest = HttpImageRequest();
-  bool isSendingImage = false;
+  bool isStreamRunning = false;
+  bool isCurrentlySendingImage = false;
+
+  final GlobalKey<FormState> formKeyServerAddress = GlobalKey<FormState>();
+  final TextEditingController inputIp = TextEditingController();
+  final TextEditingController inputPort = TextEditingController();
+  final FocusNode focusNodeIp = FocusNode();
+  final FocusNode focusNodePort = FocusNode();
+  bool showFormValidationError = false;
 
   @override
   void initState() {
@@ -166,38 +177,14 @@ class _TesteCameraState extends State<TesteCamera> {
                         ),
                         SizedBox(height: 30),
 
-                        Container(
-                          padding: EdgeInsets.all(8),
-                          margin: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: AppColors.cinzaClaro,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Column(
-                            children: [
-                              Text(
-                                textAlign: TextAlign.center,
-                                "Opções de câmera",
-                                style: AppStyles.textStyleCameraOptions,
-                              ),
-                              SizedBox(height: 20),
-                              buildDropdownMenu(
-                                getCameraListFromCurrentLensDirection(
-                                  selectedCamera!,
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                              buildResolutionDropdownMenu(resolutionPresetList),
-                              SizedBox(height: 10),
-                              if (backCameras.isNotEmpty &&
-                                  frontCameras.isNotEmpty)
-                                changeToFrontCamera(),
-                              buildStartStreamButton(),
-                            ],
-                          ),
+                        Column(
+                          children: [
+                            buildCameraOptions(),
+                            buildStreamingOptions(),
+                          ],
                         ),
 
-                        Spacer(),
+                        SizedBox(height: 30),
                         goBackButton(),
                       ],
                     ),
@@ -215,6 +202,162 @@ class _TesteCameraState extends State<TesteCamera> {
         return cameraDenied();
       }
       return cameraPermanentlyDenied();
+    }
+  }
+
+  Widget buildCameraOptions() => Container(
+    padding: EdgeInsets.all(5),
+    margin: EdgeInsets.all(8),
+    decoration: BoxDecoration(
+      color: AppColors.cinzaClaro,
+      borderRadius: BorderRadius.circular(10),
+    ),
+
+    child: ExpandablePanel(
+      header: Center(
+        child: ListTile(
+          title: Text(
+            "Opções de câmera",
+            textAlign: TextAlign.center,
+            style: AppStyles.textStyleCameraOptions,
+          ),
+        ),
+      ),
+      collapsed: Spacer(),
+      expanded: Column(
+        children: [
+          buildDropdownMenu(
+            getCameraListFromCurrentLensDirection(selectedCamera!),
+          ),
+          SizedBox(height: 10),
+          buildResolutionDropdownMenu(resolutionPresetList),
+          SizedBox(height: 10),
+          if (backCameras.isNotEmpty && frontCameras.isNotEmpty)
+            changeToFrontCamera(),
+        ],
+      ),
+    ),
+  );
+
+  Widget buildStreamingOptions() => Container(
+    padding: EdgeInsets.all(5),
+    margin: EdgeInsets.all(8),
+    decoration: BoxDecoration(
+      color: AppColors.cinzaClaro,
+      borderRadius: BorderRadius.circular(10),
+    ),
+
+    child: ExpandablePanel(
+      header: Center(
+        child: ListTile(
+          title: Text(
+            "Opções de transmissão",
+            textAlign: TextAlign.center,
+            style: AppStyles.textStyleCameraOptions,
+          ),
+        ),
+      ),
+      collapsed: buildStreamingStatus(),
+      expanded: Column(
+        children: [
+          buildStreamingStatus(),
+          SizedBox(height: 10),
+          Form(key: formKeyServerAddress, child: buildTextFormServerAddress()),
+          SizedBox(height: 10),
+          buildStartStopStreamButton(),
+        ],
+      ),
+    ),
+  );
+
+  Widget buildStreamingStatus() {
+    if (isStreamRunning) {
+      return Container(
+        margin: EdgeInsets.symmetric(horizontal: 8),
+        padding: EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: AppColors.verde,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(Icons.verified_rounded),
+            SizedBox(width: 5),
+            Text(
+              "Status: transmitindo frames",
+              style: AppStyles.textStyleStreamingState,
+            ),
+          ],
+        ),
+      );
+    }
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 8),
+      padding: EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppColors.amarelo,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(Icons.cancel_outlined),
+          SizedBox(width: 5),
+          Text(
+            "Status: não está transmitindo",
+            style: AppStyles.textStyleStreamingState,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildTextFormServerAddress() => Padding(
+    padding: EdgeInsets.all(8.0),
+    child: TextFormField(
+      controller: inputIp,
+      focusNode: focusNodeIp,
+      autofillHints: [AutofillHints.url],
+      keyboardType: TextInputType.url,
+      enabled: !isStreamRunning,
+      buildCounter:
+          (
+            BuildContext context, {
+            int? currentLength,
+            int? maxLength,
+            bool? isFocused,
+          }) => null,
+      inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'\s'))],
+      style: AppStyles.textFieldTextStyle,
+      decoration: AppStyles.textFieldDecoration("Endereço do servidor")
+          .copyWith(
+            fillColor: isStreamRunning ? AppColors.cinza : AppColors.cinzaClaro,
+          ),
+      textInputAction: TextInputAction.done,
+      validator: (value) {
+        ValidationResult serverIpValidation =
+            Validators.checkServerAddressField(value);
+        if (serverIpValidation.shouldThrowValidationError &&
+            !showFormValidationError) {
+          setState(() {
+            showFormValidationError = true;
+          });
+        }
+        return serverIpValidation.message;
+      },
+      onChanged: onChangedForm,
+      onFieldSubmitted: (_) {
+        FocusScope.of(context).requestFocus(focusNodePort);
+      },
+    ),
+  );
+
+  void onChangedForm(String value) {
+    if (showFormValidationError) {
+      formKeyServerAddress.currentState!.validate();
     }
   }
 
@@ -294,18 +437,45 @@ class _TesteCameraState extends State<TesteCamera> {
     );
   }
 
-  Widget buildStartStreamButton() {
+  Widget buildStartStopStreamButton() {
+    if (!isStreamRunning) {
+      return SizedBox(
+        height: 50,
+        width: double.infinity,
+        child: Container(
+          margin: const EdgeInsets.only(left: 15, right: 15, bottom: 10),
+          child: ElevatedButton(
+            style: AppStyles.buttonStyle(
+              AppColors.branco,
+              AppColors.azulEscuro,
+            ),
+            child: Text("Iniciar transmissão"),
+            onPressed: () async {
+              bool isValid = checkFormFieldValidation(formKeyServerAddress);
+              if (isValid) {
+                setState(() {
+                  isStreamRunning = true;
+                });
+              }
+            },
+          ),
+        ),
+      );
+    }
     return SizedBox(
       height: 50,
       width: double.infinity,
       child: Container(
         margin: const EdgeInsets.only(left: 15, right: 15, bottom: 10),
         child: ElevatedButton(
-          style: AppStyles.buttonStyle(AppColors.branco, AppColors.vermelho),
-          child: Text("Iniciar stream"),
+          style: AppStyles.buttonStyle(AppColors.branco, AppColors.azulEscuro),
+          child: Text("Parar transmissão"),
           onPressed: () async {
-            String? ip = await askForIp(context);
-            if (ip != null) {}
+            if (isStreamRunning) {
+              setState(() {
+                isStreamRunning = false;
+              });
+            }
           },
         ),
       ),
@@ -360,10 +530,14 @@ class _TesteCameraState extends State<TesteCamera> {
     );
   }
 
+  bool checkFormFieldValidation(formKey) {
+    return formKey.currentState!.validate();
+  }
+
   sendImageStream(String ip) async {
     await cameraController.startImageStream((image) async {
-      if (isSendingImage) return;
-      isSendingImage = true;
+      if (isCurrentlySendingImage) return;
+      isCurrentlySendingImage = true;
       var convertedImage = await cameraImageConverter.convertImage(image);
 
       if (convertedImage != null) {
@@ -373,7 +547,7 @@ class _TesteCameraState extends State<TesteCamera> {
           print(responseFromServer.prediction);
         }
       }
-      isSendingImage = false;
+      isCurrentlySendingImage = false;
     });
   }
 

@@ -60,4 +60,18 @@ class Validators {
     }
     return ValidationResult(shouldThrowValidationError: false, message: null);
   }
+
+  static ValidationResult checkServerAddressField(String? value) {
+    // Checks if the field is not empty
+    if (value!.isEmpty) {
+      return ValidationResult(message: "O campo não pode estar vazio");
+    }
+    // Checks if thw fields starts with http:// or https://
+    else if (!value.startsWith("http://") && !value.startsWith("https://")) {
+      return ValidationResult(
+        message: "Deve começar com \"http://\" ou \"https://\"",
+      );
+    }
+    return ValidationResult(shouldThrowValidationError: false, message: null);
+  }
 }

@@ -79,6 +79,12 @@ class AppStyles {
     fontSize: 15,
   );
 
+  static final TextStyle textStyleStreamingState = TextStyle(
+    fontWeight: FontWeight.bold,
+    fontSize: 20,
+    color: AppColors.preto,
+  );
+
   /* ----- Estilos específicos para a biblioteca LoadingIconButton ----- */
   static final LoadingButtonStyle loadingButtonStyle = LoadingButtonStyle(
     backgroundColor: AppColors.azulEscuro,

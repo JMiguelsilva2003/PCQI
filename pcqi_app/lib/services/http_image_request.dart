@@ -11,7 +11,7 @@ class HttpImageRequest {
     String ip,
   ) async {
     try {
-      final finalUrl = "http://$ip/predict";
+      final finalUrl = "$ip/predict";
       final request = http.MultipartRequest('POST', Uri.parse(finalUrl));
 
       request.files.add(
