@@ -23,7 +23,7 @@ class MachineModel {
       'name': name,
       'id': id,
       'sector_id': sectorId,
-      'crreator_id': creatorId,
+      'creator_id': creatorId,
     };
   }
 }

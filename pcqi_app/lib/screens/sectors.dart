@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pcqi_app/models/machine_model.dart';
+import 'package:pcqi_app/models/sector_model.dart';
 import 'package:pcqi_app/services/request_methods.dart';
 import 'package:pcqi_app/widgets/custom_list_view_card.dart';
 
@@ -11,7 +12,8 @@ class Sectors extends StatefulWidget {
 }
 
 class _SectorsState extends State<Sectors> {
-  List<MachineModel> machineList = [];
+  List<SectorModel> sectorList = [];
+  List<MachineModel>? machinesList = [];
   late RequestMethods requestMethods;
 
   @override
@@ -25,19 +27,24 @@ class _SectorsState extends State<Sectors> {
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () async {
-          List<MachineModel>? machineListFromServer = await requestMethods
-              .getMachineList();
-          if (machineListFromServer != null) {
+          List<SectorModel>? sectors = await requestMethods.getSectorList();
+          List<MachineModel>? machines = await requestMethods.getMachineList();
+          if (sectors != null) {
             setState(() {
-              machineList = machineListFromServer;
+              sectorList = sectors;
+              machinesList = machines;
             });
           }
         },
         child: Center(
           child: ListView.builder(
-            itemCount: machineList.length,
+            itemCount: sectorList.length,
             itemBuilder: (BuildContext context, int index) {
-              return CustomListViewCard(title: machineList[index].name!);
+              return CustomSectorViewCard(
+                name: sectorList[index].name!,
+                description: sectorList[index].description!,
+                machines: [],
+              );
             },
           ),
         ),

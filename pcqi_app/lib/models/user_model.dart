@@ -1,4 +1,5 @@
 import 'package:pcqi_app/models/machine_model.dart';
+import 'package:pcqi_app/models/sector_model.dart';
 
 class UserModel {
   String? email;
@@ -8,6 +9,7 @@ class UserModel {
   String? createdAt;
   String? role;
   List<MachineModel> machines;
+  List<SectorModel> sectors;
   String? detail;
   String? message;
   String? accessToken;
@@ -22,6 +24,7 @@ class UserModel {
     this.createdAt = "",
     this.role = "",
     this.machines = const [],
+    this.sectors = const [],
     this.detail = "",
     this.message = "",
     this.accessToken = "",
@@ -37,6 +40,7 @@ class UserModel {
     name: json['name'] ?? '',
     role: json['role'] ?? '',
     machines: json['machines'] ?? [],
+    sectors: json['sectors'] ?? [],
     detail: json['detail'] ?? '',
     message: json['message'] ?? '',
     createdAt: json['created_at'] ?? '',
@@ -54,6 +58,7 @@ class UserModel {
       'name': name,
       'role': role,
       // machine field is missing by now
+      // sectors field is missing by now
       'detail': detail,
       'message': message,
       'created_at': createdAt,
