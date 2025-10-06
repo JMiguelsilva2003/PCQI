@@ -9,7 +9,8 @@ from app.security import (
     SECRET_KEY, ALGORITHM,
     verify_password,
     create_access_token,
-    create_refresh_token
+    create_refresh_token,
+    pwd_context
 )
 from app.routers import descriptions as desc
 from app.services.email_service import send_verification_email, send_password_reset_email
@@ -78,6 +79,11 @@ def login_for_access_token(
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    
+    if pwd_context.needs_update(user.hashed_password):
+        # Se precisar, atualiza a senha no banco para o novo formato (argon2)
+        crud.update_user_password(db, user=user, new_password=form_data.password)
+        print(f"Senha do usuário {user.email} foi atualizada para o novo formato.")
     
     if not user.is_active:
         raise HTTPException(
