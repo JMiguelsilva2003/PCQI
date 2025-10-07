@@ -11,4 +11,5 @@ class AppColors {
   static final vermelho = Colors.red;
   static final amarelo = Colors.yellow;
   static final verde = Colors.green;
+  static final danger = const Color.fromRGBO(255, 210, 74, 1);
 }

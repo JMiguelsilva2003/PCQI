@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pcqi_app/screens/forgot_password.dart';
 import 'package:pcqi_app/screens/homepage_widget.dart';
+import 'package:pcqi_app/screens/perfil.dart';
 import 'package:pcqi_app/screens/register.dart';
 import 'package:pcqi_app/screens/landing_page.dart';
 import 'package:pcqi_app/screens/login.dart';
