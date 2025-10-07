@@ -81,7 +81,6 @@ def login_for_access_token(
         )
     
     if pwd_context.needs_update(user.hashed_password):
-        # Se precisar, atualiza a senha no banco para o novo formato (argon2)
         crud.update_user_password(db, user=user, new_password=form_data.password)
         print(f"Senha do usuário {user.email} foi atualizada para o novo formato.")
     
