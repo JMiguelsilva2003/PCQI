@@ -52,47 +52,57 @@ class _SectorsState extends State<Sectors> {
       );
     } else {
       if (sectorList.isNotEmpty) {
-        return Center(
-          child: ListView.builder(
-            itemCount: sectorList.length,
-            itemBuilder: (BuildContext context, int index) {
-              return CustomSectorViewCard(
-                name: sectorList[index].name!,
-                description: sectorList[index].description!,
-                machines: [],
-              );
-            },
+        return RefreshIndicator(
+          onRefresh: () async {
+            await getSectorsAndMachinesList();
+          },
+          child: Center(
+            child: ListView.builder(
+              itemCount: sectorList.length,
+              itemBuilder: (BuildContext context, int index) {
+                return CustomSectorViewCard(
+                  name: sectorList[index].name!,
+                  description: sectorList[index].description!,
+                  machines: [],
+                );
+              },
+            ),
           ),
         );
       } else {
-        return Stack(
-          children: [
-            ListView(children: [
-                      ],
-                    ),
-            Align(
-              alignment: Alignment.center,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.sentiment_dissatisfied_rounded,
-                      size: 50,
-                      color: AppColors.azulEscuro,
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      "Não foram encontrados setores cadastrados em seu usuário",
-                      style: AppStyles.textStyleTituloSecundario,
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+        return RefreshIndicator(
+          onRefresh: () async {
+            await getSectorsAndMachinesList();
+          },
+          child: Stack(
+            children: [
+              ListView(children: [
+                        ],
+                      ),
+              Align(
+                alignment: Alignment.center,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.sentiment_dissatisfied_rounded,
+                        size: 50,
+                        color: AppColors.azulEscuro,
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        "Não foram encontrados setores cadastrados em seu usuário",
+                        style: AppStyles.textStyleTituloSecundario,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       }
     }

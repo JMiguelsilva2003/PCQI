@@ -158,7 +158,7 @@ class _TesteCameraState extends State<TesteCamera> {
         if (selectedCamera != null) {
           return Scaffold(
             backgroundColor: AppColors.azulBebe,
-            body: PopScope(
+            body: /*PopScope(
               canPop: false,
               onPopInvokedWithResult: (bool didPop, Object? result) async {
                 if (isStreamRunning) {
@@ -170,38 +170,38 @@ class _TesteCameraState extends State<TesteCamera> {
                 ]);
                 Navigator.pop(context);
               },
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Center(child: CameraPreview(cameraController)),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: ListView(
-                      padding: EdgeInsets.zero,
-                      children: [
-                        SizedBox(height: 20),
-                        buildMachineTitle(
-                          "Nome da máquina nome da máquina nome da máquina",
-                        ),
-                        SizedBox(height: 30),
+              child: */ Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Center(child: CameraPreview(cameraController)),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: ListView(
+                    padding: EdgeInsets.zero,
+                    children: [
+                      SizedBox(height: 20),
+                      buildMachineTitle(
+                        "Nome da máquina nome da máquina nome da máquina",
+                      ),
+                      SizedBox(height: 30),
 
-                        Column(
-                          children: [
-                            buildCameraOptions(),
-                            buildStreamingOptions(),
-                          ],
-                        ),
+                      Column(
+                        children: [
+                          buildCameraOptions(),
+                          buildStreamingOptions(),
+                        ],
+                      ),
 
-                        SizedBox(height: 30),
-                        goBackButton(),
-                      ],
-                    ),
+                      SizedBox(height: 30),
+                      goBackButton(),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+            /*),*/
           );
         } else {
           return noCameraAvailable();
@@ -233,7 +233,7 @@ class _TesteCameraState extends State<TesteCamera> {
           ),
         ),
       ),
-      collapsed: Spacer(),
+      collapsed: SizedBox(width: 1),
       expanded: Column(
         children: [
           buildCameraSelectionDropdownMenu(
@@ -514,7 +514,7 @@ class _TesteCameraState extends State<TesteCamera> {
             if (isStreamRunning) {
               await cameraController.stopImageStream();
             }
-            SystemChrome.setPreferredOrientations([
+            await SystemChrome.setPreferredOrientations([
               DeviceOrientation.portraitDown,
               DeviceOrientation.portraitUp,
             ]);
