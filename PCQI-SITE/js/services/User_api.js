@@ -77,3 +77,31 @@ async function getUserData(token) {
     }
     return data
 }
+
+async function getSectors(token) {
+    const response = await fetch(`${API_BASE_URL}/api/v1/sectors/`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.detail || 'Erro ao buscar setores.');
+    }
+    return data;
+}
+
+async function createSector(token, sectorName, sectorDescription) {
+    const response = await fetch(`${API_BASE_URL}/api/v1/sectors/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ name: sectorName, description: sectorDescription })
+    });
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.detail || 'Erro ao criar setor.');
+    }
+    return data;
+}
