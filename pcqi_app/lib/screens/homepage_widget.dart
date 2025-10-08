@@ -37,7 +37,10 @@ class HomepageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setPreferredOrientations(DeviceOrientation.values);
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.portraitUp,
+    ]);
     return PersistentTabView(
       tabs: _tabs(),
       //gestureNavigationEnabled: true,

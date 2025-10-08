@@ -14,10 +14,7 @@ class User {
   User({required this.name, required this.email});
 
   factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      name: json["name"],
-      email: json["email"],
-    );
+    return User(name: json["name"], email: json["email"]);
   }
 }
 
@@ -31,7 +28,7 @@ class Perfil extends StatefulWidget {
 class _PerfilState extends State<Perfil> {
   User? user;
   bool isLoading = true; // controla loading
-  String? errorMessage;  // guarda mensagens de erro
+  String? errorMessage; // guarda mensagens de erro
 
   @override
   void initState() {
@@ -103,75 +100,74 @@ class _PerfilState extends State<Perfil> {
         child: isLoading
             ? const CircularProgressIndicator()
             : errorMessage != null
-                ? Text(
-                    errorMessage!,
+            ? Text(
+                errorMessage!,
+                style: GoogleFonts.poppins(
+                  fontSize: 24,
+                  color: AppColors.vermelho,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              )
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: AppColors.azulBebe,
+                    child: Icon(Icons.person, size: 60, color: AppColors.preto),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    user!.name,
                     style: GoogleFonts.poppins(
-                      fontSize: 24,
-                      color: AppColors.vermelho,
-                      fontWeight: FontWeight.bold, 
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.preto,
                     ),
-                    textAlign: TextAlign.center,
-                  )
-                : Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundColor: AppColors.azulBebe,
-                        child: Icon(Icons.person,
-                            size: 60, color: AppColors.preto),
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        user!.name,
-                        style: GoogleFonts.poppins(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.preto,
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    user!.email,
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      color: AppColors.cinza,
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+
+                  // Botão Editar Perfil
+                  SizedBox(
+                    width: 200,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.azulEscuro,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      const SizedBox(height: 5),
-                      Text(
-                        user!.email,
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const EditarPerfil(),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        "Editar Perfil",
                         style: GoogleFonts.poppins(
                           fontSize: 16,
-                          color: AppColors.cinza,
+                          color: AppColors.branco,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(height: 40),
+                    ),
+                  ),
 
-                      // Botão Editar Perfil
-                      SizedBox(
-                        width: 200,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.azulEscuro,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const EditarPerfil(),
-                              ),
-                            );
-                          },
-                          child: Text(
-                            "Editar Perfil",
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              color: AppColors.branco,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
+                  const SizedBox(height: 16),
+                  /*
                       // Botão Excluir Conta
                       SizedBox(
                         width: 200,
@@ -196,9 +192,9 @@ class _PerfilState extends State<Perfil> {
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ),*/
+                ],
+              ),
       ),
     );
   }
@@ -231,8 +227,7 @@ class _PerfilState extends State<Perfil> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style:
-                TextButton.styleFrom(foregroundColor: AppColors.vermelho),
+            style: TextButton.styleFrom(foregroundColor: AppColors.vermelho),
             child: Text(
               "Excluir",
               style: GoogleFonts.poppins(color: AppColors.vermelho),

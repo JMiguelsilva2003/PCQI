@@ -33,7 +33,7 @@ class _TesteCameraState extends State<TesteCamera> {
   late CameraController cameraController;
   PermissionStatus _permissionStatus = PermissionStatus.denied;
   bool isCameraInitializationComplete = false;
-  ResolutionPreset currentResolution = ResolutionPreset.high;
+  ResolutionPreset currentResolution = ResolutionPreset.low;
   CameraDescription? selectedCamera;
   CameraImageConverter cameraImageConverter = CameraImageConverter();
   HttpImageRequest httpImageRequest = HttpImageRequest();
@@ -60,7 +60,9 @@ class _TesteCameraState extends State<TesteCamera> {
 
   @override
   void dispose() {
-    cameraController.stopImageStream();
+    if (isStreamRunning) {
+      cameraController.stopImageStream();
+    }
     cameraController.dispose();
     super.dispose();
   }
@@ -158,8 +160,15 @@ class _TesteCameraState extends State<TesteCamera> {
             backgroundColor: AppColors.azulBebe,
             body: PopScope(
               canPop: false,
-              onPopInvokedWithResult: (bool didPop, Object? result) {
-                closeScreen();
+              onPopInvokedWithResult: (bool didPop, Object? result) async {
+                if (isStreamRunning) {
+                  await cameraController.stopImageStream();
+                }
+                SystemChrome.setPreferredOrientations([
+                  DeviceOrientation.portraitDown,
+                  DeviceOrientation.portraitUp,
+                ]);
+                Navigator.pop(context);
               },
               child: Row(
                 children: [
@@ -500,7 +509,17 @@ class _TesteCameraState extends State<TesteCamera> {
         child: ElevatedButton(
           style: AppStyles.buttonStyle(AppColors.branco, AppColors.vermelho),
           child: Text("Voltar"),
-          onPressed: () => closeScreen(),
+          onPressed: () async {
+            /*closeScreen()*/
+            if (isStreamRunning) {
+              await cameraController.stopImageStream();
+            }
+            SystemChrome.setPreferredOrientations([
+              DeviceOrientation.portraitDown,
+              DeviceOrientation.portraitUp,
+            ]);
+            Navigator.pop(context);
+          },
         ),
       ),
     );
@@ -548,7 +567,7 @@ class _TesteCameraState extends State<TesteCamera> {
     ),
   );
 
-  void closeScreen() {
+  /*void closeScreen() {
     AwesomeDialog(
       context: context,
       dialogType: DialogType.info,
@@ -560,11 +579,17 @@ class _TesteCameraState extends State<TesteCamera> {
       btnCancelText: "Cancelar",
       btnCancelColor: AppColors.azulEscuro,
       btnCancelOnPress: () {},
-      btnOkOnPress: () {
-        Navigator.pop(context);
+      autoDismiss: true,
+      btnOkOnPress: () async {
+        if (isStreamRunning) {
+          await cameraController.stopImageStream();
+        }
+        Future.delayed(const Duration(milliseconds: 150), () {
+          Navigator.of(context).pop();
+        });
       },
     ).show();
-  }
+  }*/
 
   List<CameraDescription> getCameraListFromCurrentLensDirection(
     CameraDescription cameraDescription,

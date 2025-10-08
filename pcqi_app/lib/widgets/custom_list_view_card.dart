@@ -43,4 +43,8 @@ class CustomSectorViewCard extends StatelessWidget {
       ),
     );
   }
+
+  Widget? buildMachineCard() {
+    for (var machine in machines) {}
+  }
 }

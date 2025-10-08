@@ -67,10 +67,8 @@ class Validators {
       return ValidationResult(message: "O campo não pode estar vazio");
     }
     // Checks if thw fields starts with http:// or https://
-    else if (!value.startsWith("http://") && !value.startsWith("https://")) {
-      return ValidationResult(
-        message: "Deve começar com \"http://\" ou \"https://\"",
-      );
+    else if (!value.startsWith("http://")) {
+      return ValidationResult(message: "Deve começar com \"http://\"");
     }
     return ValidationResult(shouldThrowValidationError: false, message: null);
   }
