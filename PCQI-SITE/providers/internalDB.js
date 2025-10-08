@@ -12,4 +12,6 @@ import {
   createStore,
 } from './indexedDB';
 
-// planejar o que salvar de dados
+(function init(){
+  // planejar pos processamento de dados
+})();
