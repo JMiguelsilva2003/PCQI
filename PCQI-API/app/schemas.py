@@ -37,22 +37,6 @@ class ResetPasswordRequest(BaseModel):
     token: str
     new_password: Annotated[str, Field(..., min_length=8)]
 
-# Schemas para Setor
-
-class SectorBase(BaseModel):
-    name: str
-    description: Optional[str] = None
-
-class SectorCreate(SectorBase):
-    pass
-
-class Sector(SectorBase):
-    id: int
-    model_config = ConfigDict(from_attributes=True)
-
-class MemberAddRequest(BaseModel):
-    user_id: int
-
 # Schemas para Máquina
 
 class MachineBase(BaseModel):
@@ -66,3 +50,20 @@ class Machine(MachineBase):
     sector_id: int
     creator_id: int
     model_config = ConfigDict(from_attributes=True)
+
+# Schemas para Setor
+
+class SectorBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+
+class SectorCreate(SectorBase):
+    pass
+
+class Sector(SectorBase):
+    id: int
+    machines: List[Machine] = []
+    model_config = ConfigDict(from_attributes=True)
+
+class MemberAddRequest(BaseModel):
+    user_id: int
