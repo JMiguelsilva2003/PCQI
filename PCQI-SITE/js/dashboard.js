@@ -1,6 +1,32 @@
+async function initializeHeader() {
+    const accessToken = localStorage.getItem('accessToken');
+
+    if (!accessToken) {
+        console.error("Nenhum token de acesso encontrado. Redirecionando para o login.");
+        window.location.href = '/login.html';
+        return null; 
+    }
+
+    try {
+        const userData = await getUserData(accessToken);
+        console.log("Usuário autenticado:", userData.name);
+
+
+        return userData;
+
+    } catch (error) {
+        console.error("Erro ao validar token ou buscar dados do usuário:", error);
+        localStorage.removeItem('accessToken');
+        window.location.href = '/login.html';
+        return null;
+    }
+}
+
 async function setupDashboard() {
-    await loadHTML('/PCQI-SITE/components/header.html', 'header-container');
+    await loadHTML('/PCQI-SITE/components/header.html', 'header-dashboard');
+    
     const user = await initializeHeader();
+    
     if (!user) return;
 
     await Promise.all([
@@ -17,7 +43,7 @@ async function setupDashboard() {
     const renderMachineList = (sector) => {
         let machineHTML = `<h3>Máquinas no Setor: ${sector.name}</h3>`;
         
-        if (sector.machines.length === 0) {
+        if (!sector.machines || sector.machines.length === 0) {
             machineHTML += '<p>Nenhuma máquina cadastrada neste setor.</p>';
         } else {
             machineHTML += '<div class="machine-grid">';
@@ -82,7 +108,7 @@ async function setupDashboard() {
             if (newSectorName) {
                 try {
                     const accessToken = localStorage.getItem('accessToken');
-                    await createSector(accessToken, newSectorName, "");
+                    await createSector(accessToken, newSectorName, ""); 
                     await loadSectorsAsTabs();
                 } catch(error) {
                     alert(`Erro ao criar setor: ${error.message}`);
