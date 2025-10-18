@@ -119,7 +119,8 @@ async function renderMachinesView(container, user) {
                 tab.addEventListener("click", () => {
                     tabsContainer.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
                     tab.classList.add("active");
-                    renderMachineList(screen, sector);
+                    
+                    renderMachineList(screen, sector, user);
                 });
 
                 if (index === 0) {
@@ -162,7 +163,8 @@ async function renderMachinesView(container, user) {
     });
 }
 
-function renderMachineList(screenElement, sector) {
+function renderMachineList(screenElement, sector, user) {
+    
     let machineHTML = `<h3>Máquinas no Setor: ${sector.name}</h3>`;
     
     if (!sector.machines || sector.machines.length === 0) {
@@ -179,7 +181,33 @@ function renderMachineList(screenElement, sector) {
         });
         machineHTML += '</div>';
     }
-    screenElement.innerHTML = machineHTML;
+
+    
+    let membersHTML = '';
+    
+    if (user.role === 'admin' && sector.members) {
+        membersHTML = `<h3 style="margin-top: 2rem;">Membros no Setor: ${sector.name}</h3>`;
+        
+        if (sector.members.length === 0) {
+            membersHTML += '<p>Nenhum membro cadastrado neste setor.</p>';
+        } else {
+            
+            membersHTML += '<div class="member-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">';
+            sector.members.forEach(member => {
+                
+                membersHTML += `
+                    <div class="member-card" style="background: #fff; border: 1px solid #ccc; border-radius: 4px; padding: 1rem;">
+                        <h4>${member.name || 'Nome não disponível'}</h4>
+                        <p style="font-size: 1.2rem; color: #555;">${member.email || 'Email não disponível'}</p>
+                    </div>
+                `;
+            });
+            membersHTML += '</div>';
+        }
+    }
+
+    
+    screenElement.innerHTML = machineHTML + membersHTML;
 }
 
 async function renderCreateMachineForm(viewContainer, user) {
