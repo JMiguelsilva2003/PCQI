@@ -6,15 +6,14 @@ from local_api.ml.model import model, device
 from local_api.config import TRANSFORM, CLASSES
 
 def predict_image_from_bytes(image_bytes: bytes) -> dict:
-    """
-    Recebe os bytes de uma imagem, processa com o modelo e retorna a predição.
-    """
-    image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
-    
-    # Prepara o tensor da imagem
+    """Recebe os bytes de uma imagem, processa com o modelo e retorna a predição."""
+    try:
+        image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
+    except Exception:
+        raise ValueError("Conteúdo do arquivo não é uma imagem válida.")
+
     img_tensor = TRANSFORM(image).unsqueeze(0).to(device)
     
-    # Faz a predição
     with torch.no_grad():
         outputs = model(img_tensor)
         probabilities = torch.nn.functional.softmax(outputs, dim=1)
