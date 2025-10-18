@@ -8,7 +8,9 @@ import 'package:pcqi_app/models/image_request_response_model.dart';
 class HttpImageRequest {
   Future<ImageRequestResponseModel?> sendImage(
     Uint8List imageBytes,
-    String ip,
+    String ip /*
+    int height,
+    int width,*/,
   ) async {
     try {
       final finalUrl = "$ip/predict";
@@ -19,9 +21,12 @@ class HttpImageRequest {
           'file',
           imageBytes,
           filename: 'frame_${DateTime.now().millisecondsSinceEpoch}.jpg',
-          contentType: MediaType('image', 'jpeg'),
+          contentType: MediaType('image', 'jpg'),
         ),
       );
+
+      //request.fields['width'] = width.toString();
+      //request.fields['height'] = height.toString();
 
       final response = await request.send();
 
@@ -33,10 +38,12 @@ class HttpImageRequest {
               ImageRequestResponseModel.fromJson(jsonMap);
           return responseModel;
         } catch (e) {
+          print(e);
           return null;
         }
       }
     } catch (e) {
+      print(e);
       return null;
     }
     return null;

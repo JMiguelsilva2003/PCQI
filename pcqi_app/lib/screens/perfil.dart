@@ -3,20 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:pcqi_app/config/app_colors.dart';
+import 'package:pcqi_app/models/user_model.dart';
+import 'package:pcqi_app/providers/provider_model.dart';
 import 'package:pcqi_app/screens/editar_perfil.dart';
 import 'package:pcqi_app/services/shared_preferences_helper.dart';
-
-// Modelo de usuário
-class User {
-  final String name;
-  final String email;
-
-  User({required this.name, required this.email});
-
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(name: json["name"], email: json["email"]);
-  }
-}
+import 'package:provider/provider.dart';
 
 class Perfil extends StatefulWidget {
   const Perfil({super.key});
@@ -26,7 +17,7 @@ class Perfil extends StatefulWidget {
 }
 
 class _PerfilState extends State<Perfil> {
-  User? user;
+  UserModel? user;
   bool isLoading = true; // controla loading
   String? errorMessage; // guarda mensagens de erro
 
@@ -55,11 +46,10 @@ class _PerfilState extends State<Perfil> {
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          user = User.fromJson(data);
-          isLoading = false;
-        });
+        UserModel result = UserModel.fromJson(jsonDecode(response.body));
+        final provider = context.read<ProviderModel>();
+        provider.setUser(result);
+        isLoading = false;
       } else if (response.statusCode == 401) {
         setState(() {
           errorMessage = "Sessão expirada. Faça login novamente.";
@@ -82,119 +72,126 @@ class _PerfilState extends State<Perfil> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.branco,
-      appBar: AppBar(
-        title: Text(
-          "Perfil",
-          style: GoogleFonts.poppins(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-            color: AppColors.branco,
+    final aaa = Provider.of<ProviderModel>(context);
+    return Consumer<ProviderModel>(
+      builder: (context, value, child) => Scaffold(
+        backgroundColor: AppColors.branco,
+        appBar: AppBar(
+          title: Text(
+            "Perfil",
+            style: GoogleFonts.poppins(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: AppColors.branco,
+            ),
           ),
+          backgroundColor: AppColors.azulEscuro,
+          elevation: 0,
         ),
-        backgroundColor: AppColors.azulEscuro,
-        elevation: 0,
-      ),
-      body: Center(
-        child: isLoading
-            ? const CircularProgressIndicator()
-            : errorMessage != null
-            ? Text(
-                errorMessage!,
-                style: GoogleFonts.poppins(
-                  fontSize: 24,
-                  color: AppColors.vermelho,
-                  fontWeight: FontWeight.bold,
+        body: Center(
+          child: isLoading
+              ? const CircularProgressIndicator()
+              : errorMessage != null
+              ? Text(
+                  errorMessage!,
+                  style: GoogleFonts.poppins(
+                    fontSize: 24,
+                    color: AppColors.vermelho,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                )
+              : Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundColor: AppColors.azulBebe,
+                      child: Icon(
+                        Icons.person,
+                        size: 60,
+                        color: AppColors.preto,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      aaa.userData.name!,
+                      style: GoogleFonts.poppins(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.preto,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      aaa.userData.email!,
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: AppColors.cinza,
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+
+                    // Botão Editar Perfil
+                    SizedBox(
+                      width: 200,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.azulEscuro,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const EditarPerfil(),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          "Editar Perfil",
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            color: AppColors.branco,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+                    /*
+                        // Botão Excluir Conta
+                        SizedBox(
+                          width: 200,
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
+                                  color: AppColors.vermelho, width: 2),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onPressed: () => _confirmDelete(context),
+                            icon:
+                                Icon(Icons.delete, color: AppColors.vermelho),
+                            label: Text(
+                              "Excluir Conta",
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                color: AppColors.vermelho,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),*/
+                  ],
                 ),
-                textAlign: TextAlign.center,
-              )
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: AppColors.azulBebe,
-                    child: Icon(Icons.person, size: 60, color: AppColors.preto),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    user!.name,
-                    style: GoogleFonts.poppins(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.preto,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    user!.email,
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      color: AppColors.cinza,
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-
-                  // Botão Editar Perfil
-                  SizedBox(
-                    width: 200,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.azulEscuro,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const EditarPerfil(),
-                          ),
-                        );
-                      },
-                      child: Text(
-                        "Editar Perfil",
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: AppColors.branco,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-                  /*
-                      // Botão Excluir Conta
-                      SizedBox(
-                        width: 200,
-                        child: OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                                color: AppColors.vermelho, width: 2),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          onPressed: () => _confirmDelete(context),
-                          icon:
-                              Icon(Icons.delete, color: AppColors.vermelho),
-                          label: Text(
-                            "Excluir Conta",
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              color: AppColors.vermelho,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),*/
-                ],
-              ),
+        ),
       ),
     );
   }

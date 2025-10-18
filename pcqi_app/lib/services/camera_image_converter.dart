@@ -4,6 +4,54 @@ import 'package:camera/camera.dart';
 import 'package:image/image.dart' as img;
 
 class CameraImageConverter {
+  /*Future<Uint8List?> convertYUV420ToUint8List(CameraImage image) async {
+    final Uint8List yPlane = image.planes[0].bytes;
+    final Uint8List uPlane = image.planes[1].bytes;
+    final Uint8List vPlane = image.planes[2].bytes;
+    final Uint8List combinedBytes = Uint8List(
+      yPlane.length + uPlane.length + vPlane.length,
+    );
+
+    combinedBytes.setAll(0, yPlane);
+
+    combinedBytes.setAll(yPlane.length, uPlane);
+    combinedBytes.setAll(yPlane.length + uPlane.length, vPlane);
+
+    return combinedBytes;
+  }*/
+
+  Future<Uint8List?> convertYUV420ToUint8List(CameraImage image) async {
+    try {
+      final width = image.width;
+      final height = image.height;
+
+      final yPlane = image.planes[0];
+      final uPlane = image.planes[1];
+      final vPlane = image.planes[2];
+
+      final yBytes = yPlane.bytes;
+      final uBytes = uPlane.bytes;
+      final vBytes = vPlane.bytes;
+
+      final nv21 = Uint8List(width * height + uBytes.length + vBytes.length);
+
+      // Copia Y
+      nv21.setRange(0, yBytes.length, yBytes);
+
+      // Intercala VU
+      int offset = yBytes.length;
+      for (int i = 0; i < uBytes.length; i++) {
+        nv21[offset++] = vBytes[i]; // V
+        nv21[offset++] = uBytes[i]; // U
+      }
+
+      return nv21;
+    } catch (e) {
+      print("Erro na conversão NV21: $e");
+      return null;
+    }
+  }
+
   Future<Uint8List?> convertImage(CameraImage cameraImage) async {
     try {
       final image = convertCameraImage(cameraImage);

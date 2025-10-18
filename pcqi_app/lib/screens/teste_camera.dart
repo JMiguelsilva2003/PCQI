@@ -534,10 +534,11 @@ class _TesteCameraState extends State<TesteCamera> {
       if (isCurrentlySendingImage) return;
       isCurrentlySendingImage = true;
       var convertedImage = await cameraImageConverter.convertImage(image);
+      //var convertedImage = await cameraImageConverter.convertCameraImage(image);
 
       if (convertedImage != null) {
         ImageRequestResponseModel? responseFromServer = await httpImageRequest
-            .sendImage(convertedImage, ip.trim());
+            .sendImage(convertedImage, ip.trim() /*image.height, image.width*/);
         if (responseFromServer != null) {
           setState(() {
             resultTextPrediction = responseFromServer.prediction!;

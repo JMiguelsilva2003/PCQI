@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pcqi_app/providers/provider_model.dart';
 import 'package:pcqi_app/screens/forgot_password.dart';
 import 'package:pcqi_app/screens/homepage_widget.dart';
 import 'package:pcqi_app/screens/perfil.dart';
@@ -8,13 +9,19 @@ import 'package:pcqi_app/screens/landing_page.dart';
 import 'package:pcqi_app/screens/login.dart';
 import 'package:pcqi_app/screens/teste_camera.dart';
 import 'package:pcqi_app/services/shared_preferences_helper.dart';
+import 'package:provider/provider.dart';
 
 Future main() async {
   // Configuring SharedPreferences
   WidgetsFlutterBinding.ensureInitialized();
   await SharedPreferencesHelper.init();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ProviderModel(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
