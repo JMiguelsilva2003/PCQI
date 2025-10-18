@@ -257,3 +257,55 @@ body {
     background-color: #dc3545;
     color: white;
 }
+
+.main #component-dashboard {
+  width: 90vw;
+  height: 85vh;
+  display: flex;
+  flex-flow: column;
+}
+
+.main #component-dashboard .tabs {
+  display: flex;
+  flex-flow: row nowrap;
+  overflow-x: auto;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #f3f2f2;
+  border-bottom: 0.1rem solid #c8c3c3;
+  min-height: 6.5rem;
+  align-items: center;
+}
+
+
+.main #component-dashboard .screen {
+  flex: 1;
+  background-color: #bdd4e7;
+  margin: 1rem 1rem 1rem 1rem;
+  border-radius: 1rem 1rem 1rem 1rem;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.logout-btn {
+  padding: 0.8rem 1.5rem;
+  border: 1px solid #dc3545;
+  background-color: transparent;
+  color: #dc3545;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  background-color: #dc3545;
+  color: white;
+}
+
+.logout-btn:disabled {
+  background-color: #ccc;
+  color: #888;
+  border-color: #ccc;
+  cursor: not-allowed;
+}

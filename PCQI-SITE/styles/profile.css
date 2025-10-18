@@ -44,3 +44,58 @@
     padding: 0.8rem;
     border-radius: 4px;
 }
+
+.profile-main {
+    max-width: 900px;
+    margin: 4rem auto;
+    padding: 2rem;
+}
+
+.profile-card {
+    background: white;
+    padding: 3rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.profile-card h2 {
+    font-size: 2.4rem;
+    margin-bottom: 2.5rem;
+    color: #3399e6;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr; 
+    gap: 2rem;
+}
+
+@media (min-width: 768px) {
+    .info-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.info-item span:first-child {
+    font-weight: 600;
+    color: #555;
+    font-size: 1.4rem;
+}
+
+.info-item span:last-child {
+    font-size: 1.6rem;
+    color: #333;
+    background-color: #f7f7f7;
+    padding: 0.8rem;
+    border-radius: 4px;
+    word-break: break-all;
+}

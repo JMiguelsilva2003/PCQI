@@ -11,12 +11,31 @@ function formatDate(isoString) {
 }
 
 async function setupProfilePage() {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        console.error("Auth Guard: Nenhum token encontrado. Redirecionando...");
+        window.location.href = '/PCQI-SITE/screens/index.html';
+        return;
+    }
+
+    let user;
+    try {
+        user = await getUserData(accessToken);
+    } catch (error) {
+        console.error("Sessão inválida ou expirada:", error.message);
+        localStorage.clear();
+        window.location.href = "/PCQI-SITE/screens/index.html";
+        return;
+    }
+
     await loadHTML('/PCQI-SITE/components/header.html', 'header-container');
-    
-    const user = await initializeHeader();
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    initializeHeaderComponent(user);
     
     if (user) {
         await loadHTML('/PCQI-SITE/components/userInfo.html', 'user-info-container');
+        await new Promise(resolve => setTimeout(resolve, 0));
         
         document.getElementById("user-name").textContent = user.name;
         document.getElementById("user-email").textContent = user.email;
