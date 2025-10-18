@@ -56,16 +56,40 @@ class _EditarPerfilState extends State<EditarPerfil> {
   }*/
 
   Future<void> salvarPerfil() async {
+    String newName = nomeController.text.trim();
+    String newPassword = emailController.text.trim();
+
+    if (newName.isEmpty && newPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Complete ao menos um dos campos")),
+      );
+    } else {
+      if (newName.isNotEmpty && newPassword.isEmpty) {
+        final body = {"name": nomeController.text};
+        await sendInfo(body);
+      } else if (newName.isEmpty && newPassword.isNotEmpty) {
+        if (newPassword.length < 8) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                "A senha deve conter no mínimo 8 caracteres. Apague-a completamente caso não deseje modificá-la.",
+              ),
+            ),
+          );
+        } else {
+          final body = {"password": newPassword};
+          await sendInfo(body);
+        }
+      } else {
+        final body = {"name": newName, "password": newPassword};
+        await sendInfo(body);
+      }
+    }
+  }
+
+  Future<void> sendInfo(Map<String?, String?> info) async {
     const url = "https://pcqi-api.onrender.com/api/v1/users/me";
     final token = SharedPreferencesHelper.getAccessToken();
-
-    final body = {
-      "name": nomeController.text.isNotEmpty ? nomeController.text : nomeAtual,
-      "password": emailController.text.isNotEmpty
-          ? emailController.text
-          : emailAtual,
-    };
-
     try {
       final response = await http.put(
         Uri.parse(url),
@@ -73,13 +97,13 @@ class _EditarPerfilState extends State<EditarPerfil> {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
         },
-        body: jsonEncode(body),
+        body: jsonEncode(info),
       );
 
       /*if (response.statusCode == 200) {*/
       UserModel result = UserModel.fromJson(jsonDecode(response.body));
       final provider = context.read<ProviderModel>();
-      if (result.name != null || result.name != "") {
+      if (result.name != null && result.name != "") {
         provider.setUsername(result.name!);
       }
       ScaffoldMessenger.of(context).showSnackBar(
@@ -111,7 +135,7 @@ class _EditarPerfilState extends State<EditarPerfil> {
               fontSize: 20,
               fontFamily: 'Poppins-Regular',
               fontWeight: FontWeight.w600,
-              color: AppColors.branco,
+              color: AppColors.cinzaClaro,
             ),
           ),
           backgroundColor: AppColors.azulEscuro,
@@ -134,12 +158,12 @@ class _EditarPerfilState extends State<EditarPerfil> {
                         bool? isFocused,
                       }) => null,
                   style: AppStyles.textFieldTextStyle,
-                  decoration:
-                      AppStyles.textFieldDecoration(
-                        "Nome atual: ${nomeAtual ?? ''}",
-                      ).copyWith(
-                        hintText: "Novo nome",
-                        prefixIcon: Icon(Icons.person, color: AppColors.cinza),
+                  decoration: AppStyles.textFieldDecoration("Novo nome")
+                      .copyWith(
+                        prefixIcon: Icon(
+                          Icons.person_rounded,
+                          color: AppColors.cinza,
+                        ),
                       ),
                 ),
                 const SizedBox(height: 15),
@@ -156,16 +180,22 @@ class _EditarPerfilState extends State<EditarPerfil> {
                         int? maxLength,
                         bool? isFocused,
                       }) => null,
-                  decoration:
-                      AppStyles.textFieldDecoration(
-                        "Senha atual: ${emailAtual ?? ''}",
-                      ).copyWith(
-                        hintText: "Nova senha",
+                  decoration: AppStyles.textFieldDecoration("Nova senha")
+                      .copyWith(
                         prefixIcon: Icon(
                           Icons.lock_outline_rounded,
                           color: AppColors.cinza,
                         ),
                       ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  "*Não é obrigatório preencher todos os campos",
+                  style: TextStyle(
+                    fontFamily: 'Poppins-Regular',
+                    fontSize: 12,
+                    color: AppColors.cinza,
+                  ),
                 ),
                 const SizedBox(height: 30),
 
