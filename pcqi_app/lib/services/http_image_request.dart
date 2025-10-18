@@ -6,15 +6,18 @@ import 'package:http_parser/http_parser.dart';
 import 'package:pcqi_app/models/image_request_response_model.dart';
 
 class HttpImageRequest {
+  final urlCameraRequest = "https://miguel15468-pcqi-ai-api.hf.space/predict";
+
   Future<ImageRequestResponseModel?> sendImage(
-    Uint8List imageBytes,
-    String ip /*
+    Uint8List imageBytes /*
     int height,
     int width,*/,
   ) async {
     try {
-      final finalUrl = "$ip/predict";
-      final request = http.MultipartRequest('POST', Uri.parse(finalUrl));
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse(urlCameraRequest),
+      );
 
       request.files.add(
         http.MultipartFile.fromBytes(

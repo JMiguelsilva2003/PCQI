@@ -277,7 +277,7 @@ class _TesteCameraState extends State<TesteCamera> {
         children: [
           buildStreamingStatus(),
           SizedBox(height: 10),
-          Form(key: formKeyServerAddress, child: buildTextFormServerAddress()),
+          //Form(key: formKeyServerAddress, child: buildTextFormServerAddress()),
           SizedBox(height: 10),
           buildRequestResults(),
           SizedBox(height: 10),
@@ -475,14 +475,14 @@ class _TesteCameraState extends State<TesteCamera> {
             ),
             child: Text("Iniciar transmissão"),
             onPressed: () async {
-              bool isValid = checkFormFieldValidation(formKeyServerAddress);
-              if (isValid) {
-                sendImageStream(inputIp.text);
-                setState(() {
-                  isStreamRunning = true;
-                });
-              }
+              //bool isValid = checkFormFieldValidation(formKeyServerAddress);
+              /*if (isValid) {*/
+              sendImageStream();
+              setState(() {
+                isStreamRunning = true;
+              });
             },
+            /*}*/
           ),
         ),
       );
@@ -537,7 +537,7 @@ class _TesteCameraState extends State<TesteCamera> {
     return formKey.currentState!.validate();
   }
 
-  sendImageStream(String ip) async {
+  sendImageStream() async {
     await cameraController.startImageStream((image) async {
       if (isCurrentlySendingImage) return;
       isCurrentlySendingImage = true;
@@ -546,7 +546,7 @@ class _TesteCameraState extends State<TesteCamera> {
 
       if (convertedImage != null) {
         ImageRequestResponseModel? responseFromServer = await httpImageRequest
-            .sendImage(convertedImage, ip.trim() /*image.height, image.width*/);
+            .sendImage(convertedImage /*image.height, image.width*/);
         if (responseFromServer != null) {
           setState(() {
             resultTextPrediction = responseFromServer.prediction!;
