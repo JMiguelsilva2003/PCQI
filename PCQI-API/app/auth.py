@@ -1,4 +1,5 @@
-from fastapi import Depends, HTTPException, status
+import os
+from fastapi import Depends, HTTPException, status, Header
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
@@ -9,6 +10,17 @@ from app.security import SECRET_KEY, ALGORITHM
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
+API_KEY = os.getenv("API_KEY")
+
+async def verify_api_key(x_api_key: str = Header(...)):
+    """
+    Verifica se a API Key estática enviada no header 'X-API-Key' é válida.
+    """
+    if not API_KEY:
+        raise HTTPException(status_code=500, detail="API_KEY não configurada no servidor.")
+    if x_api_key != API_KEY:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API Key")
+
 def get_current_user(
     token: str = Depends(oauth2_scheme), 
     db: Session = Depends(get_db)
@@ -16,7 +28,6 @@ def get_current_user(
     """
     Decodifica o token JWT, extrai o email (sub) e retorna o
     objeto do usuário do banco de dados.
-    Esta é a função que usaremos para proteger nossas rotas.
     """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -43,15 +54,9 @@ def get_current_admin_user(
     """
     Uma dependência que verifica se o usuário atual é um admin.
     """
-    print(f"\n[DEBUG] Verificando permissão de admin para: {current_user.email}")
-    print(f"[DEBUG] Role do usuário no banco: '{current_user.role}'")
-
     if current_user.role != "admin":
-        print("[DEBUG] ACESSO NEGADO! Role não é 'admin'.")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
             detail="The user does not have enough privileges"
         )
-    
-    print("[DEBUG] ACESSO PERMITIDO! Role é 'admin'.")
     return current_user

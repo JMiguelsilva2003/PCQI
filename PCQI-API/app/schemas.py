@@ -75,3 +75,17 @@ class Sector(SectorBase):
 
 class MemberAddRequest(BaseModel):
     user_id: int
+
+# Shemas para ia
+
+class AIPredictionRequest(BaseModel):
+    prediction: str
+
+class Command(BaseModel):
+    id: int
+    action: str
+    status: str
+    created_at: datetime
+    machine_id: int
+
+    model_config = ConfigDict(from_attributes=True)

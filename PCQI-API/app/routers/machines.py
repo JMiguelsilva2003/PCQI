@@ -1,13 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session
 from typing import List
 
 from app import crud, models, schemas
 from app.database import get_db
-from app.auth import get_current_user
+from app.auth import get_current_user, verify_api_key
 from app.routers import descriptions as desc
 
 router = APIRouter()
+
+# --- Rotas de Gestão de Máquinas (para Usuários)
 
 @router.post(
     "/",
@@ -21,6 +23,10 @@ def create_machine(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
+    """
+    Cria uma nova máquina associada a um setor.
+    Apenas Admins ou membros do setor podem criar.
+    """
     sector = crud.get_sector(db, sector_id=machine.sector_id)
     if not sector:
         raise HTTPException(status_code=404, detail="Sector not found")
@@ -44,6 +50,10 @@ def read_user_machines(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
+    """
+    Retorna uma lista de todas as máquinas de todos os setores
+    dos quais o usuário é membro.
+    """
     return crud.get_machines_for_user(db=db, user=current_user)
 
 
@@ -58,6 +68,10 @@ def read_specific_machine(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
+    """
+    Retorna os detalhes de uma máquina específica.
+    Apenas Admins ou membros do setor da máquina podem acessar.
+    """
     db_machine = crud.get_machine(db, machine_id=machine_id)
     if db_machine is None:
         raise HTTPException(status_code=404, detail="Machine not found")
@@ -69,3 +83,50 @@ def read_specific_machine(
         )
         
     return db_machine
+
+# --- ROTAS DE COMANDO (CAIXA DE CORREIO) ---
+
+@router.post(
+    "/{machine_id}/commands",
+    summary="A IA (ou App) reporta uma classificação",
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(verify_api_key)] 
+)
+def add_command_from_prediction(
+    machine_id: int,
+    request: schemas.AIPredictionRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Recebe uma predição (da IA ou do Flutter) e a traduz em comandos
+    na fila do banco de dados.
+    """
+    action = "REJECT" if request.prediction == "branco" else "ACCEPT"
+    
+    crud.create_machine_command(db=db, machine_id=machine_id, action=action)
+    
+    crud.create_machine_command(db=db, machine_id=machine_id, action="MOVE")
+    
+    return {"message": "Commands queued successfully"}
+
+
+@router.get(
+    "/{machine_id}/commands/next",
+    response_model=schemas.Command,
+    summary="O Gateway de Hardware busca o próximo comando",
+    dependencies=[Depends(verify_api_key)]
+)
+def get_next_command(
+    machine_id: int, 
+    db: Session = Depends(get_db)
+):
+    """
+    O Gateway de Hardware (script local) chama esta rota repetidamente (polling)
+    para buscar a próxima ação pendente da fila.
+    """
+    command = crud.get_next_pending_command(db=db, machine_id=machine_id)
+    
+    if not command:
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    
+    return command

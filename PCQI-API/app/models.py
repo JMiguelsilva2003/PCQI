@@ -39,3 +39,16 @@ class Machine(Base):
 
     sector = relationship("Sector", back_populates="machines")
     creator = relationship("User")
+    
+    commands = relationship("Command", back_populates="machine", cascade="all, delete-orphan")
+
+class Command(Base):
+    __tablename__ = "commands"
+
+    id = Column(Integer, primary_key=True, index=True)
+    action = Column(String, nullable=False)
+    status = Column(String, default="pending", index=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    machine_id = Column(Integer, ForeignKey("machines.id"), nullable=False)
+    machine = relationship("Machine", back_populates="commands")

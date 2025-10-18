@@ -127,3 +127,29 @@ def update_machine_heartbeat(db: Session, machine_id: int):
         db.commit()
         db.refresh(db_machine)
     return db_machine
+
+def create_machine_command(db: Session, machine_id: int, action: str) -> models.Command:
+    """Adiciona um novo comando à fila de uma máquina."""
+    db_command = models.Command(machine_id=machine_id, action=action)
+    db.add(db_command)
+    db.commit()
+    db.refresh(db_command)
+    return db_command
+
+def get_next_pending_command(db: Session, machine_id: int) -> Optional[models.Command]:
+    """
+    Busca o comando pendente mais antigo de uma máquina,
+    marca-o como 'processed' e o retorna.
+    """
+    command = db.query(models.Command).filter(
+        models.Command.machine_id == machine_id,
+        models.Command.status == "pending"
+    ).order_by(models.Command.created_at).first()
+    
+    if command:
+        command.status = "processed"
+        db.commit()
+        db.refresh(command)
+        return command
+    
+    return None
