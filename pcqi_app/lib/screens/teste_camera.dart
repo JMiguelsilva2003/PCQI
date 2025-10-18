@@ -158,7 +158,7 @@ class _TesteCameraState extends State<TesteCamera> {
         if (selectedCamera != null) {
           return Scaffold(
             backgroundColor: AppColors.azulBebe,
-            body: /*PopScope(
+            body: PopScope(
               canPop: false,
               onPopInvokedWithResult: (bool didPop, Object? result) async {
                 if (isStreamRunning) {
@@ -168,40 +168,42 @@ class _TesteCameraState extends State<TesteCamera> {
                   DeviceOrientation.portraitDown,
                   DeviceOrientation.portraitUp,
                 ]);
-                Navigator.pop(context);
+                if (!didPop) {
+                  Navigator.pop(context);
+                }
               },
-              child: */ Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Center(child: CameraPreview(cameraController)),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: ListView(
-                    padding: EdgeInsets.zero,
-                    children: [
-                      SizedBox(height: 20),
-                      buildMachineTitle(
-                        "Nome da máquina nome da máquina nome da máquina",
-                      ),
-                      SizedBox(height: 30),
-
-                      Column(
-                        children: [
-                          buildCameraOptions(),
-                          buildStreamingOptions(),
-                        ],
-                      ),
-
-                      SizedBox(height: 30),
-                      goBackButton(),
-                    ],
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Center(child: CameraPreview(cameraController)),
                   ),
-                ),
-              ],
+                  Expanded(
+                    flex: 1,
+                    child: ListView(
+                      padding: EdgeInsets.zero,
+                      children: [
+                        SizedBox(height: 20),
+                        buildMachineTitle(
+                          "Nome da máquina nome da máquina nome da máquina",
+                        ),
+                        SizedBox(height: 30),
+
+                        Column(
+                          children: [
+                            buildCameraOptions(),
+                            buildStreamingOptions(),
+                          ],
+                        ),
+
+                        SizedBox(height: 30),
+                        goBackButton(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-            /*),*/
           );
         } else {
           return noCameraAvailable();
