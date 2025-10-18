@@ -11,7 +11,7 @@ async function initializeHeaderComponent(user) {
         perfilDisplay.textContent = user.name;
         perfilDisplay.style.cursor = "pointer";
         perfilDisplay.addEventListener("click", () => {
-            window.location.href = "/PCQI-SITE/screens/user-profile.html";
+            window.location.href = "/screens/user-profile.html";
         });
     } else {
         perfilDisplay.textContent = "Usuário";
@@ -19,7 +19,7 @@ async function initializeHeaderComponent(user) {
 
     logoutButton.addEventListener("click", () => {
         localStorage.clear(); 
-        window.location.href = "/PCQI-SITE/screens/index.html";
+        window.location.href = "/screens/index.html";
     });
 
     console.log("Componente Header inicializado.");

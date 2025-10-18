@@ -14,7 +14,7 @@ async function setupProfilePage() {
     const accessToken = localStorage.getItem('accessToken');
     if (!accessToken) {
         console.error("Auth Guard: Nenhum token encontrado. Redirecionando...");
-        window.location.href = '/PCQI-SITE/screens/index.html';
+        window.location.href = '/screens/index.html';
         return;
     }
 
@@ -24,17 +24,17 @@ async function setupProfilePage() {
     } catch (error) {
         console.error("Sessão inválida ou expirada:", error.message);
         localStorage.clear();
-        window.location.href = "/PCQI-SITE/screens/index.html";
+        window.location.href = "/screens/index.html";
         return;
     }
 
-    await loadHTML('/PCQI-SITE/components/header.html', 'header-container');
+    await loadHTML('/components/header.html', 'header-container');
     await new Promise(resolve => setTimeout(resolve, 0));
 
     initializeHeaderComponent(user);
     
     if (user) {
-        await loadHTML('/PCQI-SITE/components/userInfo.html', 'user-info-container');
+        await loadHTML('/components/userInfo.html', 'user-info-container');
         await new Promise(resolve => setTimeout(resolve, 0));
         
         document.getElementById("user-name").textContent = user.name;

@@ -6,7 +6,7 @@ async function authGuardAndGetUserData() {
 
     if (!accessToken) {
         console.error("Auth Guard: Nenhum token de acesso encontrado. Redirecionando...");
-        window.location.href = '/PCQI-SITE/screens/index.html';
+        window.location.href = '/screens/index.html';
         return null; 
     }
 
@@ -20,7 +20,7 @@ async function authGuardAndGetUserData() {
     } catch (error) {
         console.error("Auth Guard: Token inválido ou expirado.", error);
         localStorage.clear(); 
-        window.location.href = '/PCQI-SITE/screens/index.html';
+        window.location.href = '/screens/index.html';
         return null;
     }
 }
@@ -31,8 +31,8 @@ async function setupDashboard() {
 
     try {
         await Promise.all([
-            loadHTML("/PCQI-SITE/components/dashboardHeader.html", "header-dashboard"),
-            loadHTML("/PCQI-SITE/components/dashboardList.html", "list-dashboard")
+            loadHTML("/components/dashboardHeader.html", "header-dashboard"),
+            loadHTML("/components/dashboardList.html", "list-dashboard")
         ]);
         
         await new Promise(resolve => setTimeout(resolve, 0));
@@ -47,7 +47,7 @@ async function setupDashboard() {
     setupNavigation(userData);
 
     const contentContainer = document.getElementById("component-dashboard");
-    await loadHTML("/PCQI-SITE/components/viewMachines.html", "component-dashboard");
+    await loadHTML("/components/viewMachines.html", "component-dashboard");
     
     await new Promise(resolve => setTimeout(resolve, 0));
     
@@ -67,7 +67,7 @@ function setupNavigation(user) {
         btnVerMaquinas.classList.add("active");
         btnVerPerfis.classList.remove("active");
 
-        await loadHTML("/PCQI-SITE/components/viewMachines.html", "component-dashboard");
+        await loadHTML("/components/viewMachines.html", "component-dashboard");
         await new Promise(resolve => setTimeout(resolve, 0));
         renderMachinesView(contentContainer, user);
     });
@@ -77,7 +77,7 @@ function setupNavigation(user) {
             btnVerMaquinas.classList.remove("active");
             btnVerPerfis.classList.add("active");
 
-            await loadHTML("/PCQI-SITE/components/viewProfiles.html", "component-dashboard");
+            await loadHTML("/components/viewProfiles.html", "component-dashboard");
             await new Promise(resolve => setTimeout(resolve, 0));
             renderProfilesView(contentContainer);
         });
@@ -148,7 +148,7 @@ async function renderMachinesView(container, user) {
     }
 
     btnCriarMaquina.addEventListener("click", async () => {
-        await loadHTML("/PCQI-SITE/components/formCreateMachine.html", "machines-screen-content");
+        await loadHTML("/components/formCreateMachine.html", "machines-screen-content");
         await new Promise(resolve => setTimeout(resolve, 0));
         renderCreateMachineForm(container, user);
     });
