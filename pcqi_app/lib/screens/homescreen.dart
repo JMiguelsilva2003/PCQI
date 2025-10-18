@@ -20,7 +20,9 @@ class _HomescreenState extends State<Homescreen> {
       backgroundColor: AppColors.branco,
       body: Stack(
         children: [
-          Center(child: Text("Usuário Logado")),
+          Center(
+            child: Text("Bem vindo", style: AppStyles.textStyleForgotPassword),
+          ),
           Positioned(
             top: 30,
             right: 30,
@@ -34,14 +36,11 @@ class _HomescreenState extends State<Homescreen> {
               icon: const Icon(Icons.camera_alt), // ícone
               label: const Text(
                 "Câmera",
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontFamily: 'Poppins-Regular'),
               ),
               backgroundColor: AppColors.azulEscuro,
               foregroundColor: AppColors.branco,
+              elevation: 0,
             ),
           ),
         ],

@@ -79,7 +79,8 @@ class _PerfilState extends State<Perfil> {
         appBar: AppBar(
           title: Text(
             "Perfil",
-            style: GoogleFonts.poppins(
+            style: TextStyle(
+              fontFamily: 'Poppins-Regular',
               fontSize: 20,
               fontWeight: FontWeight.w600,
               color: AppColors.branco,
@@ -94,10 +95,11 @@ class _PerfilState extends State<Perfil> {
               : errorMessage != null
               ? Text(
                   errorMessage!,
-                  style: GoogleFonts.poppins(
+                  style: TextStyle(
                     fontSize: 24,
                     color: AppColors.vermelho,
                     fontWeight: FontWeight.bold,
+                    fontFamily: 'Poppins-Bold',
                   ),
                   textAlign: TextAlign.center,
                 )
@@ -116,18 +118,19 @@ class _PerfilState extends State<Perfil> {
                     const SizedBox(height: 20),
                     Text(
                       aaa.userData.name!,
-                      style: GoogleFonts.poppins(
+                      style: TextStyle(
                         fontSize: 22,
-                        fontWeight: FontWeight.bold,
                         color: AppColors.preto,
+                        fontFamily: 'Poppins-Bold',
                       ),
                     ),
                     const SizedBox(height: 5),
                     Text(
                       aaa.userData.email!,
-                      style: GoogleFonts.poppins(
+                      style: TextStyle(
                         fontSize: 16,
                         color: AppColors.cinza,
+                        fontFamily: 'Poppins-Regular',
                       ),
                     ),
                     const SizedBox(height: 40),
@@ -153,10 +156,10 @@ class _PerfilState extends State<Perfil> {
                         },
                         child: Text(
                           "Editar Perfil",
-                          style: GoogleFonts.poppins(
+                          style: TextStyle(
                             fontSize: 16,
+                            fontFamily: 'Poppins-Bold',
                             color: AppColors.branco,
-                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
@@ -203,7 +206,8 @@ class _PerfilState extends State<Perfil> {
       builder: (_) => AlertDialog(
         title: Text(
           "Excluir conta",
-          style: GoogleFonts.poppins(
+          style: TextStyle(
+            fontFamily: 'Poppins-Bold',
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: AppColors.preto,
@@ -212,14 +216,21 @@ class _PerfilState extends State<Perfil> {
         content: Text(
           "Tem certeza que deseja excluir sua conta?\n"
           "Esta ação é permanente e não pode ser desfeita.",
-          style: GoogleFonts.poppins(fontSize: 14, color: AppColors.cinza),
+          style: TextStyle(
+            fontSize: 14,
+            fontFamily: 'Poppins-Regular',
+            color: AppColors.cinza,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               "Cancelar",
-              style: GoogleFonts.poppins(color: AppColors.cinzaEscuro),
+              style: TextStyle(
+                color: AppColors.cinzaEscuro,
+                fontFamily: 'Poppins-Regular',
+              ),
             ),
           ),
           TextButton(
@@ -227,7 +238,10 @@ class _PerfilState extends State<Perfil> {
             style: TextButton.styleFrom(foregroundColor: AppColors.vermelho),
             child: Text(
               "Excluir",
-              style: GoogleFonts.poppins(color: AppColors.vermelho),
+              style: TextStyle(
+                color: AppColors.vermelho,
+                fontFamily: 'Poppins-Regular',
+              ),
             ),
           ),
         ],
@@ -239,7 +253,7 @@ class _PerfilState extends State<Perfil> {
         SnackBar(
           content: Text(
             "Conta excluída com sucesso",
-            style: GoogleFonts.poppins(),
+            style: TextStyle(fontFamily: 'Poppins-Regular'),
           ),
         ),
       );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pcqi_app/config/app_styles.dart';
 import 'package:pcqi_app/screens/homescreen.dart';
 import 'package:pcqi_app/screens/sectors.dart';
 import 'package:pcqi_app/screens/perfil.dart';
@@ -15,6 +16,7 @@ class HomepageWidget extends StatelessWidget {
         icon: const Icon(Icons.home_rounded),
         title: "Início",
         iconSize: 30,
+        textStyle: AppStyles.textStyleBottomNavBar,
       ),
     ),
     PersistentTabConfig(
@@ -23,6 +25,7 @@ class HomepageWidget extends StatelessWidget {
         icon: const Icon(Icons.factory_rounded),
         title: "Setores",
         iconSize: 30,
+        textStyle: AppStyles.textStyleBottomNavBar,
       ),
     ),
     PersistentTabConfig(
@@ -31,6 +34,7 @@ class HomepageWidget extends StatelessWidget {
         icon: const Icon(Icons.person_rounded),
         title: "Perfil",
         iconSize: 30,
+        textStyle: AppStyles.textStyleBottomNavBar,
       ),
     ),
   ];

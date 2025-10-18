@@ -107,8 +107,9 @@ class _EditarPerfilState extends State<EditarPerfil> {
         appBar: AppBar(
           title: Text(
             "Editar Perfil",
-            style: GoogleFonts.poppins(
+            style: TextStyle(
               fontSize: 20,
+              fontFamily: 'Poppins-Regular',
               fontWeight: FontWeight.w600,
               color: AppColors.branco,
             ),
@@ -125,6 +126,13 @@ class _EditarPerfilState extends State<EditarPerfil> {
                 TextFormField(
                   controller: nomeController,
                   maxLength: 80,
+                  buildCounter:
+                      (
+                        BuildContext context, {
+                        int? currentLength,
+                        int? maxLength,
+                        bool? isFocused,
+                      }) => null,
                   style: AppStyles.textFieldTextStyle,
                   decoration:
                       AppStyles.textFieldDecoration(
@@ -141,6 +149,13 @@ class _EditarPerfilState extends State<EditarPerfil> {
                   controller: emailController,
                   keyboardType: TextInputType.emailAddress,
                   style: AppStyles.textFieldTextStyle,
+                  buildCounter:
+                      (
+                        BuildContext context, {
+                        int? currentLength,
+                        int? maxLength,
+                        bool? isFocused,
+                      }) => null,
                   decoration:
                       AppStyles.textFieldDecoration(
                         "Senha atual: ${emailAtual ?? ''}",
@@ -165,7 +180,7 @@ class _EditarPerfilState extends State<EditarPerfil> {
                       await salvarPerfil();
                     },
                     child: Text(
-                      "Salvar Alterações",
+                      "Salvar alterações",
                       style: AppStyles.loadingButtonTextStyle,
                     ),
                   ),

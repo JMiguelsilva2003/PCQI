@@ -146,7 +146,10 @@ class _TesteCameraState extends State<TesteCamera> {
                     Text(
                       "Inicializando câmera...",
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 40),
+                      style: TextStyle(
+                        fontSize: 40,
+                        fontFamily: 'Poppins-Regular',
+                      ),
                     ),
                   ],
                 ),
@@ -400,7 +403,7 @@ class _TesteCameraState extends State<TesteCamera> {
           items: camerasList.map((camera) {
             return DropdownMenuItem<CameraDescription>(
               value: camera,
-              child: Text(camera.name),
+              child: Text(camera.name, style: AppStyles.textStyleDropdownItem),
             );
           }).toList(),
           onChanged: (camera) async {
@@ -435,7 +438,10 @@ class _TesteCameraState extends State<TesteCamera> {
           items: resolutionPresetList.map((resolution) {
             return DropdownMenuItem<ResolutionPreset>(
               value: resolution,
-              child: Text(resolution.name),
+              child: Text(
+                resolution.name,
+                style: AppStyles.textStyleDropdownItem,
+              ),
             );
           }).toList(),
           onChanged: (resolution) async {
@@ -564,8 +570,14 @@ class _TesteCameraState extends State<TesteCamera> {
     child: Column(
       children: [
         Text("Resultado", style: AppStyles.textStyleOptionsTab),
-        Text("prediction: $resultTextPrediction"),
-        Text("confidence: $resultTextConfidence"),
+        Text(
+          "prediction: $resultTextPrediction",
+          style: AppStyles.textStyleDropdownItem,
+        ),
+        Text(
+          "confidence: $resultTextConfidence",
+          style: AppStyles.textStyleDropdownItem,
+        ),
       ],
     ),
   );
@@ -615,7 +627,9 @@ class _TesteCameraState extends State<TesteCamera> {
             Text(
               'Por favor, permita o acesso à câmera para continuar.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 25),
+              style: AppStyles.textStyleCameraPermissionScreen.copyWith(
+                fontSize: 25,
+              ),
             ),
             SizedBox(height: 30),
             SizedBox(
@@ -630,7 +644,9 @@ class _TesteCameraState extends State<TesteCamera> {
                 child: Text(
                   textAlign: TextAlign.center,
                   'Permitir acesso à câmera',
-                  style: TextStyle(fontSize: 20),
+                  style: AppStyles.textStyleCameraPermissionScreen.copyWith(
+                    fontSize: 20,
+                  ),
                 ),
               ),
             ),
@@ -655,7 +671,9 @@ class _TesteCameraState extends State<TesteCamera> {
               child: Text(
                 'Por favor, permita o acesso à câmera nas configurações do aplicativo em seu dispositivo e depois tente novamente.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 25),
+                style: AppStyles.textStyleCameraPermissionScreen.copyWith(
+                  fontSize: 25,
+                ),
               ),
             ),
             SizedBox(height: 30),
@@ -674,7 +692,9 @@ class _TesteCameraState extends State<TesteCamera> {
                     ),
                     child: Text(
                       'Abrir configurações',
-                      style: TextStyle(fontSize: 20),
+                      style: AppStyles.textStyleCameraPermissionScreen.copyWith(
+                        fontSize: 20,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -694,7 +714,9 @@ class _TesteCameraState extends State<TesteCamera> {
                     child: Text(
                       'Tentar novamente',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 20),
+                      style: AppStyles.textStyleCameraPermissionScreen.copyWith(
+                        fontSize: 20,
+                      ),
                     ),
                   ),
                 ),
@@ -718,7 +740,9 @@ class _TesteCameraState extends State<TesteCamera> {
             Text(
               'Não foi possível identificar câmeras disponíveis neste dispositivo.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 25),
+              style: AppStyles.textStyleCameraPermissionScreen.copyWith(
+                fontSize: 25,
+              ),
             ),
             SizedBox(height: 30),
             SizedBox(
@@ -735,7 +759,9 @@ class _TesteCameraState extends State<TesteCamera> {
                 child: Text(
                   textAlign: TextAlign.center,
                   'Voltar',
-                  style: TextStyle(fontSize: 20),
+                  style: AppStyles.textStyleCameraPermissionScreen.copyWith(
+                    fontSize: 20,
+                  ),
                 ),
               ),
             ),
