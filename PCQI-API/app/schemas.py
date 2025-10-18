@@ -18,6 +18,13 @@ class User(UserBase):
     is_active: bool
     model_config = ConfigDict(from_attributes=True)
 
+class UserPublic(BaseModel):
+    id: int
+    email: str
+    name: str
+    role: str
+    model_config = ConfigDict(from_attributes=True)
+
 class UserUpdate(BaseModel):
     name: Optional[str] = None
     password: Optional[Annotated[str, Field(..., min_length=8)]] = None
@@ -63,6 +70,7 @@ class SectorCreate(SectorBase):
 class Sector(SectorBase):
     id: int
     machines: List[Machine] = []
+    members: List[UserPublic] = []
     model_config = ConfigDict(from_attributes=True)
 
 class MemberAddRequest(BaseModel):
