@@ -134,17 +134,25 @@ async function renderMachinesView(container, user) {
 
     if (user.role === 'admin') {
         newTabBtn.classList.add('admin-visible'); 
-        newTabBtn.addEventListener("click", async () => {
-            const newSectorName = prompt("Digite o nome do novo setor:");
-            if (newSectorName) {
-                try {
-                    await createSector(currentAccessToken, newSectorName, ""); 
-                    renderMachinesView(container, user); 
-                } catch(error) {
-                    alert(`Erro ao criar setor: ${error.message}`);
+        
+        if (!newTabBtn.dataset.listenerAttached) {
+            newTabBtn.dataset.listenerAttached = 'true';
+            
+            newTabBtn.addEventListener("click", async () => {
+                const newSectorName = prompt("Digite o nome do novo setor (obrigatório):");
+                
+                if (newSectorName) {
+                    const newSectorDesc = prompt("Digite a descrição do setor (opcional):");
+                    
+                    try {
+                        await createSector(currentAccessToken, newSectorName, newSectorDesc || ""); 
+                        renderMachinesView(container, user); 
+                    } catch(error) {
+                        alert(`Erro ao criar setor: ${error.message}`);
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     btnCriarMaquina.addEventListener("click", async () => {
