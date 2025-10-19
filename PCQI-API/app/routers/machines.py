@@ -84,7 +84,7 @@ def read_specific_machine(
         
     return db_machine
 
-# --- ROTAS DE COMANDO (CAIXA DE CORREIO) ---
+# --- ROTAS DE COMANDO ---
 
 @router.post(
     "/{machine_id}/commands",
@@ -97,18 +97,11 @@ def add_command_from_prediction(
     request: schemas.AIPredictionRequest,
     db: Session = Depends(get_db)
 ):
-    """
-    Recebe uma predição (da IA ou do Flutter) e a traduz em comandos
-    na fila do banco de dados.
-    """
     action = "REJECT" if request.prediction == "branco" else "ACCEPT"
-    
-    crud.create_machine_command(db=db, machine_id=machine_id, action=action)
-    
-    crud.create_machine_command(db=db, machine_id=machine_id, action="MOVE")
-    
-    return {"message": "Commands queued successfully"}
 
+    crud.create_machine_command(db=db, machine_id=machine_id, action=action)
+
+    return {"message": "Command queued successfully"}
 
 @router.get(
     "/{machine_id}/commands/next",
