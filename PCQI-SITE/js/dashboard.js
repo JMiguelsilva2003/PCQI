@@ -167,6 +167,13 @@ function renderMachineList(screenElement, sector, user) {
     
     let machineHTML = `<h3>Máquinas no Setor: ${sector.name}</h3>`;
     
+    // --- ADIÇÃO DA DESCRIÇÃO AQUI ---
+    if (sector.description) {
+        machineHTML += `<p class="sector-description">${sector.description}</p>`;
+    }
+    machineHTML += `<h4 style="margin-top: 1rem;">Máquinas:</h4>`;
+    // --- FIM DA ADIÇÃO ---
+
     if (!sector.machines || sector.machines.length === 0) {
         machineHTML += '<p>Nenhuma máquina cadastrada neste setor.</p>';
     } else {
