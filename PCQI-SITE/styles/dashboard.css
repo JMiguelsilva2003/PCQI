@@ -313,7 +313,7 @@ body {
 .sector-description {
     font-size: 1.6rem;
     color: #555;
-    margin-top: -1.5rem;
+    margin-top: 0.2rem;
     margin-bottom: 2rem;
     border-bottom: 1px solid #eee;
     padding-bottom: 1.5rem;
