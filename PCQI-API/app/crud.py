@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from datetime import datetime, timezone
 from typing import Optional
+from sqlalchemy import func, case
 
 from app import models, schemas
 from app.security import hash_password
