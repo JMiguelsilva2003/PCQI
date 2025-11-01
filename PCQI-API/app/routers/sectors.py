@@ -74,3 +74,26 @@ def add_member_to_sector(
         raise HTTPException(status_code=400, detail="User is already a member of this sector")
 
     return crud.add_user_to_sector(db=db, user=user_to_add, sector=sector)
+
+# ROTA DELETE para Setores
+
+@router.delete(
+    "/{sector_id}",
+    response_model=schemas.Sector,
+    summary="Deleta um setor (Apenas Admin)",
+    description="Deleta um setor do sistema. Por padrão, só permite apagar setores vazios (sem máquinas)."
+)
+def delete_sector(
+    sector_id: int,
+    db: Session = Depends(get_db),
+    current_admin: models.User = Depends(get_current_admin_user)
+):
+    try:
+        db_sector = crud.delete_sector(db, sector_id=sector_id)
+        if db_sector is None:
+            raise HTTPException(status_code=404, detail="Setor não encontrado.")
+        return db_sector
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Erro interno ao deletar o setor.")

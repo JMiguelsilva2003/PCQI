@@ -123,3 +123,32 @@ def get_next_command(
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     
     return command
+
+# ROTA DELETE para Máquinas
+
+@router.delete(
+    "/{machine_id}",
+    response_model=schemas.Machine,
+    summary="Deleta uma máquina",
+    description="Deleta uma máquina. O usuário deve ser o criador da máquina ou um administrador."
+)
+def delete_machine(
+    machine_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    db_machine = crud.get_machine(db, machine_id=machine_id)
+    if db_machine is None:
+        raise HTTPException(status_code=404, detail="Máquina não encontrada.")
+
+    if current_user.role != "admin" and db_machine.creator_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Você não tem permissão para deletar esta máquina."
+        )
+    
+    deleted_machine = crud.delete_machine(db, machine_id=machine_id)
+    if deleted_machine is None:
+        raise HTTPException(status_code=404, detail="Máquina não encontrada durante a deleção.")
+
+    return deleted_machine

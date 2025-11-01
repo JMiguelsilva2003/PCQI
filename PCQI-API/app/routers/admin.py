@@ -36,3 +36,25 @@ def promote_user_to_admin(
         raise HTTPException(status_code=404, detail="User not found")
     
     return crud.update_user_role(db=db, user=db_user, role="admin")
+
+# ROTA DELETE para Usuários
+
+@router.delete(
+    "/users/{user_id}",
+    response_model=schemas.User,
+    summary="Deleta um usuário (Apenas Admin)",
+    description="Deleta um usuário do sistema. Remove suas associações de setor e anula seu 'creator_id' em máquinas."
+)
+def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_admin: models.User = Depends(get_current_admin_user)
+):
+    if user_id == current_admin.id:
+        raise HTTPException(status_code=400, detail="Administradores não podem deletar a si próprios.")
+        
+    db_user = crud.delete_user(db, user_id=user_id)
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+    
+    return db_user

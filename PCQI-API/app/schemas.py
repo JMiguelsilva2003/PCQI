@@ -89,3 +89,10 @@ class Command(BaseModel):
     machine_id: int
 
     model_config = ConfigDict(from_attributes=True)
+
+# Schema para Estatísticas
+class StatsResponse(BaseModel):
+    total: int = 0
+    maduras: int = 0
+    verdes: int = 0
+    outras: int = 0

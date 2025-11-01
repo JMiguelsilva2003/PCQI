@@ -154,3 +154,87 @@ def get_next_pending_command(db: Session, machine_id: int) -> Optional[models.Co
         return command
     
     return None
+
+# Funções para Stats
+
+def get_command_stats(
+    db: Session, 
+    user: models.User, 
+    sector_id: Optional[int] = None, 
+    machine_id: Optional[int] = None
+) -> schemas.StatsResponse:
+    """
+    Calcula as estatísticas de comandos (mangas analisadas) com base nas permissões
+    do usuário e filtros opcionais.
+    """
+    
+    query = db.query(
+        func.count(models.Command.id).label("total"),
+        func.sum(case((models.Command.action == 'MATURA', 1), else_=0)).label("maduras"),
+        func.sum(case((models.Command.action == 'VERDE', 1), else_=0)).label("verdes"),
+        func.sum(case((models.Command.action.notin_(['MATURA', 'VERDE']), 1), else_=0)).label("outras")
+    ).join(models.Machine)
+
+    if user.role != "admin":
+        user_sector_ids = [sector.id for sector in user.sectors]
+        query = query.filter(models.Machine.sector_id.in_(user_sector_ids))
+    
+    if machine_id:
+        query = query.filter(models.Machine.id == machine_id)
+    elif sector_id:
+        if user.role == "admin" or sector_id in user_sector_ids:
+            query = query.filter(models.Machine.sector_id == sector_id)
+        else:
+            return schemas.StatsResponse()
+
+    stats = query.first()
+
+    if not stats or stats.total is None:
+        return schemas.StatsResponse()
+
+    return schemas.StatsResponse(
+        total=stats.total or 0,
+        maduras=int(stats.maduras or 0),
+        verdes=int(stats.verdes or 0),
+        outras=int(stats.outras or 0)
+    )
+
+# Funções para Deletar
+
+def delete_user(db: Session, user_id: int) -> Optional[models.User]:
+    """ Deleta um usuário e limpa suas associações. """
+    db_user = get_user(db, user_id)
+    if not db_user:
+        return None
+    
+    db.query(models.Machine).filter(
+        models.Machine.creator_id == user_id
+    ).update({"creator_id": None})
+    
+    db.delete(db_user)
+    db.commit()
+    return db_user
+
+def delete_sector(db: Session, sector_id: int) -> Optional[models.Sector]:
+    """ Deleta um setor."""
+    db_sector = get_sector(db, sector_id)
+    if not db_sector:
+        return None
+
+    if len(db_sector.machines) > 0:
+        raise ValueError("Não é possível apagar o setor. Ele ainda contém máquinas.")
+    
+    db.delete(db_sector)
+    db.commit()
+    return db_sector
+
+
+def delete_machine(db: Session, machine_id: int) -> Optional[models.Machine]:
+    """ Deleta uma máquina. (Comandos associados são deletados em cascata) """
+    db_machine = get_machine(db, machine_id)
+    if not db_machine:
+        return None
+    
+    db.delete(db_machine)
+    db.commit()
+    return db_machine

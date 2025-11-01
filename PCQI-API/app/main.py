@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import auth, machines, admin, users, sectors
+from app.routers import stats
 
 app = FastAPI(
     title="PCQI API",
@@ -27,6 +28,7 @@ app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
 app.include_router(machines.router, prefix="/api/v1/machines", tags=["Machines"])
 app.include_router(admin.router, prefix="/api/v1/admin", tags=["Admin"])
 app.include_router(sectors.router, prefix="/api/v1/sectors", tags=["Sectors"])
+app.include_router(stats.router, prefix="/api/v1/stats", tags=["Statistics"])
 
 
 @app.get("/")
