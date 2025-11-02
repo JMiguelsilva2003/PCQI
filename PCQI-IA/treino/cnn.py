@@ -6,31 +6,33 @@ from torchvision import transforms
 from PIL import Image
 import os
 
-# CONFIGURAÇÕES
 DATA_DIR = 'dataset'
-MODEL_SAVE_PATH = 'modelo_bw.pth'
+MODEL_SAVE_PATH = 'modelo_manga_v1.pth' 
 
-# Parâmetros do Treinamento
-NUM_EPOCHS = 15       # Quantas vezes o modelo verá todo o dataset
-BATCH_SIZE = 8        # Quantas imagens processar de uma vez
-LEARNING_RATE = 0.001 # Taxa de aprendizado do otimizador
-IMG_SIZE = 128        # Todas as imagens serão redimensionadas para 128x128 pixels
+NUM_EPOCHS = 15
+BATCH_SIZE = 8
+LEARNING_RATE = 0.001
+IMG_SIZE = 128
 
-class BrancoPretoDataset(Dataset):
+class MangaDataset(Dataset):
     def __init__(self, root_dir, transform=None):
         self.root_dir = root_dir
         self.transform = transform
-        self.classes = sorted(os.listdir(root_dir))
+        self.classes = sorted([d for d in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, d))])
         self.class_to_idx = {cls_name: i for i, cls_name in enumerate(self.classes)}
         self.image_paths = self._get_image_paths()
+        
+        if not self.image_paths:
+            raise RuntimeError(f"Nenhuma imagem encontrada em {root_dir}. Verifique a estrutura das pastas.")
+            
         print(f"Dataset encontrado com {len(self.image_paths)} imagens em {len(self.classes)} classes: {self.classes}")
 
     def _get_image_paths(self):
         paths = []
         for cls_name in self.classes:
             class_dir = os.path.join(self.root_dir, cls_name)
-            if os.path.isdir(class_dir):
-                for img_name in os.listdir(class_dir):
+            for img_name in os.listdir(class_dir):
+                if img_name.lower().endswith(('.png', '.jpg', '.jpeg')):
                     paths.append((os.path.join(class_dir, img_name), self.class_to_idx[cls_name]))
         return paths
 
@@ -46,7 +48,6 @@ class BrancoPretoDataset(Dataset):
             
         return image, label
 
-# ARQUITETURA DA CNN 
 class SimpleCNN(nn.Module):
     def __init__(self, num_classes=2):
         super(SimpleCNN, self).__init__()
@@ -60,7 +61,9 @@ class SimpleCNN(nn.Module):
         
         self.flatten = nn.Flatten()
         
-        self.fc1 = nn.Linear(in_features=32 * (IMG_SIZE//4) * (IMG_SIZE//4), out_features=64)
+        in_features = 32 * (IMG_SIZE // 4) * (IMG_SIZE // 4)
+        
+        self.fc1 = nn.Linear(in_features=in_features, out_features=64)
         self.relu3 = nn.ReLU()
         self.fc2 = nn.Linear(in_features=64, out_features=num_classes)
 
@@ -82,8 +85,10 @@ if __name__ == '__main__':
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
 
-    full_dataset = BrancoPretoDataset(root_dir=DATA_DIR, transform=transform)
+    full_dataset = MangaDataset(root_dir=DATA_DIR, transform=transform)
 
+    NUM_CLASSES = len(full_dataset.classes)
+    
     train_size = int(0.8 * len(full_dataset))
     val_size = len(full_dataset) - train_size
     train_dataset, val_dataset = random_split(full_dataset, [train_size, val_size])
@@ -91,11 +96,11 @@ if __name__ == '__main__':
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)
     
-    model = SimpleCNN(num_classes=len(full_dataset.classes)).to(device)
+    model = SimpleCNN(num_classes=NUM_CLASSES).to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
-    print("\n--- Iniciando o Treinamento ---")
+    print("\nIniciando o Treinamento")
     
     for epoch in range(NUM_EPOCHS):
         model.train()
@@ -104,12 +109,9 @@ if __name__ == '__main__':
             images, labels = images.to(device), labels.to(device)
             
             optimizer.zero_grad()
-            
             outputs = model(images)
             loss = criterion(outputs, labels)
-            
             loss.backward()
-            
             optimizer.step()
             
             running_loss += loss.item()
@@ -128,7 +130,9 @@ if __name__ == '__main__':
         accuracy = 100 * correct / total
         print(f'Época [{epoch+1}/{NUM_EPOCHS}], Perda (Loss): {running_loss/len(train_loader):.4f}, Acurácia na Validação: {accuracy:.2f}%')
 
-    print("--- Treinamento Concluído ---")
+    print("Treinamento Concluído")
 
     torch.save(model.state_dict(), MODEL_SAVE_PATH)
     print(f"Modelo salvo com sucesso em: {MODEL_SAVE_PATH}")
+    
+    print(f"Mapeamento de Classes: {full_dataset.class_to_idx}")
