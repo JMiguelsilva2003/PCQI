@@ -50,11 +50,17 @@ def run_gateway():
         comando = buscar_proximo_comando()
         
         if comando:
-            if comando == "REJECT":
-                enviar_comando_arduino("REJECT")
-            elif comando == "ACCEPT":
-                print("Peça 'preto' (ou b) aceita. Nenhuma ação.")
             
+            if comando == "VERDE":
+                print("Comando 'VERDE' recebido. Ejetando...")
+                enviar_comando_arduino("REJECT") 
+                
+            elif comando == "MATURA":
+                print("Comando 'MATURA' recebido. Aceitando (nenhuma ação).")
+                
+            else:
+                print(f"Comando '{comando}' desconhecido. Ignorando.")
+                
         time.sleep(1)
 
 if __name__ == "__main__":
