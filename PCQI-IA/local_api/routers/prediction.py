@@ -1,32 +1,37 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException
+import httpx
+import asyncio
+import os
+
 from local_api.ml.processing import predict_image_from_bytes
-from local_api.hardware.arduino import send_command
+from local_api.state_manager import AnalysisStateManager
 
 router = APIRouter()
 
-@router.post("/predict", summary="Recebe imagem, classifica e comanda o Arduino")
-async def handle_prediction(file: UploadFile = File(...)):
-    if not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Formato de arquivo inválido.")
+RENDER_API_URL = os.getenv()
+
+MACHINE_ID_FOR_IA = os.getenv() 
+
+RENDER_API_KEY = os.getenv() 
+
+manager = AnalysisStateManager()
+
+async def send_to_render_api(prediction: str):
+    if not RENDER_API_URL or not RENDER_API_KEY:
+        print("❌ERRO: Variáveis RENDER_API_URL ou RENDER_API_KEY não definidas.")
+        return
+
+    url = f"{RENDER_API_URL}/api/v1/machines/{MACHINE_ID_FOR_IA}/commands"
+    headers = {"X-API-Key": RENDER_API_KEY, "Content-Type": "application/json"}
+    data = {"prediction": prediction} 
 
     try:
-        contents = await file.read()
-        result = predict_image_from_bytes(image_bytes=contents)
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, headers=headers, json=data)
         
-        if result["prediction"] == 'branco':
-            send_command("REJECT")
+        if response.status_code == 201:
+            print(f"Sucesso: Comando Único '{prediction}' enviado para o Render.")
         else:
-            print(f"Peça '{result['prediction']}' aceita.")
-
-        send_command("MOVE")
-
-        return result
-        
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+            print(f"ERRO ao enviar para o Render: {response.status_code} - {response.text}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao processar a imagem: {str(e)}")
-
-@router.get("/", summary="Verifica o status da API")
-def read_root():
-    return {"status": "PCQI Local AI API está online e pronta!"}
+        print(f"Exceção ao enviar para o Render: {e}")
