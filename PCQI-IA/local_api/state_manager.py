@@ -5,19 +5,18 @@ FRAMES_PARA_TERMINAR = 5
 MIN_FRAMES_ANALISE = 5    
 
 class AnalysisStateManager:
-    
     def __init__(self):
         self.reset()
 
     def reset(self):
+        """Reseta o estado para AGUARDANDO (pronto para a próxima manga)."""
         self.state = "Aguardando"
-        self.current_frames = []      
+        self.current_frames = [] 
         self.background_frames_count = 0 
-        self.object_frames_count = 0      
+        self.object_frames_count = 0  
         print("State Manager: Resetado. AGUARDANDO.")
 
     def process_prediction(self, prediction: str) -> (str, str | None):
-        
         final_decision = None
 
         if self.state == "Aguardando":
@@ -46,9 +45,7 @@ class AnalysisStateManager:
         return self.state, final_decision
 
     def _make_decision(self) -> str | None:
-        """
-        Calcula a decisão final (a "moda") com base nos frames coletados.
-        """
+        
         print(f"State Manager: DECIDINDO com {len(self.current_frames)} frames.")
         
         if len(self.current_frames) < MIN_FRAMES_ANALISE:

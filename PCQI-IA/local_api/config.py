@@ -4,8 +4,8 @@ from torchvision import transforms
 _CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 _PROJECT_ROOT = os.path.abspath(os.path.join(_CURRENT_DIR, '..'))
 
-MODELO_PATH = os.path.join(_PROJECT_ROOT, 'treino/modelo_bw.pth')
-CLASSES = ['preto', 'branco']
+MODELO_PATH = os.path.join(_PROJECT_ROOT, 'treino/modelo_manga_v1.pth')
+CLASSES = ['FUNDO', 'MATURA', 'VERDE']
 IMG_SIZE = 128
 TRANSFORM = transforms.Compose([
     transforms.Resize((IMG_SIZE, IMG_SIZE)),
