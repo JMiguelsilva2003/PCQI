@@ -4,12 +4,10 @@ from typing import List
 
 from app import crud, models, schemas
 from app.database import get_db
-from app.auth import get_current_user, verify_api_key
+from app.routers import auth 
 from app.routers import descriptions as desc
 
 router = APIRouter()
-
-# --- Rotas de Gestão de Máquinas (para Usuários)
 
 @router.post(
     "/",
@@ -21,7 +19,7 @@ router = APIRouter()
 def create_machine(
     machine: schemas.MachineCreate,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user)
+    current_user: models.User = Depends(auth.get_current_user)
 ):
     """
     Cria uma nova máquina associada a um setor.
@@ -48,7 +46,7 @@ def create_machine(
 )
 def read_user_machines(
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user)
+    current_user: models.User = Depends(auth.get_current_user)
 ):
     """
     Retorna uma lista de todas as máquinas de todos os setores
@@ -66,7 +64,7 @@ def read_user_machines(
 def read_specific_machine(
     machine_id: int,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user)
+    current_user: models.User = Depends(auth.get_current_user)
 ):
     """
     Retorna os detalhes de uma máquina específica.
@@ -84,30 +82,42 @@ def read_specific_machine(
         
     return db_machine
 
-# --- ROTAS DE COMANDO ---
-
 @router.post(
     "/{machine_id}/commands",
     summary="A IA (ou App) reporta uma classificação",
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(verify_api_key)] 
+    description="A API de IA chama este endpoint após uma análise. O valor "
+                "da 'prediction' (ex: 'MATURA', 'VERDE') é salvo "
+                "diretamente na fila de comandos.",
+    dependencies=[Depends(auth.verify_api_key)]
 )
 def add_command_from_prediction(
     machine_id: int,
     request: schemas.AIPredictionRequest,
     db: Session = Depends(get_db)
 ):
-    action = "REJECT" if request.prediction == "branco" else "ACCEPT"
+    action_from_ia = request.prediction
 
-    crud.create_machine_command(db=db, machine_id=machine_id, action=action)
+    if not action_from_ia:
+        raise HTTPException(status_code=400, detail="Prediction não pode estar vazia.")
 
-    return {"message": "Command queued successfully"}
+    try:
+        crud.create_machine_command(
+            db=db, 
+            machine_id=machine_id, 
+            action=action_from_ia
+        )
+        return {"message": f"Command '{action_from_ia}' created for machine {machine_id}"}
+    
+    except Exception as e:
+        print(f"Erro ao criar comando no CRUD: {e}")
+        raise HTTPException(status_code=500, detail="Erro interno ao salvar comando.")
 
 @router.get(
     "/{machine_id}/commands/next",
     response_model=schemas.Command,
     summary="O Gateway de Hardware busca o próximo comando",
-    dependencies=[Depends(verify_api_key)]
+    dependencies=[Depends(auth.verify_api_key)]
 )
 def get_next_command(
     machine_id: int, 
@@ -124,8 +134,6 @@ def get_next_command(
     
     return command
 
-# ROTA DELETE para Máquinas
-
 @router.delete(
     "/{machine_id}",
     response_model=schemas.Machine,
@@ -135,7 +143,7 @@ def get_next_command(
 def delete_machine(
     machine_id: int,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user)
+    current_user: models.User = Depends(auth.get_current_user)
 ):
     db_machine = crud.get_machine(db, machine_id=machine_id)
     if db_machine is None:
