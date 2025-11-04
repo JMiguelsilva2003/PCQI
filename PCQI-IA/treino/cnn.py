@@ -6,7 +6,8 @@ from torchvision import transforms
 from PIL import Image
 import os
 
-DATA_DIR = 'dataset'
+_CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(_CURRENT_DIR, 'dataset')
 MODEL_SAVE_PATH = 'modelo_manga_v1.pth' 
 
 NUM_EPOCHS = 15
