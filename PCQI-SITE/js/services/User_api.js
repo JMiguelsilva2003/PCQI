@@ -130,8 +130,16 @@ async function deleteUser(token, userId) {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
     });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.detail || 'Erro ao deletar usuário.');
+    
+    let data = null;
+    if (response.status !== 204) {
+        try { data = await response.json(); } catch {}
+    }
+
+    if (!response.ok) {
+        const message = (data && data.detail) || 'Erro ao deletar usuário.';
+        throw new Error(message);
+    }
     return data;
 }
 
@@ -180,6 +188,31 @@ async function deleteMachine(token, machineId) {
 
     if (!response.ok) {
         const message = (data && data.detail) || 'Erro ao deletar máquina.';
+        throw new Error(message);
+    }
+    return data;
+}
+
+async function deleteSector(token, sectorId) {
+    const response = await fetch(`${API_BASE_URL}/api/v1/sectors/${sectorId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    
+    let data = null;
+    if (response.status !== 204) {
+        try {
+            data = await response.json();
+        } catch {
+            data = null;
+        }
+    }
+
+    if (!response.ok) {
+        const message = (data && data.detail) || 'Erro ao deletar setor.';
+        if (response.status === 400) {
+            throw new Error(data.detail);
+        }
         throw new Error(message);
     }
     return data;

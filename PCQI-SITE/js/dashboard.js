@@ -65,14 +65,19 @@ function setupNavigation(user) {
   const btnVerPerfis = document.getElementById("btn-ver-perfis");
   const contentContainer = document.getElementById("component-dashboard");
 
+  const navButtons = [btnVerMaquinas, btnVerPerfis, btnVerStats].filter(Boolean);
+
+  function setActiveButton(activeBtn) {
+    navButtons.forEach(btn => btn.classList.remove("active"));
+    if (activeBtn) activeBtn.classList.add("active");
+  }
+
   if (user.role === "admin") {
     btnVerPerfis.style.display = "block";
   }
 
   btnVerMaquinas.addEventListener("click", async () => {
-    btnVerMaquinas.classList.add("active");
-    btnVerPerfis.classList.remove("active");
-
+    setActiveButton(btnVerMaquinas);
     await loadHTML("/components/viewMachines.html", "component-dashboard");
     await new Promise((resolve) => setTimeout(resolve, 0));
     renderMachinesView(contentContainer, user);
@@ -80,9 +85,7 @@ function setupNavigation(user) {
 
   if (user.role === "admin") {
     btnVerPerfis.addEventListener("click", async () => {
-      btnVerMaquinas.classList.remove("active");
-      btnVerPerfis.classList.add("active");
-
+      setActiveButton(btnVerPerfis);
       await loadHTML("/components/viewProfiles.html", "component-dashboard");
       await new Promise((resolve) => setTimeout(resolve, 0));
       renderProfilesView(contentContainer);
@@ -119,12 +122,44 @@ async function renderMachinesView(container, user) {
       sectors.forEach((sector, index) => {
         const tab = document.createElement("div");
         tab.classList.add("tab");
-        tab.textContent = sector.name;
         tab.dataset.sectorId = sector.id;
+
+        const tabName = document.createElement("span");
+        tabName.textContent = sector.name;
+        tab.appendChild(tabName);
+
+        if (user.role === "admin") {
+            const deleteSectorBtn = document.createElement("button");
+            deleteSectorBtn.textContent = "X";
+            deleteSectorBtn.classList.add("delete-sector-btn");
+            deleteSectorBtn.title = `Deletar setor ${sector.name}`;
+            
+            deleteSectorBtn.addEventListener("click", async (e) => {
+                e.stopPropagation(); 
+                
+                if (confirm(`Tem certeza que deseja deletar o setor "${sector.name}"? \n\nAVISO: Setores com máquinas não podem ser deletados.`)) {
+                    try {
+                        await deleteSector(currentAccessToken, sector.id);
+                        alert("Setor deletado com sucesso!");
+                        tab.remove();
+
+                        const firstTab = tabsContainer.querySelector(".tab");
+                        if (firstTab) firstTab.click();
+                        else screen.innerHTML = "<p>Nenhum setor encontrado.</p>";
+
+                    } catch (error) {
+                        alert(`Erro ao deletar setor: ${error.message}`);
+                    }
+                }
+            });
+            tab.appendChild(deleteSectorBtn);
+        }
 
         tabsContainer.insertBefore(tab, newTabBtn);
 
-        tab.addEventListener("click", () => {
+        tab.addEventListener("click", (e) => {
+          if (e.target.classList.contains("delete-sector-btn")) return;
+
           tabsContainer
             .querySelectorAll(".tab")
             .forEach((t) => t.classList.remove("active"));
@@ -165,7 +200,7 @@ async function renderMachinesView(container, user) {
               newSectorName,
               newSectorDesc || ""
             );
-            renderMachinesView(container, user);
+            renderMachinesView(container, user); 
           } catch (error) {
             alert(`Erro ao criar setor: ${error.message}`);
           }
@@ -187,12 +222,10 @@ async function renderMachinesView(container, user) {
 function renderMachineList(screenElement, sector, user) {
   let machineHTML = `<h3>Máquinas no Setor: ${sector.name}</h3>`;
 
-  // --- ADIÇÃO DA DESCRIÇÃO AQUI ---
   if (sector.description) {
     machineHTML += `<p class="sector-description">${sector.description}</p>`;
   }
   machineHTML += `<h4 style="margin-top: 1rem;">Máquinas:</h4>`;
-  // --- FIM DA ADIÇÃO ---
 
   if (!sector.machines || sector.machines.length === 0) {
     machineHTML += "<p>Nenhuma máquina cadastrada neste setor.</p>";
@@ -243,10 +276,16 @@ function renderMachineList(screenElement, sector, user) {
     screenElement.querySelectorAll(".delete-machine").forEach((button) => {
       button.addEventListener("click", async (e) => {
         const machineId = e.target.dataset.machineId;
-        if (confirm(`Tem certeza que deseja deletar a máquina ${machineId}?`)) {
+        const machineCard = e.target.closest(".machine-card");
+        const machineName = machineCard.querySelector("h4").textContent;
+
+        if (confirm(`Tem certeza que deseja deletar a máquina "${machineName}" (ID: ${machineId})?`)) {
           try {
             await deleteMachine(currentAccessToken, machineId);
-            alert("Máquina removido com sucesso!");
+            alert("Máquina removida com sucesso!");
+            
+            machineCard.remove();
+
           } catch (error) {
             alert(`Erro ao deletar: ${error.message}`);
           }
@@ -347,22 +386,22 @@ async function renderProfilesView(container) {
                     </div>
                     <div class="info-item">
                         <span>Ações</span>
-                        <div style="display: flex; gap: 1rem; align-items: center;">
-                            <button class="promote-btn logout-btn" 
+                        <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
+                            <button class="promote-btn" 
                                 data-user-id="${user.id}" 
                                 ${user.role === "admin" ? "disabled" : ""}>
-                                ${
-                                  user.role === "admin"
-                                    ? "Já é Admin"
-                                    : "Promover a Admin"
-                                }
+                                ${user.role === "admin" ? "Já é Admin" : "Promover"}
                             </button>
-                            <select class="add-to-sector-select" data-user-id="${
-                              user.id
-                            }" style="padding: 0.8rem; border-radius: 6px;">
+                            <select class="add-to-sector-select" data-user-id="${user.id}" style="padding: 0.8rem; border-radius: 6px;">
                                 ${sectorOptions}
                             </select>
                             
+                            <button class="delete-btn logout-btn" 
+                                data-user-id="${user.id}" 
+                                data-user-name="${user.name}"
+                                ${user.role === "admin" ? "disabled" : ""}>
+                                Excluir
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -392,10 +431,15 @@ async function renderProfilesView(container) {
     screen.querySelectorAll(".delete-btn").forEach((button) => {
       button.addEventListener("click", async (e) => {
         const userId = e.target.dataset.userId;
-        if (confirm(`Tem certeza que deseja deletar o usuário ${userId}?`)) {
+        const userName = e.target.dataset.userName;
+        
+        if (confirm(`Tem certeza que deseja deletar o usuário "${userName}" (ID: ${userId})? \n\nAtenção: esta ação não pode ser desfeita.`)) {
           try {
             await deleteUser(currentAccessToken, userId);
             alert("Usuário removido com sucesso!");
+            
+            e.target.closest(".profile-card").remove();
+
           } catch (error) {
             alert(`Erro ao deletar: ${error.message}`);
           }
