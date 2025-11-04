@@ -4,7 +4,7 @@ from typing import List
 
 from app import crud, models, schemas
 from app.database import get_db
-from app.routers import auth 
+from app.auth import get_current_user, verify_api_key
 from app.routers import descriptions as desc
 
 router = APIRouter()
@@ -19,7 +19,7 @@ router = APIRouter()
 def create_machine(
     machine: schemas.MachineCreate,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(auth.get_current_user)
+    current_user: models.User = Depends(get_current_user) 
 ):
     """
     Cria uma nova máquina associada a um setor.
@@ -46,7 +46,7 @@ def create_machine(
 )
 def read_user_machines(
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(auth.get_current_user)
+    current_user: models.User = Depends(get_current_user) 
 ):
     """
     Retorna uma lista de todas as máquinas de todos os setores
@@ -64,7 +64,7 @@ def read_user_machines(
 def read_specific_machine(
     machine_id: int,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(auth.get_current_user)
+    current_user: models.User = Depends(get_current_user) 
 ):
     """
     Retorna os detalhes de uma máquina específica.
@@ -89,7 +89,7 @@ def read_specific_machine(
     description="A API de IA chama este endpoint após uma análise. O valor "
                 "da 'prediction' (ex: 'MATURA', 'VERDE') é salvo "
                 "diretamente na fila de comandos.",
-    dependencies=[Depends(auth.verify_api_key)]
+    dependencies=[Depends(verify_api_key)] 
 )
 def add_command_from_prediction(
     machine_id: int,
@@ -105,7 +105,7 @@ def add_command_from_prediction(
         crud.create_machine_command(
             db=db, 
             machine_id=machine_id, 
-            action=action_from_ia
+            action=action_from_ia 
         )
         return {"message": f"Command '{action_from_ia}' created for machine {machine_id}"}
     
@@ -117,7 +117,7 @@ def add_command_from_prediction(
     "/{machine_id}/commands/next",
     response_model=schemas.Command,
     summary="O Gateway de Hardware busca o próximo comando",
-    dependencies=[Depends(auth.verify_api_key)]
+    dependencies=[Depends(verify_api_key)]
 )
 def get_next_command(
     machine_id: int, 
@@ -143,7 +143,7 @@ def get_next_command(
 def delete_machine(
     machine_id: int,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(auth.get_current_user)
+    current_user: models.User = Depends(get_current_user) 
 ):
     db_machine = crud.get_machine(db, machine_id=machine_id)
     if db_machine is None:
