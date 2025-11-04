@@ -204,6 +204,10 @@ function renderMachineList(screenElement, sector, user) {
                 <div class="machine-card" style="background: #fff; border: 1px solid #ccc; border-radius: 4px; padding: 1rem;">
                     <h4>${machine.name}</h4>
                     <p style="font-size: 1.2rem; color: #555;">ID: ${machine.id}</p>
+                    <button class="delete-machine" 
+                        data-machine-id = "${machine.id}">
+                        excluir 
+                    </button>
                 </div>
             `;
     });
@@ -235,6 +239,20 @@ function renderMachineList(screenElement, sector, user) {
   }
 
   screenElement.innerHTML = machineHTML + membersHTML;
+
+    screenElement.querySelectorAll(".delete-machine").forEach((button) => {
+      button.addEventListener("click", async (e) => {
+        const machineId = e.target.dataset.machineId;
+        if (confirm(`Tem certeza que deseja deletar a máquina ${machineId}?`)) {
+          try {
+            await deleteMachine(currentAccessToken, machineId);
+            alert("Máquina removido com sucesso!");
+          } catch (error) {
+            alert(`Erro ao deletar: ${error.message}`);
+          }
+        }
+      });
+    });
 }
 
 async function renderCreateMachineForm(viewContainer, user) {

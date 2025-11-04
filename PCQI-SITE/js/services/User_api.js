@@ -124,6 +124,7 @@ async function promoteUser(token, userId) {
     if (!response.ok) throw new Error(data.detail || 'Erro ao promover usuário.');
     return data;
 }
+
 async function deleteUser(token, userId) {
     const response = await fetch(`${API_BASE_URL}/api/v1/admin/users/${userId}`, {
         method: 'DELETE',
@@ -159,5 +160,27 @@ async function createMachine(token, machineName, sectorId) {
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.detail || 'Erro ao criar máquina.');
+    return data;
+}
+
+async function deleteMachine(token, machineId) {
+    const response = await fetch(`${API_BASE_URL}/api/v1/machines/${machineId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    let data = null;
+
+    if (response.status !== 204) {
+        try {
+        data = await response.json();
+        } catch {
+        data = null;
+        }
+    }
+
+    if (!response.ok) {
+        const message = (data && data.detail) || 'Erro ao deletar máquina.';
+        throw new Error(message);
+    }
     return data;
 }
