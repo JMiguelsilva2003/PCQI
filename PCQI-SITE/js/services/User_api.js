@@ -124,6 +124,15 @@ async function promoteUser(token, userId) {
     if (!response.ok) throw new Error(data.detail || 'Erro ao promover usuário.');
     return data;
 }
+async function deleteUser(token, userId) {
+    const response = await fetch(`${API_BASE_URL}/api/v1/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.detail || 'Erro ao deletar usuário.');
+    return data;
+}
 
 async function addUserToSector(token, sectorId, userId) {
     const response = await fetch(`${API_BASE_URL}/api/v1/sectors/${sectorId}/members`, {
