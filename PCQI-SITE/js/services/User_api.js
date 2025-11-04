@@ -217,3 +217,24 @@ async function deleteSector(token, sectorId) {
     }
     return data;
 }
+
+async function getStats(token, sectorId = null, machineId = null) {
+    const url = new URL(`${API_BASE_URL}/api/v1/stats/`);
+    if (sectorId) {
+        url.searchParams.append('sector_id', sectorId);
+    }
+    if (machineId) {
+        url.searchParams.append('machine_id', machineId);
+    }
+
+    const response = await fetch(url.toString(), {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.detail || 'Erro ao buscar estatísticas.');
+    }
+    return data;
+}

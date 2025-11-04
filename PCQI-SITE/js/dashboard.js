@@ -63,6 +63,7 @@ async function setupDashboard() {
 function setupNavigation(user) {
   const btnVerMaquinas = document.getElementById("btn-ver-maquinas");
   const btnVerPerfis = document.getElementById("btn-ver-perfis");
+  const btnVerStats = document.getElementById("btn-ver-estatisticas");
   const contentContainer = document.getElementById("component-dashboard");
 
   const navButtons = [btnVerMaquinas, btnVerPerfis, btnVerStats].filter(Boolean);
@@ -81,6 +82,13 @@ function setupNavigation(user) {
     await loadHTML("/components/viewMachines.html", "component-dashboard");
     await new Promise((resolve) => setTimeout(resolve, 0));
     renderMachinesView(contentContainer, user);
+  });
+
+  btnVerStats.addEventListener("click", async () => {
+    setActiveButton(btnVerStats);
+    await loadHTML("/components/viewStatistics.html", "component-dashboard");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    renderStatisticsView(contentContainer, user);
   });
 
   if (user.role === "admin") {
@@ -468,5 +476,70 @@ async function renderProfilesView(container) {
     screen.innerHTML = `<p style='color:red;'>Erro ao carregar dados: ${error.message}</p>`;
   }
 }
+
+async function renderStatisticsView(container, user) {
+    const loadingEl = container.querySelector("#stats-loading");
+    const totalEl = container.querySelector("#stats-total");
+    const madurasEl = container.querySelector("#stats-maduras");
+    const verdesEl = container.querySelector("#stats-verdes");
+    const outrasEl = container.querySelector("#stats-outras");
+
+    const sectorSelect = container.querySelector("#stats-filter-sector");
+    const machineSelect = container.querySelector("#stats-filter-machine");
+    const filterBtn = container.querySelector("#btn-apply-filter");
+
+    if (allSectorsCache.length > 0) {
+        sectorSelect.innerHTML = '<option value="all">Todos os Setores</option>';
+        allSectorsCache.forEach(sector => {
+            sectorSelect.innerHTML += `<option value="${sector.id}">${sector.name}</option>`;
+        });
+    }
+
+    sectorSelect.addEventListener("change", () => {
+        const sectorId = sectorSelect.value;
+        machineSelect.innerHTML = '<option value="all">Todas as Máquinas</option>';
+        
+        if (sectorId !== "all") {
+            const selectedSector = allSectorsCache.find(s => s.id == sectorId);
+            if (selectedSector && selectedSector.machines) {
+                selectedSector.machines.forEach(machine => {
+                    machineSelect.innerHTML += `<option value="${machine.id}">${machine.name}</option>`;
+                });
+            }
+        }
+    });
+
+    const fetchAndRenderStats = async () => {
+        loadingEl.style.display = "block";
+        totalEl.textContent = "...";
+        madurasEl.textContent = "...";
+        verdesEl.textContent = "...";
+        outrasEl.textContent = "...";
+
+        const sectorId = sectorSelect.value === "all" ? null : sectorSelect.value;
+        const machineId = machineSelect.value === "all" ? null : machineSelect.value;
+
+        try {
+            const stats = await getStats(currentAccessToken, sectorId, machineId);
+            totalEl.textContent = stats.total;
+            madurasEl.textContent = stats.maduras;
+            verdesEl.textContent = stats.verdes;
+            outrasEl.textContent = stats.outras;
+            loadingEl.style.display = "none";
+        } catch (error) {
+            console.error("Erro ao buscar estatísticas:", error);
+            loadingEl.style.display = "none";
+            totalEl.textContent = "Erro";
+            madurasEl.textContent = "Erro";
+            verdesEl.textContent = "Erro";
+            outrasEl.textContent = "Erro";
+        }
+    };
+
+    filterBtn.addEventListener("click", fetchAndRenderStats);
+
+    fetchAndRenderStats();
+}
+
 
 document.addEventListener("DOMContentLoaded", setupDashboard);
