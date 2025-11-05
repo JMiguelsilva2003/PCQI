@@ -10,17 +10,23 @@ class AutoLoginResponseHandler {
       UserModel userModelResponse = UserModel.fromJson(
         jsonDecode(response.body),
       );
-      //logger.d(response.body);
-      if (userModelResponse.accessToken!.isNotEmpty) {
-        await SharedPreferencesHelper.setAccessToken(
-          userModelResponse.accessToken!,
-        );
-        await SharedPreferencesHelper.setRefreshToken(
-          userModelResponse.refreshToken!,
-        );
-        if (!context.mounted) return;
-        Navigator.pushReplacementNamed(context, '/homepage');
+      if (userModelResponse.detail!.startsWith("Could")) {
+        await SharedPreferencesHelper.setAccessToken("");
+        await SharedPreferencesHelper.setRefreshToken("");
+        Navigator.pushReplacementNamed(context, '/landingpage');
         return;
+      } else {
+        if (userModelResponse.accessToken!.isNotEmpty) {
+          await SharedPreferencesHelper.setAccessToken(
+            userModelResponse.accessToken!,
+          );
+          await SharedPreferencesHelper.setRefreshToken(
+            userModelResponse.refreshToken!,
+          );
+          if (!context.mounted) return;
+          Navigator.pushReplacementNamed(context, '/homepage');
+          return;
+        }
       }
     } catch (e) {
       Navigator.pushReplacementNamed(context, '/landingpage');
