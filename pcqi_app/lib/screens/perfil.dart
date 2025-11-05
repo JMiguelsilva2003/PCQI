@@ -6,6 +6,7 @@ import 'package:pcqi_app/config/app_colors.dart';
 import 'package:pcqi_app/models/user_model.dart';
 import 'package:pcqi_app/providers/provider_model.dart';
 import 'package:pcqi_app/screens/editar_perfil.dart';
+import 'package:pcqi_app/screens/landing_page.dart';
 import 'package:pcqi_app/services/shared_preferences_helper.dart';
 import 'package:provider/provider.dart';
 
@@ -156,6 +157,39 @@ class _PerfilState extends State<Perfil> {
                         },
                         child: Text(
                           "Editar Perfil",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontFamily: 'Poppins-Bold',
+                            color: AppColors.branco,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+
+                    SizedBox(
+                      width: 200,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.vermelho,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () async {
+                          await SharedPreferencesHelper.setAccessToken("");
+                          await SharedPreferencesHelper.setRefreshToken("");
+                          Navigator.of(
+                            context,
+                            rootNavigator: true,
+                          ).pushNamedAndRemoveUntil(
+                            '/landingpage',
+                            (route) => false,
+                          );
+                        },
+                        child: Text(
+                          "Sair da conta",
                           style: TextStyle(
                             fontSize: 16,
                             fontFamily: 'Poppins-Bold',

@@ -22,6 +22,18 @@ class HttpRequest {
     return response;
   }
 
+  static postWithAuthorization(String method, [String? additionalInfo]) async {
+    var urlSend = Uri.parse("$url/$method");
+
+    final token = SharedPreferencesHelper.getAccessToken();
+
+    var response = await http
+        .post(urlSend, headers: {"Authorization": "Bearer $token"})
+        .timeout(timeoutSeconds);
+
+    return response;
+  }
+
   static postFormUrlEncoded(
     String method,
     Map<String, String> requestData,

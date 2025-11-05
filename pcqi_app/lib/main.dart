@@ -7,6 +7,7 @@ import 'package:pcqi_app/screens/perfil.dart';
 import 'package:pcqi_app/screens/register.dart';
 import 'package:pcqi_app/screens/landing_page.dart';
 import 'package:pcqi_app/screens/login.dart';
+import 'package:pcqi_app/screens/splash_screen.dart';
 import 'package:pcqi_app/screens/teste_camera.dart';
 import 'package:pcqi_app/services/shared_preferences_helper.dart';
 import 'package:provider/provider.dart';
@@ -31,9 +32,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: TesteCamera(),
+      home: SplashScreen(),
       routes: {
-        //'/': (context) => LandingPage(),
+        '/landingpage': (context) => LandingPage(),
         '/login': (context) => Login(),
         '/forgot-password': (context) => ForgotPassword(),
         '/cadastro': (context) => Register(),

@@ -4,6 +4,7 @@ import 'package:pcqi_app/models/sector_model.dart';
 //import 'package:logger/logger.dart';
 import 'package:pcqi_app/services/http_request.dart';
 import 'package:pcqi_app/models/user_model.dart';
+import 'package:pcqi_app/utils/auto_login_response_handler.dart';
 import 'package:pcqi_app/utils/forgot_password_response_handler.dart';
 import 'package:pcqi_app/utils/get_machines_response_handler.dart';
 import 'package:pcqi_app/utils/get_sectors_response_handler.dart';
@@ -37,6 +38,17 @@ class RequestMethods {
         "Falha na conexão. Por favor, tente novamente.",
         context,
       );
+    }
+  }
+
+  Future<void> autoLogin() async {
+    try {
+      final response = await HttpRequest.postWithAuthorization('auth/refresh');
+      if (!context.mounted) return;
+      await AutoLoginResponseHandler.handleAutoLoginResponse(response, context);
+    } catch (e) {
+      if (!context.mounted) return;
+      Navigator.pushReplacementNamed(context, '/landingpage');
     }
   }
 
