@@ -16,6 +16,8 @@ import 'package:pcqi_app/utils/validators.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:web_socket/web_socket.dart';
 
+enum WebSocketConnectionStatus { disconnected, connecting, connected }
+
 class TesteCamera extends StatefulWidget {
   const TesteCamera({super.key});
 
@@ -40,6 +42,8 @@ class _TesteCameraState extends State<TesteCamera> {
   CameraDescription? selectedCamera;
   CameraImageConverter cameraImageConverter = CameraImageConverter();
   HttpImageRequest httpImageRequest = HttpImageRequest();
+  WebSocketConnectionStatus connectionStatus =
+      WebSocketConnectionStatus.disconnected;
   bool isStreamRunning = false;
   bool isCurrentlySendingImage = false;
 
@@ -48,9 +52,11 @@ class _TesteCameraState extends State<TesteCamera> {
   final FocusNode focusNodeIp = FocusNode();
   bool showFormValidationError = false;
 
-  String resultTextStatus = "";
-  String resultTextCurrentPrediction = "";
-  String resultTextConfidence = "";
+  String debugTextStatus = "";
+  String debugTextCurrentPrediction = "";
+  String debugTextConfidence = "";
+
+  String textStatus = "Aguardando...";
 
   @override
   void initState() {
@@ -281,9 +287,9 @@ class _TesteCameraState extends State<TesteCamera> {
         children: [
           buildStreamingStatus(),
           SizedBox(height: 10),
-          //Form(key: formKeyServerAddress, child: buildTextFormServerAddress()),
-          SizedBox(height: 10),
           buildRequestResults(),
+          SizedBox(height: 10),
+          buildAIResultDebug(),
           SizedBox(height: 10),
           buildStartStopStreamButton(),
         ],
@@ -292,22 +298,50 @@ class _TesteCameraState extends State<TesteCamera> {
   );
 
   Widget buildStreamingStatus() {
-    if (isStreamRunning) {
+    if (connectionStatus == WebSocketConnectionStatus.disconnected) {
       return Container(
         margin: EdgeInsets.symmetric(horizontal: 8),
         padding: EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: AppColors.verde,
+          color: AppColors.cinza,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(Icons.task_alt_rounded),
+            Icon(Icons.do_disturb_on_outlined),
             SizedBox(width: 5),
             Text(
-              "Status: transmitindo frames",
+              "Não está transmitindo",
+              style: AppStyles.textStyleStreamingState,
+            ),
+          ],
+        ),
+      );
+    } else if (connectionStatus == WebSocketConnectionStatus.connecting) {
+      return Container(
+        margin: EdgeInsets.symmetric(horizontal: 8),
+        padding: EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: AppColors.amarelo,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: AppStyles.textStyleStreamingState.fontSize! * 1.7,
+              height: AppStyles.textStyleStreamingState.fontSize! * 1.7,
+              child: CircularProgressIndicator(
+                color: AppColors.preto,
+                strokeWidth: 2,
+              ),
+            ),
+            SizedBox(width: 5),
+            Text(
+              "Iniciando transmissão...",
               style: AppStyles.textStyleStreamingState,
             ),
           ],
@@ -318,17 +352,17 @@ class _TesteCameraState extends State<TesteCamera> {
       margin: EdgeInsets.symmetric(horizontal: 8),
       padding: EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppColors.amarelo,
+        color: AppColors.verde,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(Icons.pause_circle_outline_rounded),
+          Icon(Icons.check_circle_outline_rounded),
           SizedBox(width: 5),
           Text(
-            "Status: não está transmitindo",
+            "Transmitindo imagens",
             style: AppStyles.textStyleStreamingState,
           ),
         ],
@@ -466,31 +500,6 @@ class _TesteCameraState extends State<TesteCamera> {
   }
 
   Widget buildStartStopStreamButton() {
-    if (!isStreamRunning) {
-      return SizedBox(
-        height: 50,
-        width: double.infinity,
-        child: Container(
-          margin: const EdgeInsets.only(left: 15, right: 15, bottom: 10),
-          child: ElevatedButton(
-            style: AppStyles.buttonStyle(
-              AppColors.branco,
-              AppColors.azulEscuro,
-            ),
-            child: Text("Iniciar transmissão"),
-            onPressed: () async {
-              //bool isValid = checkFormFieldValidation(formKeyServerAddress);
-              /*if (isValid) {*/
-              sendImageStream();
-              setState(() {
-                isStreamRunning = true;
-              });
-            },
-            /*}*/
-          ),
-        ),
-      );
-    }
     return SizedBox(
       height: 50,
       width: double.infinity,
@@ -498,18 +507,30 @@ class _TesteCameraState extends State<TesteCamera> {
         margin: const EdgeInsets.only(left: 15, right: 15, bottom: 10),
         child: ElevatedButton(
           style: AppStyles.buttonStyle(AppColors.branco, AppColors.azulEscuro),
-          child: Text("Parar transmissão"),
+          child: textButtonSendFrames(),
           onPressed: () async {
-            if (isStreamRunning) {
-              setState(() {
-                isStreamRunning = false;
-              });
+            if (connectionStatus == WebSocketConnectionStatus.disconnected) {
+              await sendImageFrames();
+            } else if (connectionStatus ==
+                WebSocketConnectionStatus.connected) {
               await cameraController.stopImageStream();
+              setState(() {
+                connectionStatus = WebSocketConnectionStatus.disconnected;
+              });
             }
           },
         ),
       ),
     );
+  }
+
+  Widget textButtonSendFrames() {
+    if (connectionStatus == WebSocketConnectionStatus.disconnected) {
+      return Text("Iniciar transmissão");
+    } else if (connectionStatus == WebSocketConnectionStatus.connecting) {
+      return Text("Conectando...");
+    }
+    return Text("Parar transmissão");
   }
 
   Widget goBackButton() {
@@ -549,6 +570,13 @@ class _TesteCameraState extends State<TesteCamera> {
     margin: EdgeInsets.symmetric(horizontal: 8),
     padding: EdgeInsets.all(4),
     width: double.infinity,
+    child: Text(textStatus, style: AppStyles.textStyleDropdownItem),
+  );
+
+  Widget buildAIResultDebug() => Container(
+    margin: EdgeInsets.symmetric(horizontal: 8),
+    padding: EdgeInsets.all(4),
+    width: double.infinity,
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(10),
       border: Border.all(color: AppColors.preto, width: 1),
@@ -556,17 +584,17 @@ class _TesteCameraState extends State<TesteCamera> {
 
     child: Column(
       children: [
-        Text("Último resultado", style: AppStyles.textStyleOptionsTab),
+        Text("Resultado da IA", style: AppStyles.textStyleOptionsTab),
         Text(
-          "status: $resultTextStatus",
+          "status: $debugTextStatus",
           style: AppStyles.textStyleDropdownItem,
         ),
         Text(
-          "prediction: $resultTextCurrentPrediction",
+          "prediction: $debugTextCurrentPrediction",
           style: AppStyles.textStyleDropdownItem,
         ),
         Text(
-          "confidence: $resultTextConfidence",
+          "confidence: $debugTextConfidence",
           style: AppStyles.textStyleDropdownItem,
         ),
       ],
@@ -791,7 +819,13 @@ class _TesteCameraState extends State<TesteCamera> {
 
   Future<void> sendImageFrames() async {
     try {
+      setState(() {
+        connectionStatus = WebSocketConnectionStatus.connecting;
+      });
       WebSocket webSocket = await httpImageRequest.connectToSocket();
+      setState(() {
+        connectionStatus = WebSocketConnectionStatus.connected;
+      });
 
       webSocket.events.listen((e) async {
         switch (e) {
@@ -799,10 +833,11 @@ class _TesteCameraState extends State<TesteCamera> {
             ImageRequestResponseModel responseFromServer =
                 ImageRequestResponseModel.fromJson(jsonDecode(text));
             setState(() {
-              resultTextStatus = responseFromServer.status!;
-              resultTextCurrentPrediction =
+              textStatus = setTextStatus(responseFromServer.status!);
+              debugTextStatus = responseFromServer.status!;
+              debugTextCurrentPrediction =
                   responseFromServer.currentPrediction!;
-              resultTextConfidence = responseFromServer.confidence!;
+              debugTextConfidence = responseFromServer.confidence!;
             });
 
           case BinaryDataReceived(data: final data):
@@ -823,11 +858,24 @@ class _TesteCameraState extends State<TesteCamera> {
         isCurrentlySendingImage = false;
       });
     } catch (e) {
-      await cameraController.stopImageStream();
+      if (connectionStatus == WebSocketConnectionStatus.connected) {
+        await cameraController.stopImageStream();
+      }
       setState(() {
         isStreamRunning = false;
         isCurrentlySendingImage = false;
       });
     }
+  }
+
+  String setTextStatus(String status) {
+    if (status.startsWith("Aguardando")) {
+      return "Posicione em frente à câmera";
+    } else if (status.startsWith("Analisando")) {
+      return "Analisando...";
+    } else if (status.startsWith("Decid")) {
+      return "Análise concluída";
+    }
+    return status;
   }
 }
