@@ -1,16 +1,26 @@
 class ImageRequestResponseModel {
-  String? prediction;
+  String? status;
+  String? currentPrediction;
   String? confidence;
 
-  ImageRequestResponseModel({this.prediction = "", this.confidence = ""});
+  ImageRequestResponseModel({
+    this.status = "",
+    this.currentPrediction = "",
+    this.confidence = "",
+  });
 
   factory ImageRequestResponseModel.fromJson(Map<String, dynamic> json) =>
       ImageRequestResponseModel(
-        prediction: json['prediction'] ?? '',
+        status: json['status'] ?? '',
+        currentPrediction: json['current_prediction'] ?? '',
         confidence: json['confidence'] ?? '',
       );
 
   Map<String, dynamic> toJson() {
-    return {'prediction': prediction, 'confidence': confidence};
+    return {
+      'status': status,
+      'current_prediction': currentPrediction,
+      'confidence': confidence,
+    };
   }
 }

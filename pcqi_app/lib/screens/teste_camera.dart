@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:camera/camera.dart';
 import 'package:expandable/expandable.dart';
@@ -46,7 +48,8 @@ class _TesteCameraState extends State<TesteCamera> {
   final FocusNode focusNodeIp = FocusNode();
   bool showFormValidationError = false;
 
-  String resultTextPrediction = "";
+  String resultTextStatus = "";
+  String resultTextCurrentPrediction = "";
   String resultTextConfidence = "";
 
   @override
@@ -553,9 +556,13 @@ class _TesteCameraState extends State<TesteCamera> {
 
     child: Column(
       children: [
-        Text("Resultado", style: AppStyles.textStyleOptionsTab),
+        Text("Último resultado", style: AppStyles.textStyleOptionsTab),
         Text(
-          "prediction: $resultTextPrediction",
+          "status: $resultTextStatus",
+          style: AppStyles.textStyleDropdownItem,
+        ),
+        Text(
+          "prediction: $resultTextCurrentPrediction",
           style: AppStyles.textStyleDropdownItem,
         ),
         Text(
@@ -786,20 +793,31 @@ class _TesteCameraState extends State<TesteCamera> {
     try {
       WebSocket webSocket = await httpImageRequest.connectToSocket();
 
+      webSocket.events.listen((e) async {
+        switch (e) {
+          case TextDataReceived(text: final text):
+            ImageRequestResponseModel responseFromServer =
+                ImageRequestResponseModel.fromJson(jsonDecode(text));
+            setState(() {
+              resultTextStatus = responseFromServer.status!;
+              resultTextCurrentPrediction =
+                  responseFromServer.currentPrediction!;
+              resultTextConfidence = responseFromServer.confidence!;
+            });
+
+          case BinaryDataReceived(data: final data):
+            print('Received Binary: $data');
+          case CloseReceived(code: final code, reason: final reason):
+            print('Connection to server closed: $code [$reason]');
+        }
+      });
+
       await cameraController.startImageStream((image) async {
         if (isCurrentlySendingImage) return;
         isCurrentlySendingImage = true;
         var convertedImage = await cameraImageConverter.convertImage(image);
 
         if (convertedImage != null) {
-          /*ImageRequestResponseModel? responseFromServer = await httpImageRequest
-            .sendImage(convertedImage, image.height, image.width);
-        if (responseFromServer != null) {
-          setState(() {
-            resultTextPrediction = responseFromServer.prediction!;
-            resultTextConfidence = responseFromServer.confidence!;
-          });
-        }*/
           webSocket.sendBytes(convertedImage);
         }
         isCurrentlySendingImage = false;
