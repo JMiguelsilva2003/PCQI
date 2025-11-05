@@ -87,4 +87,21 @@ class HttpRequest {
       print('Erro no envio: ${response.statusCode}');
     }
   }
+
+  static Future deleteWithAuthorization(String endpoint) async {
+    final token = SharedPreferencesHelper.getAccessToken();
+    final urlSend = Uri.parse("$url/$endpoint");
+
+    var response = await http
+        .delete(
+          urlSend,
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+          },
+        )
+        .timeout(timeoutSeconds);
+
+    return response;
+  }
 }

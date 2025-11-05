@@ -119,4 +119,22 @@ class RequestMethods {
     }
     return null;
   }
+
+  
+Future<bool> deleteMachine(String machineId) async {
+  try {
+    final response = await HttpRequest.deleteWithAuthorization(
+      "machines/$machineId",
+    );
+
+    print("DELETE MACHINE STATUS: ${response.statusCode}");
+
+    return response.statusCode == 200 || response.statusCode == 204;
+  } catch (e) {
+    print("Erro ao deletar máquina: $e");
+    return false;
+  }
+}
+
+
 }

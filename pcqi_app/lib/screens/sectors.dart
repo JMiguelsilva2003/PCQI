@@ -18,6 +18,7 @@ class _SectorsState extends State<Sectors> {
   List<MachineModel>? machinesList = [];
   late RequestMethods requestMethods;
   bool gotInfoFromServer = false;
+  String? deletingMachineId; // <-- controla o loading
 
   @override
   void initState() {
@@ -30,99 +31,85 @@ class _SectorsState extends State<Sectors> {
     if (!gotInfoFromServer) {
       return Scaffold(
         backgroundColor: AppColors.branco,
-        body: FutureBuilder<void>(
+        body: FutureBuilder(
           future: getSectorsAndMachinesList(),
           builder: (context, snapshot) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   CircularProgressIndicator(color: AppColors.azulEscuro),
-                  SizedBox(height: 20),
-                  Text(
-                    "Carregando...",
-                    style: AppStyles.textStyleTituloSecundario,
-                  ),
+                  const SizedBox(height: 20),
+                  Text("Carregando...", style: AppStyles.textStyleTituloSecundario),
                 ],
               ),
             );
           },
         ),
       );
-    } else {
-      if (sectorList.isNotEmpty) {
-        return RefreshIndicator(
-          onRefresh: () async {
-            await getSectorsAndMachinesList();
-          },
-          child: Center(
-            child: ListView.builder(
+    }
+
+    return RefreshIndicator(
+      onRefresh: () async => await getSectorsAndMachinesList(),
+      child: sectorList.isNotEmpty
+          ? ListView.builder(
               itemCount: sectorList.length,
               itemBuilder: (BuildContext context, int index) {
                 return CustomSectorViewCard(
                   name: sectorList[index].name!,
                   description: sectorList[index].description!,
-                  machines: [],
+                  machines: machinesList!
+                      .where((machine) => machine.sectorId == sectorList[index].id)
+                      .toList(),
+                  deletingMachineId: deletingMachineId, // <-- passa o estado
+                  onDeleteMachine: (machineId) async {
+                    await deleteMachineFromList(machineId);
+                  },
                 );
               },
-            ),
-          ),
-        );
-      } else {
-        return RefreshIndicator(
-          onRefresh: () async {
-            await getSectorsAndMachinesList();
-          },
-          child: Stack(
-            children: [
-              ListView(children: [
-                        ],
-                      ),
-              Align(
-                alignment: Alignment.center,
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.sentiment_dissatisfied_rounded,
-                        size: 50,
-                        color: AppColors.azulEscuro,
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        "Não foram encontrados setores cadastrados em seu usuário",
-                        style: AppStyles.textStyleTituloSecundario,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
+            )
+          : Center(
+              child: Text(
+                "Não foram encontrados setores cadastrados",
+                style: AppStyles.textStyleTituloSecundario,
               ),
-            ],
-          ),
-        );
-      }
-    }
+            ),
+    );
   }
 
-  Future<void> refreshScreen() async {
-    await getSectorsAndMachinesList();
+  Future<void> deleteMachineFromList(String machineId) async {
+    setState(() {
+      deletingMachineId = machineId; // <-- ativa loading
+    });
+
+    bool success = await requestMethods.deleteMachine(machineId);
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Máquina removida com sucesso")),
+      );
+      await getSectorsAndMachinesList();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Erro ao remover a máquina")),
+      );
+    }
+
+    setState(() {
+      deletingMachineId = null; // <-- desativa loading
+    });
   }
 
   Future<void> getSectorsAndMachinesList() async {
     List<SectorModel>? sectors = await requestMethods.getSectorList();
     List<MachineModel>? machines = await requestMethods.getMachineList();
+
     if (sectors != null) {
-      setState(() {
-        sectorList = sectors;
-        machinesList = machines;
-      });
+      sectorList = sectors;
+      machinesList = machines;
     }
-    setState(() {
-      gotInfoFromServer = true;
-    });
+
+    gotInfoFromServer = true;
+    setState(() {});
   }
 }
