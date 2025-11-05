@@ -12,6 +12,7 @@ import 'package:pcqi_app/services/camera_image_converter.dart';
 import 'package:pcqi_app/services/http_image_request.dart';
 import 'package:pcqi_app/utils/validators.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:web_socket/web_socket.dart';
 
 class TesteCamera extends StatefulWidget {
   const TesteCamera({super.key});
@@ -538,24 +539,7 @@ class _TesteCameraState extends State<TesteCamera> {
   }
 
   sendImageStream() async {
-    await cameraController.startImageStream((image) async {
-      if (isCurrentlySendingImage) return;
-      isCurrentlySendingImage = true;
-      var convertedImage = await cameraImageConverter.convertImage(image);
-      //var convertedImage = await cameraImageConverter.convertCameraImage(image);
-
-      if (convertedImage != null) {
-        ImageRequestResponseModel? responseFromServer = await httpImageRequest
-            .sendImage(convertedImage /*image.height, image.width*/);
-        if (responseFromServer != null) {
-          setState(() {
-            resultTextPrediction = responseFromServer.prediction!;
-            resultTextConfidence = responseFromServer.confidence!;
-          });
-        }
-      }
-      isCurrentlySendingImage = false;
-    });
+    await sendImageFrames();
   }
 
   Widget buildRequestResults() => Container(
@@ -796,5 +780,36 @@ class _TesteCameraState extends State<TesteCamera> {
         child: Text("Inverter câmera"),
       ),
     );
+  }
+
+  Future<void> sendImageFrames() async {
+    try {
+      WebSocket webSocket = await httpImageRequest.connectToSocket();
+
+      await cameraController.startImageStream((image) async {
+        if (isCurrentlySendingImage) return;
+        isCurrentlySendingImage = true;
+        var convertedImage = await cameraImageConverter.convertImage(image);
+
+        if (convertedImage != null) {
+          /*ImageRequestResponseModel? responseFromServer = await httpImageRequest
+            .sendImage(convertedImage, image.height, image.width);
+        if (responseFromServer != null) {
+          setState(() {
+            resultTextPrediction = responseFromServer.prediction!;
+            resultTextConfidence = responseFromServer.confidence!;
+          });
+        }*/
+          webSocket.sendBytes(convertedImage);
+        }
+        isCurrentlySendingImage = false;
+      });
+    } catch (e) {
+      await cameraController.stopImageStream();
+      setState(() {
+        isStreamRunning = false;
+        isCurrentlySendingImage = false;
+      });
+    }
   }
 }

@@ -46,6 +46,7 @@ dependencies:
   google_fonts: ^6.2.1
   provider: ^6.1.5+1
   rename_app: ^1.6.5
+  web_socket: ^1.0.1
   
   flutter:
     sdk: flutter

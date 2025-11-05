@@ -1,54 +1,24 @@
-import 'dart:convert';
-import 'dart:typed_data';
+import 'dart:async';
 
-import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart';
-import 'package:pcqi_app/models/image_request_response_model.dart';
+import 'package:web_socket/web_socket.dart';
 
 class HttpImageRequest {
-  final urlCameraRequest = "https://miguel15468-pcqi-ai-api.hf.space/predict";
+  final urlSocket = "wss://miguel15468-pcqi-ai-api.hf.space/ws/predict";
 
-  Future<ImageRequestResponseModel?> sendImage(
-    Uint8List imageBytes /*
-    int height,
-    int width,*/,
-  ) async {
-    try {
-      final request = http.MultipartRequest(
-        'POST',
-        Uri.parse(urlCameraRequest),
-      );
+  Future<WebSocket> connectToSocket() async {
+    final socket = await WebSocket.connect(Uri.parse(urlSocket));
 
-      request.files.add(
-        http.MultipartFile.fromBytes(
-          'file',
-          imageBytes,
-          filename: 'frame_${DateTime.now().millisecondsSinceEpoch}.jpg',
-          contentType: MediaType('image', 'jpg'),
-        ),
-      );
-
-      //request.fields['width'] = width.toString();
-      //request.fields['height'] = height.toString();
-
-      final response = await request.send();
-
-      if (response.statusCode == 200) {
-        final responseString = await response.stream.bytesToString();
-        final Map<String, dynamic> jsonMap = jsonDecode(responseString);
-        try {
-          ImageRequestResponseModel responseModel =
-              ImageRequestResponseModel.fromJson(jsonMap);
-          return responseModel;
-        } catch (e) {
-          print(e);
-          return null;
-        }
+    socket.events.listen((e) async {
+      switch (e) {
+        case TextDataReceived(text: final text):
+          print('Received Text: $text');
+        case BinaryDataReceived(data: final data):
+          print('Received Binary: $data');
+        case CloseReceived(code: final code, reason: final reason):
+          print('Connection to server closed: $code [$reason]');
       }
-    } catch (e) {
-      print(e);
-      return null;
-    }
-    return null;
+    });
+
+    return socket;
   }
 }
