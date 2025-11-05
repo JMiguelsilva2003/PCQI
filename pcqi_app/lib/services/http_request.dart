@@ -1,107 +1,70 @@
-import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart';
-import 'dart:convert';
+// lib/services/http_request.dart
 
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:pcqi_app/services/shared_preferences_helper.dart';
 
 class HttpRequest {
-  static final url = "https://pcqi-api.onrender.com/api/v1";
+  static const String url = "https://pcqi-api.onrender.com/api/v1";
   static final timeoutSeconds = Duration(seconds: 20);
 
-  static post(String method, jsonBody) async {
-    var urlSend = Uri.parse("$url/$method");
-
-    var response = await http
-        .post(
-          urlSend,
-          headers: {"Content-Type": "application/json"},
-          body: jsonEncode(jsonBody),
-        )
-        .timeout(timeoutSeconds);
-
-    return response;
+  static post(String endpoint, Map<String, dynamic> jsonBody) async {
+    var urlSend = Uri.parse("$url/$endpoint");
+    return http.post(
+      urlSend,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(jsonBody),
+    ).timeout(timeoutSeconds);
   }
 
-  static postFormUrlEncoded(
-    String method,
-    Map<String, String> requestData,
-  ) async {
-    var urlSend = Uri.parse("$url/$method");
-    String encodedBody = requestData.keys
-        .map((key) => "$key=${requestData[key]}")
-        .join('&');
+  static postFormUrlEncoded(String endpoint, Map<String, String> requestData) async {
+    var urlSend = Uri.parse("$url/$endpoint");
 
-    var response = await http
-        .post(
-          urlSend,
-          headers: {"Content-Type": "application/x-www-form-urlencoded"},
-          body: encodedBody,
-        )
-        .timeout(timeoutSeconds);
+    String encodedBody =
+        requestData.entries.map((e) => '${e.key}=${e.value}').join('&');
 
-    return response;
+    return http.post(
+      urlSend,
+      headers: {"Content-Type": "application/x-www-form-urlencoded"},
+      body: encodedBody,
+    ).timeout(timeoutSeconds);
   }
 
-  static getWithAuthorization(String method, [String? additionalInfo]) async {
-    var urlSend = Uri();
-    if (additionalInfo != null) {
-      urlSend = Uri.parse("$url/$method/$additionalInfo/");
-    } else {
-      urlSend = Uri.parse("$url/$method/");
-    }
+  /// ✅ GET com token (sectors / machines)
+  static Future getWithAuthorization(String endpoint) async {
     final token = SharedPreferencesHelper.getAccessToken();
 
-    var response = await http
-        .get(urlSend, headers: {"Authorization": "Bearer $token"})
-        .timeout(timeoutSeconds);
-
-    return response;
+    var urlSend = Uri.parse("$url/$endpoint/");
+    return http.get(
+      urlSend,
+      headers: {"Authorization": "Bearer $token"},
+    ).timeout(timeoutSeconds);
   }
 
-  static get(String method, String additionalInfo) async {
-    var urlSend = Uri.parse("$url/$method/$additionalInfo");
-    var response = await http.get(urlSend).timeout(timeoutSeconds);
-    return response;
+  /// ✅ POST com token (create machine)
+  static Future postWithAuthorization(
+      String endpoint, Map<String, dynamic> jsonBody) async {
+    final token = SharedPreferencesHelper.getAccessToken();
+
+    var urlSend = Uri.parse("$url/$endpoint");
+    return http.post(
+      urlSend,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode(jsonBody),
+    ).timeout(timeoutSeconds);
   }
 
-  static Future<void> sendImageBytes(List<int> imageBytes) async {
-    final request = http.MultipartRequest(
-      'POST',
-      Uri.parse('https://seu-servidor.com/upload'),
-    );
-
-    request.files.add(
-      http.MultipartFile.fromBytes(
-        'image',
-        imageBytes,
-        filename: 'frame_${DateTime.now().millisecondsSinceEpoch}.jpg',
-        contentType: MediaType('image', 'jpeg'),
-      ),
-    );
-
-    final response = await request.send();
-
-    if (response.statusCode == 200) {
-      print('Imagem enviada com sucesso - Tamanho: ${imageBytes.length} bytes');
-    } else {
-      print('Erro no envio: ${response.statusCode}');
-    }
-  }
-
+  /// ✅ DELETE com token (delete machine)
   static Future deleteWithAuthorization(String endpoint) async {
     final token = SharedPreferencesHelper.getAccessToken();
-    final urlSend = Uri.parse("$url/$endpoint");
 
-    var response = await http
-        .delete(
-          urlSend,
-          headers: {
-            "Authorization": "Bearer $token",
-            "Content-Type": "application/json",
-          },
-        )
-        .timeout(timeoutSeconds);
-
-    return response;
+    var urlSend = Uri.parse("$url/$endpoint");
+    return http.delete(
+      urlSend,
+      headers: {"Authorization": "Bearer $token"},
+    ).timeout(timeoutSeconds);
   }
 }
