@@ -46,7 +46,7 @@ class HttpRequest {
       String endpoint, Map<String, dynamic> jsonBody) async {
     final token = SharedPreferencesHelper.getAccessToken();
 
-    var urlSend = Uri.parse("$url/$endpoint");
+    var urlSend =Uri.parse("$url/$endpoint");
     return http.post(
       urlSend,
       headers: {
