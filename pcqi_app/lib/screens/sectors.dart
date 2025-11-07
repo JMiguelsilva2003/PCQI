@@ -15,69 +15,61 @@ class _SectorsState extends State<Sectors> {
   List<SectorModel> sectorList = [];
   List<MachineModel> machineList = [];
   late RequestMethods requestMethods;
-  bool loaded = false;
+  bool loading = true;
 
   @override
   void initState() {
     super.initState();
     requestMethods = RequestMethods(context: context);
+    _loadData(); // ✅ carrega automaticamente ao entrar na tela
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!loaded) {
-      return FutureBuilder(
-        future: _loadData(),
-        builder: (context, snapshot) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        },
-      );
-    }
+    return Scaffold(
+      body: loading
+          ? const Center(child: CircularProgressIndicator()) // ✅ tela de loading
+          : RefreshIndicator(
+              onRefresh: _loadData,
+              child: ListView(
+                children: sectorList.map((sector) {
+                  final machines = machineList
+                      .where((m) => m.sectorId.toString() == sector.id.toString())
+                      .toList();
 
-return Scaffold(
-  body: RefreshIndicator(
-    onRefresh: _loadData,
-    child: ListView(
-      children: sectorList.map((sector) {
-       final machines = machineList
-    .where((m) => m.sectorId.toString() == sector.id.toString())
-    .toList();
+                  return CustomSectorViewCard(
+                    name: sector.name ?? "",
+                    description: sector.description ?? "",
+                    machines: machines,
 
-        return CustomSectorViewCard(
-          name: sector.name ?? "",
-          description: sector.description ?? "",
-          machines: machines,
-            onDeleteMachine: (machineId) async {
-              await requestMethods.deleteMachine(machineId);
-              await _loadData().then((_) => setState(() {}));
-            },
-          onCreateMachine: (machineName) async {
-            await requestMethods.createMachine(
-              sector.id!.toString(), // ⇦ converte para String
-              machineName,
-            );
-            await _loadData().then((_) => setState(() {}));
+                    // ✅ Criar máquina
+                    onCreateMachine: (machineName) async {
+                      await requestMethods.createMachine(
+                        sector.id!.toString(),
+                        machineName,
+                      );
+                      await _loadData(); // ✅ agora atualiza a lista
+                    },
 
-          },
-        );
-      }).toList(),
-    ),
-  ),
-);
-
+                    // ✅ Deletar máquina
+                    onDeleteMachine: (machineId) async {
+                      await requestMethods.deleteMachine(machineId);
+                      await _loadData(); // ✅ atualiza a lista
+                    },
+                  );
+                }).toList(),
+              ),
+            ),
+    );
   }
-  
 
- Future<void> _loadData() async {
-  sectorList = await requestMethods.getSectorList() ?? [];
-  machineList = await requestMethods.getMachineList() ?? [];
+  Future<void> _loadData() async {
+    setState(() => loading = true);
 
- if (!mounted) return;
-setState(() {
-  loaded = true;
-});
- }
+    sectorList = await requestMethods.getSectorList() ?? [];
+    machineList = await requestMethods.getMachineList() ?? [];
 
+    if (!mounted) return;
+    setState(() => loading = false); // ✅ reconstrução correta da tela
+  }
 }
