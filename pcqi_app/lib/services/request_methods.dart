@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pcqi_app/models/machine_model.dart';
 import 'package:pcqi_app/models/sector_model.dart';
-//import 'package:logger/logger.dart';
-import 'package:pcqi_app/services/http_request.dart';
 import 'package:pcqi_app/models/user_model.dart';
 import 'package:pcqi_app/utils/auto_login_response_handler.dart';
+import 'package:pcqi_app/services/http_request.dart';
 import 'package:pcqi_app/utils/forgot_password_response_handler.dart';
 import 'package:pcqi_app/utils/get_machines_response_handler.dart';
 import 'package:pcqi_app/utils/get_sectors_response_handler.dart';
@@ -14,9 +13,19 @@ import 'package:pcqi_app/widgets/simple_awesome_dialog.dart';
 
 class RequestMethods {
   final BuildContext context;
-  //Logger logger = Logger();
 
   RequestMethods({required this.context});
+
+  Future<void> autoLogin() async {
+    try {
+      final response = await HttpRequest.postWithAuthorization('auth/refresh');
+      if (!context.mounted) return;
+      await AutoLoginResponseHandler.handleAutoLoginResponse(response, context);
+    } catch (e) {
+      if (!context.mounted) return;
+      Navigator.pushReplacementNamed(context, '/landingpage');
+    }
+  }
 
   Future<void> register(String name, String email, String password) async {
     try {
@@ -41,17 +50,6 @@ class RequestMethods {
     }
   }
 
-  Future<void> autoLogin() async {
-    try {
-      final response = await HttpRequest.postWithAuthorization('auth/refresh');
-      if (!context.mounted) return;
-      await AutoLoginResponseHandler.handleAutoLoginResponse(response, context);
-    } catch (e) {
-      if (!context.mounted) return;
-      Navigator.pushReplacementNamed(context, '/landingpage');
-    }
-  }
-
   Future<void> login(String email, String password) async {
     try {
       final requestData = {"username": email, "password": password};
@@ -72,63 +70,46 @@ class RequestMethods {
   }
 
   Future<void> forgotPasswordRequest(String email) async {
-    try {
-      UserModel userRequest = UserModel(email: email);
-      final response = await HttpRequest.post(
-        "auth/forgot-password",
-        userRequest.toJson(),
-      );
-      if (!context.mounted) return;
-      await ForgotPasswordResponseHandler.handleForgotPasswordResponse(
-        response,
-        context,
-      );
-    } catch (e) {
-      if (!context.mounted) return;
-      SimpleAwesomeDialog.error(
-        "Falha na conexão. Por favor, tente novamente.",
-        context,
-      );
-    }
+    final user = UserModel(email: email);
+    final response = await HttpRequest.post(
+      "auth/forgot-password",
+      user.toJson(),
+    );
+    await ForgotPasswordResponseHandler.handleForgotPasswordResponse(
+      response,
+      context,
+    );
   }
 
   Future<List<SectorModel>?> getSectorList() async {
-    try {
-      final response = await HttpRequest.getWithAuthorization("sectors");
-      if (!context.mounted) return null;
-      final sectorListFromServer =
-          await GetSectorsResponseHandler.handleGetSectorsResponse(
-            response,
-            context,
-          );
-      return sectorListFromServer;
-    } catch (e) {
-      if (!context.mounted) return null;
-      SimpleAwesomeDialog.error(
-        "Falha na conexão. Por favor, tente novamente.",
-        context,
-      );
-    }
-    return null;
+    final response = await HttpRequest.getWithAuthorization("sectors");
+    return GetSectorsResponseHandler.handleGetSectorsResponse(
+      response,
+      context,
+    );
   }
 
   Future<List<MachineModel>?> getMachineList() async {
-    try {
-      final response = await HttpRequest.getWithAuthorization("machines");
-      if (!context.mounted) return null;
-      final machineListFromServer =
-          await GetMachinesResponseHandler.handleGetMachinesResponse(
-            response,
-            context,
-          );
-      return machineListFromServer;
-    } catch (e) {
-      if (!context.mounted) return null;
-      SimpleAwesomeDialog.error(
-        "Falha na conexão. Por favor, tente novamente.",
-        context,
-      );
-    }
-    return null;
+    final response = await HttpRequest.getWithAuthorization("machines");
+    return GetMachinesResponseHandler.handleGetMachinesResponse(
+      response,
+      context,
+    );
+  }
+
+  Future<bool> createMachine(String sectorId, String machineName) async {
+    final response = await HttpRequest.postWithAuthorizationJson("machines", {
+      "name": machineName,
+      "sector_id": sectorId,
+    });
+
+    return response.statusCode == 200 || response.statusCode == 201;
+  }
+
+  Future<bool> deleteMachine(String machineId) async {
+    final response = await HttpRequest.deleteWithAuthorization(
+      "machines/$machineId",
+    );
+    return response.statusCode == 200 || response.statusCode == 204;
   }
 }

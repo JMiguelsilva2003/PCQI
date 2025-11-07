@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pcqi_app/config/app_colors.dart';
-import 'package:pcqi_app/config/app_styles.dart';
 import 'package:pcqi_app/models/machine_model.dart';
 import 'package:pcqi_app/models/sector_model.dart';
 import 'package:pcqi_app/services/request_methods.dart';
@@ -15,9 +13,9 @@ class Sectors extends StatefulWidget {
 
 class _SectorsState extends State<Sectors> {
   List<SectorModel> sectorList = [];
-  List<MachineModel>? machinesList = [];
+  List<MachineModel> machineList = [];
   late RequestMethods requestMethods;
-  bool gotInfoFromServer = false;
+  bool loaded = false;
 
   @override
   void initState() {
@@ -27,102 +25,59 @@ class _SectorsState extends State<Sectors> {
 
   @override
   Widget build(BuildContext context) {
-    if (!gotInfoFromServer) {
-      return Scaffold(
-        backgroundColor: AppColors.branco,
-        body: FutureBuilder<void>(
-          future: getSectorsAndMachinesList(),
-          builder: (context, snapshot) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(color: AppColors.azulEscuro),
-                  SizedBox(height: 20),
-                  Text(
-                    "Carregando...",
-                    style: AppStyles.textStyleTituloSecundario,
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
+    if (!loaded) {
+      return FutureBuilder(
+        future: _loadData(),
+        builder: (context, snapshot) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        },
       );
-    } else {
-      if (sectorList.isNotEmpty) {
-        return RefreshIndicator(
-          onRefresh: () async {
-            await getSectorsAndMachinesList();
-          },
-          child: Center(
-            child: ListView.builder(
-              itemCount: sectorList.length,
-              itemBuilder: (BuildContext context, int index) {
-                return CustomSectorViewCard(
-                  name: sectorList[index].name!,
-                  description: sectorList[index].description!,
-                  machines: [],
-                );
-              },
-            ),
-          ),
-        );
-      } else {
-        return RefreshIndicator(
-          onRefresh: () async {
-            await getSectorsAndMachinesList();
-          },
-          child: Stack(
-            children: [
-              ListView(children: [
-                        ],
-                      ),
-              Align(
-                alignment: Alignment.center,
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.sentiment_dissatisfied_rounded,
-                        size: 50,
-                        color: AppColors.azulEscuro,
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        "Não foram encontrados setores cadastrados em seu usuário",
-                        style: AppStyles.textStyleTituloSecundario,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      }
     }
-  }
 
-  Future<void> refreshScreen() async {
-    await getSectorsAndMachinesList();
-  }
+return Scaffold(
+  body: RefreshIndicator(
+    onRefresh: _loadData,
+    child: ListView(
+      children: sectorList.map((sector) {
+       final machines = machineList
+    .where((m) => m.sectorId.toString() == sector.id.toString())
+    .toList();
 
-  Future<void> getSectorsAndMachinesList() async {
-    List<SectorModel>? sectors = await requestMethods.getSectorList();
-    List<MachineModel>? machines = await requestMethods.getMachineList();
-    if (sectors != null) {
-      setState(() {
-        sectorList = sectors;
-        machinesList = machines;
-      });
-    }
-    setState(() {
-      gotInfoFromServer = true;
-    });
+        return CustomSectorViewCard(
+          name: sector.name ?? "",
+          description: sector.description ?? "",
+          machines: machines,
+            onDeleteMachine: (machineId) async {
+              await requestMethods.deleteMachine(machineId);
+              await _loadData().then((_) => setState(() {}));
+            },
+          onCreateMachine: (machineName) async {
+            await requestMethods.createMachine(
+              sector.id!.toString(), // ⇦ converte para String
+              machineName,
+            );
+            await _loadData().then((_) => setState(() {}));
+
+          },
+        );
+      }).toList(),
+    ),
+  ),
+);
+
   }
+  
+
+ Future<void> _loadData() async {
+  sectorList = await requestMethods.getSectorList() ?? [];
+  machineList = await requestMethods.getMachineList() ?? [];
+
+ if (!mounted) return;
+setState(() {
+  loaded = true;
+});
+ }
+
 }
