@@ -127,8 +127,8 @@ __pycache__/
 .env
 
 test.db
-**/PCQI-IA/treino/dataset/
 .vscode/
+**/PCQI-IA/treino/dataset/
 **/PCQI-IA/treino/dataset/branco
 **/PCQI-IA/treino/dataset/preto
 **/PCQI-IA/treino/dataset/
