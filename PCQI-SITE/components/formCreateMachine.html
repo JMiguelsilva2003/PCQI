@@ -1,0 +1,24 @@
+<div class="form-container" style="max-width: 500px; margin: 0 auto;">
+    <h3 style="margin-bottom: 2rem;">Criar Nova Máquina</h3>
+    
+    <form id="form-create-machine">
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="machine-name" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Nome da Máquina:</label>
+            <input type="text" id="machine-name" name="name" required style="width: 100%; padding: 0.8rem; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="machine-sector" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Setor:</label>
+            <select id="machine-sector" name="sector_id" required style="width: 100%; padding: 0.8rem; border: 1px solid #ccc; border-radius: 4px;">
+                <option value="">Carregando setores...</option>
+                </select>
+        </div>
+        
+        <button type="submit" class="logout-btn" style="border-color: #28a745; color: #28a745;">
+            Salvar Máquina
+        </button>
+        <button type="button" id="btn-cancelar-criacao" class="logout-btn">
+            Cancelar
+        </button>
+    </form>
+</div>

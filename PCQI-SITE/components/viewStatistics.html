@@ -1,0 +1,45 @@
+<div class="view-container">
+    <div class="view-header">
+        <h2>Dashboard de Estatísticas</h2>
+        <p>Visão geral da performance de classificação das máquinas.</p>
+    </div>
+
+    <div class="stats-filters">
+        <div class="filter-group">
+            <label for="stats-filter-sector">Filtrar por Setor:</label>
+            <select id="stats-filter-sector">
+                <option value="all">Todos os Setores</option>
+                </select>
+        </div>
+        <div class="filter-group">
+            <label for="stats-filter-machine">Filtrar por Máquina:</label>
+            <select id="stats-filter-machine">
+                <option value="all">Todas as Máquinas</option>
+                </select>
+        </div>
+        <button id="btn-apply-filter" class="action-btn">Aplicar Filtro</button>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card total">
+            <h3>Total Analisado</h3>
+            <p id="stats-total">...</p>
+        </div>
+        <div class="stat-card maduras">
+            <h3>Mangas Maduras (Aceitas)</h3>
+            <p id="stats-maduras">...</p>
+        </div>
+        <div class="stat-card verdes">
+            <h3>Mangas Verdes (Rejeitadas)</h3>
+            <p id="stats-verdes">...</p>
+        </div>
+        <div class="stat-card outras">
+            <h3>Outras Classificações</h3>
+            <p id="stats-outras">...</p>
+        </div>
+    </div>
+
+    <div id="stats-loading" style="display: none; padding: 2rem;">
+        <p>Carregando estatísticas...</p>
+    </div>
+</div>

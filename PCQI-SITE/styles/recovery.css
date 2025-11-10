@@ -1,0 +1,75 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f2f5;
+}
+
+.recovery-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 4rem;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.recovery-container .title-txt {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.recovery-container p {
+    font-size: 1.4rem;
+    color: #666;
+    margin-bottom: 2.5rem;
+}
+
+.recovery-container .textboxes {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.recovery-container .textbox {
+    height: 4rem;
+    padding: 0 1.5rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1.6rem;
+}
+
+.recovery-container .submit-btn {
+    width: 100%;
+    padding: 1.2rem;
+    border-radius: 6px;
+    border: none;
+    font-size: 1.6rem;
+    font-weight: 600;
+    cursor: pointer;
+    background-color: #3399e6;
+    color: white;
+    margin-top: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.recovery-container .submit-btn:hover {
+    background-color: #287ab8;
+}
+
+.recovery-container .back-link {
+    display: inline-block;
+    margin-top: 2.5rem;
+    color: #505050;
+    font-size: 1.4rem;
+    text-decoration: none;
+}
+
+.recovery-container .back-link:hover {
+    text-decoration: underline;
+}

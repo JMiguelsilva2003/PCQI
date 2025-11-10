@@ -1,0 +1,54 @@
+<form id="formCadastro" class="auth-form">
+  <section class="register">
+    <div class="container flex col">
+      <div class="title-txt">Cadastro</div>
+      <div class="textboxes flex col">
+        <input
+          id="nomeCadastro"
+          class="textbox"
+          type="text"
+          placeholder="Nome Completo"
+          required
+        />
+        <input
+          id="emailCadastro"
+          class="textbox"
+          type="email"
+          placeholder="Email"
+          required
+        />
+
+        <div class="campo-senha">
+          <input
+            id="senhaCadastro"
+            class="textbox-senha"
+            type="password"
+            placeholder="Senha"
+            minlength="8"
+            required
+          />
+          <button type="button" class="eye-button">
+          <i class="fas fa-eye"></i>
+        </div>
+
+        <div class="campo-senha">
+          <input
+            id="confirmSenhaCadastro"
+            class="textbox-senha"
+            type="password"
+            placeholder="Confirmar senha"
+            minlength="8"
+            required
+          />
+          <button type="button" class="eye-button">
+
+          <i class="fas fa-eye"></i>
+        </div>
+      </div>
+      <button class="submit-btn" type="submit">
+        <span class="button-text">Cadastre-se</span>
+        <span class="button-loader"></span>
+      </button>
+    </div>
+  </section>
+</form>

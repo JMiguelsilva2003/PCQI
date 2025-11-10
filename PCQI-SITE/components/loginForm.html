@@ -1,0 +1,35 @@
+<form id="formLogin" class="auth-form">
+  <section class="login">
+    <div class="container flex col">
+      <div class="title-txt">Login</div>
+      <div class="textboxes flex col">
+        <input
+          id="emailLogin"
+          class="textbox"
+          type="email"
+          placeholder="Email"
+          required
+        />
+
+        <div class="campo-senha">
+          <input
+            id="senhaLogin"
+            class="textbox-senha"
+            type="password"
+            placeholder="Senha"
+            minlength="8"
+            required
+          />
+          <button type="button" class="eye-button">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+        <a href="../screens/forgot-password.html">Esqueci a senha</a>
+      </div>
+      <button class="submit-btn" type="submit">
+        <span class="button-text">Entrar</span>
+        <span class="button-loader"></span>
+      </button>
+    </div>
+  </section>
+</form>

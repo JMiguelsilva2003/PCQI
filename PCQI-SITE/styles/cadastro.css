@@ -1,0 +1,236 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+html {
+  font-size: 62.5%;
+}
+body {
+  font-family: "Montserrat", sans-serif;
+  font-size: 1.6rem;
+  line-height: 1.2;
+  color: #303030;
+}
+.flex {
+  display: flex;
+
+  &.wrap {
+    flex-flow: row wrap;
+  }
+
+  &.col {
+    flex-flow: column;
+
+    &.wrap {
+      flex-flow: column wrap;
+    }
+  }
+}
+
+.main {
+  width: 100vw;
+  overflow: hidden;
+}
+
+.auth-form {
+  position: relative;
+  z-index: 0;
+}
+
+.auth-form .container {
+  height: 100vh;
+  width: 50vw;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+}
+
+.auth-form .title-txt {
+  font-size: 4rem;
+  font-weight: 700;
+  color: #3399e6;
+}
+
+.auth-form .textboxes {
+  gap: 1.5rem;
+  width: 27rem;
+}
+
+.auth-form .textbox {
+  height: 3.5rem;
+  padding-left: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background-color: #f7f7f7;
+  font-size: 1.4rem;
+}
+
+.auth-form .textbox-senha {
+  height: 3.5rem;
+  padding-left: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background-color: #f7f7f7;
+  font-size: 1.4rem;
+}
+
+.auth-form .submit-btn {
+  padding: 1rem 5rem;
+  border-radius: 15rem;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  background-color: #3399e6;
+  color: white;
+  margin-top: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.auth-form .submit-btn:hover {
+  background-color: #505050;
+}
+
+.campo-senha {
+  position: relative;
+}
+
+.campo-senha .textbox-senha {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.eye-button {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pager {
+  position: fixed;
+  left: 50%;
+  z-index: 5;
+  height: 100%;
+  width: 50%;
+  justify-content: center;
+  align-items: center;
+  gap: 3rem;
+  background-color: #3399e6;
+  color: rgb(255, 255, 255);
+  transition: left 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0rem 0rem 1rem rgba(0, 0, 0, 0.195);
+
+  .forma {
+    z-index: 6;
+    position: absolute;
+    transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+    &.quadrada {
+      box-shadow: 0rem 0rem 1rem rgba(0, 0, 0, 0.195);
+      top: 5rem;
+      left: 7rem;
+      height: 10rem;
+      width: 10rem;
+      background-color: #68b3f1;
+    }
+
+    &.triangular {
+      filter: drop-shadow(0.3rem 0rem 1rem rgba(0, 0, 0, 0.195));
+      height: 0rem;
+      width: 0rem;
+    }
+
+    &#triangle1 {
+      border-left: 12rem solid transparent;
+      border-right: 12rem solid transparent;
+      border-bottom: 20.78rem solid #68b3f1;
+      top: 4rem;
+      right: -2rem;
+      rotate: -90deg;
+    }
+
+    &#triangle2 {
+      border-left: 5rem solid transparent;
+      border-right: 5rem solid transparent;
+      border-bottom: 8.66rem solid #68b3f1;
+      left: 30rem;
+      rotate: 32deg;
+    }
+
+    &.retangular {
+      box-shadow: 0rem 0rem 1rem rgba(0, 0, 0, 0.195);
+      bottom: 10rem;
+      background-color: #68b3f1;
+      height: 10rem;
+      width: 20rem;
+      rotate: 10deg;
+    }
+  }
+  .text {
+    z-index: 10;
+    gap: inherit;
+  }
+}
+
+.pager.cadastro {
+  left: 0%;
+  .forma {
+    transform: rotate(45deg);
+  }
+}
+
+.pager .titulo {
+  font-weight: 700;
+  font-size: 3.5rem;
+  width: 40rem;
+  text-align: center;
+}
+
+.pager .swap-btn {
+  border: 2px solid #ffffff;
+  border-radius: 15rem;
+  background-color: transparent;
+  color: white;
+  padding: 1rem 5rem;
+  font-size: 1.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pager .swap-btn:hover {
+  background-color: white;
+  color: #303030;
+}
+
+.notificacao {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #28a745;
+  color: #ffffff;
+  padding: 15px 20px;
+  border-radius: 8px;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.5s, top 0.5s;
+  display: none;
+}
+
+.notificacao.show {
+  display: block;
+  top: 40px;
+  opacity: 1;
+}
+
+.notificacao.error {
+  background: #dc3545;
+}
