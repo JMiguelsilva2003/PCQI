@@ -1,9 +1,24 @@
+# Framework da API
 fastapi
 uvicorn[standard]
+
+# Banco de Dados e Migrações
 sqlalchemy
 psycopg2-binary
+alembic
 python-dotenv
-supabase
-passlib[bcrypt]
+
+# Segurança
+passlib[argon2] 
 python-jose[cryptography]
+
+# Ferramentas da API
 python-multipart
+
+# Serviços Externos
+supabase
+sendgrid
+
+# Testes
+pytest
+httpx

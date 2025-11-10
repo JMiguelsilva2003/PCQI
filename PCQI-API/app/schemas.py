@@ -1,39 +1,98 @@
-from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List, Annotated
+from pydantic import BaseModel, ConfigDict, Field
 
-# schemas dos users
+# Schemas de Usuário e Autenticação
+
 class UserBase(BaseModel):
     email: str
+    name: str 
 
 class UserCreate(UserBase):
-    password: str
+    password: Annotated[str, Field(..., min_length=8)]
 
 class User(UserBase):
     id: int
     created_at: datetime
+    role: str
+    is_active: bool
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        from_attributes = True
+class UserPublic(BaseModel):
+    id: int
+    email: str
+    name: str
+    role: str
+    model_config = ConfigDict(from_attributes=True)
+
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    password: Optional[Annotated[str, Field(..., min_length=8)]] = None
 
 class Token(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str
 
 class TokenData(BaseModel):
     email: Optional[str] = None
 
-# schemas das maquinas
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: Annotated[str, Field(..., min_length=8)]
+
+# Schemas para Máquina
+
 class MachineBase(BaseModel):
     name: str
 
 class MachineCreate(MachineBase):
-    pass
+    sector_id: int
 
 class Machine(MachineBase):
     id: int
-    owner_id: int
-    current_speed_ppm: int
+    sector_id: int
+    creator_id: int
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        from_attributes = True
+# Schemas para Setor
+
+class SectorBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+
+class SectorCreate(SectorBase):
+    pass
+
+class Sector(SectorBase):
+    id: int
+    machines: List[Machine] = []
+    members: List[UserPublic] = []
+    model_config = ConfigDict(from_attributes=True)
+
+class MemberAddRequest(BaseModel):
+    user_id: int
+
+# Shemas para ia
+
+class AIPredictionRequest(BaseModel):
+    prediction: str
+
+class Command(BaseModel):
+    id: int
+    action: str
+    status: str
+    created_at: datetime
+    machine_id: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+# Schema para Estatísticas
+class StatsResponse(BaseModel):
+    total: int = 0
+    maduras: int = 0
+    verdes: int = 0
+    outras: int = 0
