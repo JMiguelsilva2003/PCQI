@@ -65,7 +65,7 @@ class _CustomSectorViewCardState extends State<CustomSectorViewCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Cabeçalho (nome + botão adicionar + expandir)
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -73,7 +73,7 @@ class _CustomSectorViewCardState extends State<CustomSectorViewCard> {
                 Row(
                   children: [
                     TextButton.icon(
-                      onPressed: _openCreateMachineDialog, // ✅ AGORA CHAMA O DIALOG
+                      onPressed: _openCreateMachineDialog, 
                       icon: const Icon(Icons.add_circle_outline),
                       label: const Text("Adicionar máquina"),
                     ),

@@ -57,14 +57,13 @@ class HttpRequest {
         .timeout(timeoutSeconds);
   }
 
-  /// ✅ POST com token (create machine)
   static Future postWithAuthorizationJson(
     String endpoint,
     Map<String, dynamic> jsonBody,
   ) async {
     final token = SharedPreferencesHelper.getAccessToken();
 
-    var urlSend = Uri.parse("$url/$endpoint");
+    var urlSend = Uri.parse("$url/$endpoint/");
     return http
         .post(
           urlSend,
@@ -77,7 +76,7 @@ class HttpRequest {
         .timeout(timeoutSeconds);
   }
 
-  /// ✅ DELETE com token (delete machine)
+
   static Future deleteWithAuthorization(String endpoint) async {
     final token = SharedPreferencesHelper.getAccessToken();
 

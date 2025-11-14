@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:pcqi_app/models/machine_model.dart';
 import 'package:pcqi_app/models/sector_model.dart';
@@ -21,20 +23,22 @@ class _SectorsState extends State<Sectors> {
   void initState() {
     super.initState();
     requestMethods = RequestMethods(context: context);
-    _loadData(); // ✅ carrega automaticamente ao entrar na tela
+    _loadData();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: loading
-          ? const Center(child: CircularProgressIndicator()) // ✅ tela de loading
+          ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: _loadData,
               child: ListView(
                 children: sectorList.map((sector) {
                   final machines = machineList
-                      .where((m) => m.sectorId.toString() == sector.id.toString())
+                      .where(
+                        (m) => m.sectorId.toString() == sector.id.toString(),
+                      )
                       .toList();
 
                   return CustomSectorViewCard(
@@ -42,19 +46,43 @@ class _SectorsState extends State<Sectors> {
                     description: sector.description ?? "",
                     machines: machines,
 
-                    // ✅ Criar máquina
                     onCreateMachine: (machineName) async {
-                      await requestMethods.createMachine(
+                      var maquinaCriada = await requestMethods.createMachine(
                         sector.id!.toString(),
                         machineName,
                       );
-                      await _loadData(); // ✅ agora atualiza a lista
+                      if (maquinaCriada != null) {
+                        MachineModel novaMaquina = MachineModel.fromJson(
+                          jsonDecode(maquinaCriada),
+                        );
+                        machineList.add(novaMaquina);
+                        setState(() {});
+                      }
                     },
 
-                    // ✅ Deletar máquina
                     onDeleteMachine: (machineId) async {
-                      await requestMethods.deleteMachine(machineId);
-                      await _loadData(); // ✅ atualiza a lista
+                      var maquinaApagando = await requestMethods.deleteMachine(
+                        machineId,
+                      );
+                      try {
+                        if (maquinaApagando != null) {
+                          MachineModel antigaMaquina = MachineModel.fromJson(
+                            jsonDecode(maquinaApagando),
+                          );
+                          if (antigaMaquina.id.toString() == machineId) {
+                            for (var maquina in machineList) {
+                              if (maquina.id.toString() == machineId) {
+                                machineList.remove(maquina);
+                                break;
+                              }
+                            }
+                            setState(() {});
+                          }
+                        }
+                      } catch (e) {
+                        print(e);
+                        String a = "100";
+                      }
                     },
                   );
                 }).toList(),
@@ -70,6 +98,6 @@ class _SectorsState extends State<Sectors> {
     machineList = await requestMethods.getMachineList() ?? [];
 
     if (!mounted) return;
-    setState(() => loading = false); // ✅ reconstrução correta da tela
+    setState(() => loading = false);
   }
 }

@@ -97,19 +97,19 @@ class RequestMethods {
     );
   }
 
-  Future<bool> createMachine(String sectorId, String machineName) async {
+  Future<dynamic> createMachine(String sectorId, String machineName) async {
     final response = await HttpRequest.postWithAuthorizationJson("machines", {
       "name": machineName,
       "sector_id": sectorId,
     });
 
-    return response.statusCode == 200 || response.statusCode == 201;
+    return response.body;
   }
 
-  Future<bool> deleteMachine(String machineId) async {
+  Future<dynamic> deleteMachine(String machineId) async {
     final response = await HttpRequest.deleteWithAuthorization(
       "machines/$machineId",
     );
-    return response.statusCode == 200 || response.statusCode == 204;
+    return response.body;
   }
 }
