@@ -45,7 +45,7 @@ class _CustomSectorViewCardState extends State<CustomSectorViewCard> {
               final name = controller.text.trim();
               if (name.isEmpty) return;
 
-              Navigator.of(dialogCtx).pop(); // FECHA O DIALOG
+              Navigator.of(dialogCtx).pop(); 
               widget.onCreateMachine?.call(name); // ENVIA O NOME PARA A TELA DE SETORES
             },
             child: const Text("Salvar"),

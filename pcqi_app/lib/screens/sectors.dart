@@ -15,7 +15,6 @@ class Sectors extends StatefulWidget {
 
 class _SectorsState extends State<Sectors> {
   List<SectorModel> sectorList = [];
-  List<MachineModel> machineList = [];
   late RequestMethods requestMethods;
   bool loading = true;
 
@@ -35,16 +34,11 @@ class _SectorsState extends State<Sectors> {
               onRefresh: _loadData,
               child: ListView(
                 children: sectorList.map((sector) {
-                  final machines = machineList
-                      .where(
-                        (m) => m.sectorId.toString() == sector.id.toString(),
-                      )
-                      .toList();
 
                   return CustomSectorViewCard(
                     name: sector.name ?? "",
                     description: sector.description ?? "",
-                    machines: machines,
+                    machines: sector.machines,
 
                     onCreateMachine: (machineName) async {
                       var maquinaCriada = await requestMethods.createMachine(
@@ -55,8 +49,13 @@ class _SectorsState extends State<Sectors> {
                         MachineModel novaMaquina = MachineModel.fromJson(
                           jsonDecode(maquinaCriada),
                         );
-                        machineList.add(novaMaquina);
-                        setState(() {});
+                            for (var setor in sectorList) {
+                              if (setor.id.toString() == novaMaquina.sectorId.toString()) {
+                               sector.machines.add(novaMaquina);
+                                break;
+                              }
+                            }
+                            setState(() {});
                       }
                     },
 
@@ -70,9 +69,9 @@ class _SectorsState extends State<Sectors> {
                             jsonDecode(maquinaApagando),
                           );
                           if (antigaMaquina.id.toString() == machineId) {
-                            for (var maquina in machineList) {
-                              if (maquina.id.toString() == machineId) {
-                                machineList.remove(maquina);
+                            for (var setor in sectorList) {
+                              if (setor.id.toString() == antigaMaquina.sectorId.toString()) {
+                               sector.machines.removeWhere((m) => m.id ==  antigaMaquina.id);
                                 break;
                               }
                             }
@@ -80,8 +79,7 @@ class _SectorsState extends State<Sectors> {
                           }
                         }
                       } catch (e) {
-                        print(e);
-                        String a = "100";
+
                       }
                     },
                   );
@@ -95,7 +93,6 @@ class _SectorsState extends State<Sectors> {
     setState(() => loading = true);
 
     sectorList = await requestMethods.getSectorList() ?? [];
-    machineList = await requestMethods.getMachineList() ?? [];
 
     if (!mounted) return;
     setState(() => loading = false);
