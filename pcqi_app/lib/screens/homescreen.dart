@@ -89,11 +89,13 @@ class _HomescreenState extends State<Homescreen> {
                       const SizedBox(height: 25),
 
                       /// Cards estilizados
-                      _buildStatCard(Icons.person, "Usuários", data["total_users"]),
+                      _buildStatCard(Icons.assessment_rounded, "Total de Mangas", data["total"]),
                       _buildStatCard(
-                          Icons.map_rounded, "Setores", data["total_sectors"]),
-                      _buildStatCard(Icons.precision_manufacturing_outlined,
-                          "Máquinas", data["total_machines"]),
+                          Icons.assignment_turned_in_outlined, "Maduras", data["maduras"]),
+                      _buildStatCard(Icons.assistant_photo,
+                          "Verdes", data["verdes"]),
+                            _buildStatCard(Icons.question_mark_rounded,
+                          "Outras", data["outras"])
                     ],
                   );
                 },
