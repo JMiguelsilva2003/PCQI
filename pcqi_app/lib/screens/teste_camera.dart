@@ -58,6 +58,8 @@ class _TesteCameraState extends State<TesteCamera> {
 
   String textStatus = "Aguardando...";
 
+  String lastAnalysisDecision = "";
+
   @override
   void initState() {
     super.initState();
@@ -832,13 +834,28 @@ class _TesteCameraState extends State<TesteCamera> {
           case TextDataReceived(text: final text):
             ImageRequestResponseModel responseFromServer =
                 ImageRequestResponseModel.fromJson(jsonDecode(text));
-            setState(() {
-              textStatus = setTextStatus(responseFromServer.status!);
-              debugTextStatus = responseFromServer.status!;
-              debugTextCurrentPrediction =
-                  responseFromServer.currentPrediction!;
-              debugTextConfidence = responseFromServer.confidence!;
-            });
+            if (responseFromServer.status!.startsWith("Decid")) {
+              await cameraController.stopImageStream();
+              await webSocket.close();
+              setState(() {
+                isStreamRunning = false;
+                connectionStatus = WebSocketConnectionStatus.disconnected;
+                textStatus =
+                    responseFromServer.status! + ": " + lastAnalysisDecision;
+                debugTextStatus = responseFromServer.status!;
+              });
+            } else {
+              setState(() {
+                textStatus = setTextStatus(responseFromServer.status!);
+                debugTextStatus = responseFromServer.status!;
+                debugTextCurrentPrediction =
+                    responseFromServer.currentPrediction!;
+                if (responseFromServer.currentPrediction != "FUNDO") {
+                  lastAnalysisDecision = responseFromServer.currentPrediction!;
+                }
+                debugTextConfidence = responseFromServer.confidence!;
+              });
+            }
 
           case BinaryDataReceived(data: final data):
             print('Received Binary: $data');
@@ -873,8 +890,6 @@ class _TesteCameraState extends State<TesteCamera> {
       return "Posicione em frente à câmera";
     } else if (status.startsWith("Analisando")) {
       return "Analisando...";
-    } else if (status.startsWith("Decid")) {
-      return "Análise concluída";
     }
     return status;
   }
