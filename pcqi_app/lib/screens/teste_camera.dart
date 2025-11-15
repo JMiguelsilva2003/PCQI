@@ -867,7 +867,7 @@ class _TesteCameraState extends State<TesteCamera> {
       await cameraController.startImageStream((image) async {
         if (isCurrentlySendingImage) return;
         isCurrentlySendingImage = true;
-        var convertedImage = await cameraImageConverter.convertImage(image);
+        final convertedImage = await cameraImageConverter.convertImage(image);
 
         if (convertedImage != null) {
           webSocket.sendBytes(convertedImage);
