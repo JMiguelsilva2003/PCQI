@@ -238,3 +238,16 @@ async function getStats(token, sectorId = null, machineId = null) {
     }
     return data;
 }
+
+async function getStatsHistory(token, range = 7) {
+    const url = new URL(`${API_BASE_URL}/api/v1/stats/history`);
+    url.searchParams.append('range', range);
+    
+    const response = await fetch(url.toString(), {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.detail || 'Erro ao buscar histórico.');
+    return data;
+}

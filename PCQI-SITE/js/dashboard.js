@@ -539,6 +539,50 @@ async function renderStatisticsView(container, user) {
     filterBtn.addEventListener("click", fetchAndRenderStats);
 
     fetchAndRenderStats();
+
+    function renderHistoryChart(data) {
+    const ctx = document.getElementById('historyChart')?.getContext('2d');
+    if (!ctx) return;
+
+    // Destrói o gráfico antigo, se existir
+    if (historyChartInstance) {
+        historyChartInstance.destroy();
+    }
+
+    // Inverte os dados (API vem desc, gráfico precisa asc) e formata
+    const labels = data.map(item => item.date).reverse();
+    const madurasData = data.map(item => item.maduras).reverse();
+    const verdesData = data.map(item => item.verdes).reverse();
+
+    historyChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Mangas Maduras',
+                    data: madurasData,
+                    borderColor: '#28a745', // Verde
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    fill: true,
+                    tension: 0.1
+                },
+                {
+                    label: 'Mangas Verdes',
+                    data: verdesData,
+                    borderColor: '#dc3545', // Vermelho
+                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                    fill: true,
+                    tension: 0.1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+        }
+    });
+}
 }
 
 

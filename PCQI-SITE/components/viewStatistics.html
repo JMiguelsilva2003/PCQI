@@ -9,15 +9,15 @@
             <label for="stats-filter-sector">Filtrar por Setor:</label>
             <select id="stats-filter-sector">
                 <option value="all">Todos os Setores</option>
-                </select>
+            </select>
         </div>
         <div class="filter-group">
             <label for="stats-filter-machine">Filtrar por Máquina:</label>
             <select id="stats-filter-machine">
                 <option value="all">Todas as Máquinas</option>
-                </select>
+            </select>
         </div>
-        <button id="btn-apply-filter" class="action-btn">Aplicar Filtro</button>
+        <button id="btn-apply-filter" class="action-btn">Atualizar Cards</button>
     </div>
 
     <div class="stats-grid">
@@ -42,4 +42,24 @@
     <div id="stats-loading" style="display: none; padding: 2rem;">
         <p>Carregando estatísticas...</p>
     </div>
-</div>
+
+    <div class="charts-container">
+        
+        <div class="chart-wrapper">
+            <h3>Produção (Últimos 7 dias)</h3>
+            <div class="chart-box">
+                <canvas id="historyChart"></canvas>
+            </div>
+            <div id="history-loading" style="padding: 2rem;"><p>Carregando gráfico de histórico...</p></div>
+        </div>
+        
+        <div class="chart-wrapper">
+            <h3>Performance por Máquina</h3>
+            <div class="chart-box">
+                <canvas id="performanceChart"></canvas>
+            </div>
+            <div id="performance-loading" style="padding: 2rem;"><p>Carregando ranking...</p></div>
+        </div>
+
+    </div>
+    </div>
