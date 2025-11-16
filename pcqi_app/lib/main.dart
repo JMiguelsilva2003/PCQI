@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:pcqi_app/providers/provider_model.dart';
 import 'package:pcqi_app/screens/forgot_password.dart';
 import 'package:pcqi_app/screens/homepage_widget.dart';
+import 'package:pcqi_app/screens/machine_edit.dart';
 import 'package:pcqi_app/screens/perfil.dart';
 import 'package:pcqi_app/screens/register.dart';
 import 'package:pcqi_app/screens/landing_page.dart';
@@ -40,6 +41,7 @@ class MyApp extends StatelessWidget {
         '/cadastro': (context) => Register(),
         '/homepage': (context) => HomepageWidget(),
         '/camera': (context) => TesteCamera(),
+        '/machine-edit': (context) => MachineEdit(),
       },
     );
   }

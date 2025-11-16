@@ -34,7 +34,6 @@ class _SectorsState extends State<Sectors> {
               onRefresh: _loadData,
               child: ListView(
                 children: sectorList.map((sector) {
-
                   return CustomSectorViewCard(
                     name: sector.name ?? "",
                     description: sector.description ?? "",
@@ -49,14 +48,19 @@ class _SectorsState extends State<Sectors> {
                         MachineModel novaMaquina = MachineModel.fromJson(
                           jsonDecode(maquinaCriada),
                         );
-                            for (var setor in sectorList) {
-                              if (setor.id.toString() == novaMaquina.sectorId.toString()) {
-                               sector.machines.add(novaMaquina);
-                                break;
-                              }
-                            }
-                            setState(() {});
+                        for (var setor in sectorList) {
+                          if (setor.id.toString() ==
+                              novaMaquina.sectorId.toString()) {
+                            sector.machines.add(novaMaquina);
+                            break;
+                          }
+                        }
+                        setState(() {});
                       }
+                    },
+
+                    onEditMachine: (machineId) async {
+                      Navigator.pushNamed(context, '/machine-edit');
                     },
 
                     onDeleteMachine: (machineId) async {
@@ -70,17 +74,18 @@ class _SectorsState extends State<Sectors> {
                           );
                           if (antigaMaquina.id.toString() == machineId) {
                             for (var setor in sectorList) {
-                              if (setor.id.toString() == antigaMaquina.sectorId.toString()) {
-                               sector.machines.removeWhere((m) => m.id ==  antigaMaquina.id);
+                              if (setor.id.toString() ==
+                                  antigaMaquina.sectorId.toString()) {
+                                sector.machines.removeWhere(
+                                  (m) => m.id == antigaMaquina.id,
+                                );
                                 break;
                               }
                             }
                             setState(() {});
                           }
                         }
-                      } catch (e) {
-
-                      }
+                      } catch (e) {}
                     },
                   );
                 }).toList(),
