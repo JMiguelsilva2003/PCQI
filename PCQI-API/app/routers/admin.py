@@ -8,6 +8,7 @@ from app.auth import get_current_admin_user
 
 router = APIRouter()
 
+
 @router.get(
     "/users",
     response_model=List[schemas.User],
@@ -19,6 +20,7 @@ def read_users(
     admin_user: models.User = Depends(get_current_admin_user)
 ):
     return crud.get_users(db=db)
+
 
 @router.put(
     "/users/{user_id}/promote",
@@ -34,10 +36,11 @@ def promote_user_to_admin(
     db_user = crud.get_user(db, user_id=user_id)
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
     return crud.update_user_role(db=db, user=db_user, role="admin")
 
 # ROTA DELETE para Usuários
+
 
 @router.delete(
     "/users/{user_id}",
@@ -51,10 +54,53 @@ def delete_user(
     current_admin: models.User = Depends(get_current_admin_user)
 ):
     if user_id == current_admin.id:
-        raise HTTPException(status_code=400, detail="Administradores não podem deletar a si próprios.")
-        
+        raise HTTPException(
+            status_code=400, detail="Administradores não podem deletar a si próprios.")
+
     db_user = crud.delete_user(db, user_id=user_id)
     if db_user is None:
         raise HTTPException(status_code=404, detail="Usuário não encontrado.")
-    
+
     return db_user
+
+# Rota para controle Mestre
+
+
+@router.post(
+    "/machines/{machine_id}/control",
+    status_code=status.HTTP_201_CREATED,
+    summary="Envia um comando de controle mestre (Apenas Admin)",
+    description="Permite que um Administrador injete um comando manual "
+                "(ex: 'EJECT_MANUAL', 'PAUSE') diretamente na fila de "
+                "comandos de uma máquina específica."
+)
+def admin_control_machine(
+    machine_id: int,
+    request: schemas.MachineControlRequest,
+    db: Session = Depends(get_db),
+    current_admin: models.User = Depends(auth.get_current_admin_user)
+):
+
+    db_machine = crud.get_machine(db, machine_id=machine_id)
+    if db_machine is None:
+        raise HTTPException(status_code=404, detail="Máquina não encontrada.")
+
+    valid_commands = ["EJECT_MANUAL", "PAUSE", "RESUME"]
+    if request.command not in valid_commands:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Comando inválido. Comandos permitidos: {valid_commands}"
+        )
+
+    try:
+        crud.create_machine_command(
+            db=db,
+            machine_id=machine_id,
+            action=request.command
+        )
+        return {"message": f"Comando '{request.command}' enviado com sucesso para a máquina {machine_id}."}
+
+    except Exception as e:
+        print(f"Erro ao criar comando de admin: {e}")
+        raise HTTPException(
+            status_code=500, detail="Erro interno ao injetar comando.")

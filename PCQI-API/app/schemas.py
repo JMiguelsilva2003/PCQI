@@ -4,12 +4,15 @@ from pydantic import BaseModel, ConfigDict, Field
 
 # Schemas de Usuário e Autenticação
 
+
 class UserBase(BaseModel):
     email: str
-    name: str 
+    name: str
+
 
 class UserCreate(UserBase):
     password: Annotated[str, Field(..., min_length=8)]
+
 
 class User(UserBase):
     id: int
@@ -18,6 +21,7 @@ class User(UserBase):
     is_active: bool
     model_config = ConfigDict(from_attributes=True)
 
+
 class UserPublic(BaseModel):
     id: int
     email: str
@@ -25,20 +29,25 @@ class UserPublic(BaseModel):
     role: str
     model_config = ConfigDict(from_attributes=True)
 
+
 class UserUpdate(BaseModel):
     name: Optional[str] = None
     password: Optional[Annotated[str, Field(..., min_length=8)]] = None
+
 
 class Token(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str
 
+
 class TokenData(BaseModel):
     email: Optional[str] = None
 
+
 class ForgotPasswordRequest(BaseModel):
     email: str
+
 
 class ResetPasswordRequest(BaseModel):
     token: str
@@ -46,11 +55,14 @@ class ResetPasswordRequest(BaseModel):
 
 # Schemas para Máquina
 
+
 class MachineBase(BaseModel):
     name: str
 
+
 class MachineCreate(MachineBase):
     sector_id: int
+
 
 class Machine(MachineBase):
     id: int
@@ -60,12 +72,15 @@ class Machine(MachineBase):
 
 # Schemas para Setor
 
+
 class SectorBase(BaseModel):
     name: str
     description: Optional[str] = None
 
+
 class SectorCreate(SectorBase):
     pass
+
 
 class Sector(SectorBase):
     id: int
@@ -73,13 +88,16 @@ class Sector(SectorBase):
     members: List[UserPublic] = []
     model_config = ConfigDict(from_attributes=True)
 
+
 class MemberAddRequest(BaseModel):
     user_id: int
 
 # Shemas para ia
 
+
 class AIPredictionRequest(BaseModel):
     prediction: str
+
 
 class Command(BaseModel):
     id: int
@@ -91,8 +109,17 @@ class Command(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 # Schema para Estatísticas
+
+
 class StatsResponse(BaseModel):
     total: int = 0
     maduras: int = 0
     verdes: int = 0
     outras: int = 0
+
+# schema para controle Mestre
+
+
+class MachineControlRequest(BaseModel):
+    command: str = Field(
+        ..., description="O comando manual a ser injetado (ex: 'EJECT_MANUAL', 'PAUSE')")
