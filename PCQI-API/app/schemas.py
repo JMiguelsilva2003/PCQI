@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional, List, Annotated
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -64,10 +64,14 @@ class MachineCreate(MachineBase):
     sector_id: int
 
 
+class MachineUpdate(BaseModel):
+    name: str = Field(..., min_length=1)
+
 class Machine(MachineBase):
     id: int
     sector_id: int
     creator_id: int
+    last_heartbeat: Optional[datetime] = None
     model_config = ConfigDict(from_attributes=True)
 
 # Schemas para Setor
@@ -116,6 +120,17 @@ class StatsResponse(BaseModel):
     maduras: int = 0
     verdes: int = 0
     outras: int = 0
+
+class StatsHistoryPoint(BaseModel):
+    date: date
+    maduras: int
+    verdes: int
+
+class MachinePerformance(BaseModel):
+    machine_id: int
+    machine_name: str
+    maduras: int
+    verdes: int
 
 # schema para controle Mestre
 

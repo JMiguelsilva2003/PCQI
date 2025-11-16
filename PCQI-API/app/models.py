@@ -34,6 +34,8 @@ class Machine(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     
+    last_heartbeat = Column(DateTime, nullable=True)
+    
     creator_id = Column(Integer, ForeignKey("users.id")) 
     sector_id = Column(Integer, ForeignKey("sectors.id"))
 

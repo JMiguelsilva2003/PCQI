@@ -97,3 +97,29 @@ def delete_sector(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail="Erro interno ao deletar o setor.")
+
+@router.delete(
+    "/{sector_id}/members/{user_id}",
+    response_model=schemas.Sector,
+    summary="Remove um usuário de um setor (Apenas Admin)",
+    description="Remove a associação de um usuário a um setor."
+)
+def remove_member_from_sector(
+    sector_id: int,
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_admin: models.User = Depends(auth.get_current_admin_user)
+):
+    """ História: Remover Usuário de Setor  """
+    sector = crud.get_sector(db, sector_id)
+    if not sector:
+        raise HTTPException(status_code=404, detail="Setor não encontrado.")
+    
+    user = crud.get_user(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+
+    if user not in sector.members:
+        raise HTTPException(status_code=400, detail="Usuário não é membro deste setor.")
+
+    return crud.remove_user_from_sector(db, user=user, sector=sector)

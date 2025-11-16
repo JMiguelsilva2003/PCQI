@@ -1,7 +1,7 @@
-from sqlalchemy.orm import Session
-from datetime import datetime, timezone
+from sqlalchemy.orm import Session, aliased
+from datetime import datetime, timezone, timedelta
 from typing import Optional
-from sqlalchemy import func, case
+from sqlalchemy import func, case, Date
 
 from app import models, schemas
 from app.security import hash_password
@@ -98,6 +98,14 @@ def add_user_to_sector(db: Session, user: models.User, sector: models.Sector):
     db.refresh(sector)
     return sector
 
+def remove_user_from_sector(db: Session, user: models.User, sector: models.Sector) -> models.Sector:
+    """ História: Remover Usuário de Setor  """
+    if user in sector.members:
+        sector.members.remove(user)
+        db.commit()
+        db.refresh(sector)
+    return sector
+
 # ==================================
 # Funções CRUD para Máquinas
 # ==================================
@@ -121,13 +129,12 @@ def create_machine_in_sector(db: Session, machine: schemas.MachineCreate, user_i
     db.refresh(db_machine)
     return db_machine
 
-def update_machine_heartbeat(db: Session, machine_id: int):
-    """Atualiza o timestamp do último heartbeat de uma máquina existente."""
-    db_machine = db.query(models.Machine).filter(models.Machine.id == machine_id).first()
-    if db_machine:
-        db_machine.last_heartbeat = datetime.now(timezone.utc)
-        db.commit()
-        db.refresh(db_machine)
+def update_machine_heartbeat(db: Session, db_machine: models.Machine) -> models.Machine:
+    """ História: Endpoint de Heartbeat  """
+    db_machine.last_heartbeat = datetime.now(timezone.utc)
+    db.add(db_machine)
+    db.commit()
+    db.refresh(db_machine)
     return db_machine
 
 def create_machine_command(db: Session, machine_id: int, action: str) -> models.Command:
@@ -155,6 +162,14 @@ def get_next_pending_command(db: Session, machine_id: int) -> Optional[models.Co
         return command
     
     return None
+
+def update_machine_name(db: Session, db_machine: models.Machine, name: str) -> models.Machine:
+    """ História: Endpoint de Edição  """
+    db_machine.name = name
+    db.add(db_machine)
+    db.commit()
+    db.refresh(db_machine)
+    return db_machine
 
 # Funções para Stats
 
@@ -199,6 +214,50 @@ def get_command_stats(
         verdes=int(stats.verdes or 0),
         outras=int(stats.outras or 0)
     )
+
+def get_stats_history(db: Session, range_days: int = 7) -> List[schemas.StatsHistoryPoint]:
+    """ História: Estatísticas Históricas"""
+    
+    end_date = datetime.now(timezone.utc).date()
+    start_date = end_date - timedelta(days=range_days - 1)
+
+    command_date = func.date(models.Command.created_at)
+
+    query = db.query(
+        command_date.label("date"),
+        func.sum(case((models.Command.action == 'MATURA', 1), else_=0)).label("maduras"),
+        func.sum(case((models.Command.action == 'VERDE', 1), else_=0)).label("verdes")
+    ).filter(
+        command_date >= start_date
+    ).group_by(
+        command_date
+    ).order_by(
+        command_date.desc()
+    )
+    
+    results = query.all()
+    return [schemas.StatsHistoryPoint(date=r.date, maduras=r.maduras, verdes=r.verdes) for r in results]
+
+def get_stats_performance_by_machine(db: Session, user: models.User) -> List[schemas.MachinePerformance]:
+    """ História: Estatísticas por Máquina"""
+    
+    query = db.query(
+        models.Machine.id.label("machine_id"),
+        models.Machine.name.label("machine_name"),
+        func.sum(case((models.Command.action == 'MATURA', 1), else_=0)).label("maduras"),
+        func.sum(case((models.Command.action == 'VERDE', 1), else_=0)).label("verdes")
+    ).outerjoin(
+        models.Command
+    ).group_by(
+        models.Machine.id, models.Machine.name
+    )
+
+    if user.role != "admin":
+        user_sector_ids = [sector.id for sector in user.sectors]
+        query = query.filter(models.Machine.sector_id.in_(user_sector_ids))
+
+    results = query.all()
+    return [schemas.MachinePerformance(machine_id=r.machine_id, machine_name=r.machine_name, maduras=r.maduras, verdes=r.verdes) for r in results]
 
 # Funções para Deletar
 
