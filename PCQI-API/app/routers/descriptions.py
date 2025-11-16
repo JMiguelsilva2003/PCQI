@@ -35,3 +35,17 @@ Retorna os detalhes de uma máquina específica pelo seu ID.
 - **Segurança**: Rota protegida. Requer um token JWT válido.
 - A API verifica se o usuário é membro do setor ao qual a máquina pertence antes de retornar os dados.
 """
+
+UPDATE_MACHINE_DESCRIPTION = """
+Atualiza o nome de uma máquina existente.
+
+- **Segurança**: Rota protegida por login (JWT).
+- Apenas o **criador** da máquina ou um **admin** pode realizar esta operação.
+"""
+
+HEARTBEAT_DESCRIPTION = """
+Usado pelo 'gateway_hardware.py' para reportar que a máquina está online.
+
+- **Segurança**: Rota protegida por **X-API-Key**.
+- Atualiza o campo 'last_heartbeat' da máquina no banco de dados.
+"""
