@@ -8,7 +8,7 @@ import 'package:pcqi_app/screens/register.dart';
 import 'package:pcqi_app/screens/landing_page.dart';
 import 'package:pcqi_app/screens/login.dart';
 import 'package:pcqi_app/screens/splash_screen.dart';
-import 'package:pcqi_app/screens/teste_camera.dart';
+import 'package:pcqi_app/screens/camera.dart';
 import 'package:pcqi_app/services/shared_preferences_helper.dart';
 import 'package:provider/provider.dart';
 
@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
         '/forgot-password': (context) => ForgotPassword(),
         '/cadastro': (context) => Register(),
         '/homepage': (context) => HomepageWidget(),
-        '/camera': (context) => TesteCamera(),
+        '/camera': (context) => Camera(),
         '/machine-edit': (context) => MachineEdit(),
       },
     );

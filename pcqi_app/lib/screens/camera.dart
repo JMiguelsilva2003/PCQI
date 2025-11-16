@@ -16,14 +16,14 @@ import 'package:web_socket/web_socket.dart';
 
 enum WebSocketConnectionStatus { disconnected, connecting, connected }
 
-class TesteCamera extends StatefulWidget {
-  const TesteCamera({super.key});
+class Camera extends StatefulWidget {
+  const Camera({super.key});
 
   @override
-  State<TesteCamera> createState() => _TesteCameraState();
+  State<Camera> createState() => _CameraState();
 }
 
-class _TesteCameraState extends State<TesteCamera> {
+class _CameraState extends State<Camera> {
   List<CameraDescription> allAvailableCameras = [];
   List<CameraDescription> frontCameras = [];
   List<CameraDescription> backCameras = [];

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pcqi_app/config/app_colors.dart';
 import 'package:pcqi_app/config/app_styles.dart';
-import 'package:pcqi_app/screens/teste_camera.dart';
+import 'package:pcqi_app/screens/camera.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
 import 'package:pcqi_app/services/stats_services.dart';
 
@@ -125,9 +125,7 @@ class _HomescreenState extends State<Homescreen> {
                 onPressed: () {
                   pushWithoutNavBar(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const TesteCamera(),
-                    ),
+                    MaterialPageRoute(builder: (context) => const Camera()),
                   );
                 },
                 icon: const Icon(Icons.camera_alt),
