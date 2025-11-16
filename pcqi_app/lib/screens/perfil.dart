@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:pcqi_app/config/app_colors.dart';
+import 'package:pcqi_app/config/app_styles.dart';
 import 'package:pcqi_app/models/user_model.dart';
 import 'package:pcqi_app/providers/provider_model.dart';
 import 'package:pcqi_app/screens/editar_perfil.dart';
@@ -91,7 +92,23 @@ class _PerfilState extends State<Perfil> {
         ),
         body: Center(
           child: isLoading
-              ? const CircularProgressIndicator()
+              ? Scaffold(
+                  backgroundColor: AppColors.branco,
+                  body: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(color: AppColors.azulEscuro),
+                        SizedBox(height: 20),
+                        Text(
+                          "Carregando...",
+                          style: AppStyles.textStyleTituloSecundario,
+                        ),
+                      ],
+                    ),
+                  ),
+                )
               : errorMessage != null
               ? Text(
                   errorMessage!,

@@ -36,82 +36,106 @@ class _HomescreenState extends State<Homescreen> {
                 builder: (context, snapshot) {
                   /// LOADING
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
+                    return Scaffold(
+                      backgroundColor: AppColors.branco,
+                      body: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(
+                              color: AppColors.azulEscuro,
+                            ),
+                            SizedBox(height: 20),
+                            Text(
+                              "Carregando...",
+                              style: AppStyles.textStyleTituloSecundario,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
                   }
 
                   /// ERRO
                   if (snapshot.hasError) {
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 60,
-                          color: Colors.red.shade300,
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          "Erro ao carregar estatísticas.",
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.red.shade600,
-                            fontWeight: FontWeight.bold,
+                    return Scaffold(
+                      backgroundColor: AppColors.branco,
+                      body: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: 60,
+                            color: Colors.red.shade300,
                           ),
-                        ),
-                        const SizedBox(height: 6),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              statsFuture = StatsService.getStats();
-                            });
-                          },
-                          icon: const Icon(Icons.refresh),
-                          label: const Text("Tentar novamente"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.azulEscuro,
-                            foregroundColor: AppColors.branco,
+                          const SizedBox(height: 10),
+                          Text(
+                            "Erro ao carregar estatísticas.",
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.red.shade600,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 6),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              setState(() {
+                                statsFuture = StatsService.getStats();
+                              });
+                            },
+                            icon: const Icon(Icons.refresh),
+                            label: const Text("Tentar novamente"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.azulEscuro,
+                              foregroundColor: AppColors.branco,
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   }
 
                   /// SUCESSO
                   final data = snapshot.data!;
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Dashboard",
-                        style: AppStyles.textStyleForgotPassword.copyWith(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
+                  return Scaffold(
+                    backgroundColor: AppColors.branco,
+                    body: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Dashboard",
+                          style: AppStyles.textStyleForgotPassword.copyWith(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 25),
+                        const SizedBox(height: 25),
 
-                      /// Cards estilizados
-                      _buildStatCard(
-                        Icons.assessment_rounded,
-                        "Total de Mangas",
-                        data["total"],
-                      ),
-                      _buildStatCard(
-                        Icons.assignment_turned_in_outlined,
-                        "Maduras",
-                        data["maduras"],
-                      ),
-                      _buildStatCard(
-                        Icons.assistant_photo,
-                        "Verdes",
-                        data["verdes"],
-                      ),
-                      _buildStatCard(
-                        Icons.question_mark_rounded,
-                        "Outras",
-                        data["outras"],
-                      ),
-                    ],
+                        /// Cards estilizados
+                        _buildStatCard(
+                          Icons.assessment_rounded,
+                          "Total de Mangas",
+                          data["total"],
+                        ),
+                        _buildStatCard(
+                          Icons.assignment_turned_in_outlined,
+                          "Maduras",
+                          data["maduras"],
+                        ),
+                        _buildStatCard(
+                          Icons.assistant_photo,
+                          "Verdes",
+                          data["verdes"],
+                        ),
+                        _buildStatCard(
+                          Icons.question_mark_rounded,
+                          "Outras",
+                          data["outras"],
+                        ),
+                      ],
+                    ),
                   );
                 },
               ),

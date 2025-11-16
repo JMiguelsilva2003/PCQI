@@ -55,84 +55,91 @@ class _SectorsState extends State<Sectors> {
       );
     } else {
       if (sectorList == null) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline_rounded,
-                size: 50,
-                color: AppColors.azulEscuro,
-              ),
-              SizedBox(height: 10),
-              Text(
-                "Falha ao obter informações. Por favor, tente novamente.",
-                style: AppStyles.textStyleTituloSecundario,
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 20),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 40),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: LoadingButton(
-                    type: ButtonType.elevated,
-                    style: AppStyles.loadingButtonStyle,
-                    successDuration: Duration(seconds: 0),
-                    onPressed: () async {
-                      setState(() {
-                        gotInfoFromServer = false;
-                      });
-                    },
-                    child: Text(
-                      "Tentar novamente",
-                      style: AppStyles.loadingButtonTextStyle,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      } else {
-        if (sectorList!.isEmpty) {
-          return RefreshIndicator(
-            onRefresh: () async {
-              await getSectorList();
-            },
-            child: Stack(
+        return Scaffold(
+          backgroundColor: AppColors.branco,
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                ListView(children: [
-                        ],
+                Icon(
+                  Icons.error_outline_rounded,
+                  size: 50,
+                  color: AppColors.azulEscuro,
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "Falha ao obter informações. Por favor, tente novamente.",
+                  style: AppStyles.textStyleTituloSecundario,
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 20),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 40),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: LoadingButton(
+                      type: ButtonType.elevated,
+                      style: AppStyles.loadingButtonStyle,
+                      successDuration: Duration(seconds: 0),
+                      onPressed: () async {
+                        setState(() {
+                          gotInfoFromServer = false;
+                        });
+                      },
+                      child: Text(
+                        "Tentar novamente",
+                        style: AppStyles.loadingButtonTextStyle,
                       ),
-                Align(
-                  alignment: Alignment.center,
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.sentiment_dissatisfied_rounded,
-                          size: 50,
-                          color: AppColors.azulEscuro,
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          "Não foram encontrados setores cadastrados em seu usuário",
-                          style: AppStyles.textStyleTituloSecundario,
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
                     ),
                   ),
                 ),
               ],
             ),
+          ),
+        );
+      } else {
+        if (sectorList!.isEmpty) {
+          return Scaffold(
+            body: RefreshIndicator(
+              backgroundColor: AppColors.branco,
+              onRefresh: () async {
+                await getSectorList();
+              },
+              child: Stack(
+                children: [
+                  ListView(children: [
+                          ],
+                        ),
+                  Align(
+                    alignment: Alignment.center,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.sentiment_dissatisfied_rounded,
+                            size: 50,
+                            color: AppColors.azulEscuro,
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            "Não foram encontrados setores cadastrados em seu usuário",
+                            style: AppStyles.textStyleTituloSecundario,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           );
         } else {
           return Scaffold(
+            backgroundColor: AppColors.branco,
             body: RefreshIndicator(
               onRefresh: getSectorList,
               child: ListView(
