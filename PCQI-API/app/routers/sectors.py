@@ -4,7 +4,7 @@ from typing import List
 
 from app import crud, models, schemas
 from app.database import get_db
-from app.auth import get_current_user, get_current_admin_user
+from app.auth import get_current_user, get_current_admin_user 
 
 router = APIRouter()
 
@@ -108,9 +108,9 @@ def remove_member_from_sector(
     sector_id: int,
     user_id: int,
     db: Session = Depends(get_db),
-    current_admin: models.User = Depends(auth.get_current_admin_user)
+    current_admin: models.User = Depends(get_current_admin_user)
 ):
-    """ História: Remover Usuário de Setor  """
+    """ História: Remover Usuário de Setor """
     sector = crud.get_sector(db, sector_id)
     if not sector:
         raise HTTPException(status_code=404, detail="Setor não encontrado.")
