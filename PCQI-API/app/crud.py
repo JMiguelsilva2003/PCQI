@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session, aliased
 from datetime import datetime, timezone, timedelta
-from typing import Optional
+from typing import Optional, List
 from sqlalchemy import func, case, Date
 
 from app import models, schemas
