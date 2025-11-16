@@ -134,7 +134,5 @@ class MachinePerformance(BaseModel):
 
 # schema para controle Mestre
 
-
 class MachineControlRequest(BaseModel):
-    command: str = Field(
-        ..., description="O comando manual a ser injetado (ex: 'EJECT_MANUAL', 'PAUSE')")
+    command: str = Field(..., description="O comando manual a ser injetado (ex: 'EJECT_MANUAL', 'PAUSE')")
