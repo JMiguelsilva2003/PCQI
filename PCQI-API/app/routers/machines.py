@@ -19,7 +19,7 @@ router = APIRouter()
 def create_machine(
     machine: schemas.MachineCreate,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user) 
+    current_user: models.User = Depends(get_current_user)
 ):
     """
     Cria uma nova máquina associada a um setor.
@@ -46,7 +46,7 @@ def create_machine(
 )
 def read_user_machines(
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user) 
+    current_user: models.User = Depends(get_current_user)
 ):
     """
     Retorna uma lista de todas as máquinas de todos os setores
@@ -64,7 +64,7 @@ def read_user_machines(
 def read_specific_machine(
     machine_id: int,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user) 
+    current_user: models.User = Depends(get_current_user)
 ):
     """
     Retorna os detalhes de uma máquina específica.
@@ -93,9 +93,10 @@ def read_specific_machine(
 )
 def add_command_from_prediction(
     machine_id: int,
-    request: schemas.AIPredictionRequest,
+    request: schemas.AIPredictionRequest, 
     db: Session = Depends(get_db)
 ):
+    
     action_from_ia = request.prediction
 
     if not action_from_ia:
@@ -105,7 +106,7 @@ def add_command_from_prediction(
         crud.create_machine_command(
             db=db, 
             machine_id=machine_id, 
-            action=action_from_ia 
+            action=action_from_ia
         )
         return {"message": f"Command '{action_from_ia}' created for machine {machine_id}"}
     
@@ -134,6 +135,49 @@ def get_next_command(
     
     return command
 
+@router.put(
+    "/{machine_id}",
+    response_model=schemas.Machine,
+    summary="Atualiza (Edita) o nome de uma máquina",
+    description=desc.UPDATE_MACHINE_DESCRIPTION 
+)
+def update_machine_name(
+    machine_id: int,
+    machine_update: schemas.MachineUpdate, 
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    db_machine = crud.get_machine(db, machine_id=machine_id)
+    if db_machine is None:
+        raise HTTPException(status_code=404, detail="Máquina não encontrada.")
+
+    if current_user.role != "admin" and db_machine.creator_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Você não tem permissão para editar esta máquina."
+        )
+    
+    return crud.update_machine_name(db, db_machine=db_machine, name=machine_update.name)
+
+
+@router.put(
+    "/{machine_id}/heartbeat",
+    response_model=schemas.Machine,
+    summary="O Gateway de Hardware reporta um 'heartbeat'",
+    description=desc.HEARTBEAT_DESCRIPTION,
+    dependencies=[Depends(verify_api_key)]
+)
+def report_heartbeat(
+    machine_id: int,
+    db: Session = Depends(get_db)
+):
+    db_machine = crud.get_machine(db, machine_id=machine_id)
+    if db_machine is None:
+        raise HTTPException(status_code=404, detail="Máquina não encontrada.")
+
+    return crud.update_machine_heartbeat(db, db_machine=db_machine)
+
+
 @router.delete(
     "/{machine_id}",
     response_model=schemas.Machine,
@@ -143,7 +187,7 @@ def get_next_command(
 def delete_machine(
     machine_id: int,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user) 
+    current_user: models.User = Depends(get_current_user)
 ):
     db_machine = crud.get_machine(db, machine_id=machine_id)
     if db_machine is None:
@@ -160,46 +204,3 @@ def delete_machine(
         raise HTTPException(status_code=404, detail="Máquina não encontrada durante a deleção.")
 
     return deleted_machine
-
-@router.put(
-    "/{machine_id}",
-    response_model=schemas.Machine,
-    summary="Atualiza (Edita) o nome de uma máquina",
-    description=desc.UPDATE_MACHINE_DESCRIPTION
-)
-def update_machine_name(
-    machine_id: int,
-    machine_update: schemas.MachineUpdate,
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(auth.get_current_user)
-):
-    """ História: Endpoint de Edição  """
-    db_machine = crud.get_machine(db, machine_id=machine_id)
-    if db_machine is None:
-        raise HTTPException(status_code=404, detail="Máquina não encontrada.")
-
-    if current_user.role != "admin" and db_machine.creator_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Você não tem permissão para editar esta máquina."
-        )
-    
-    return crud.update_machine_name(db, db_machine=db_machine, name=machine_update.name)
-
-@router.put(
-    "/{machine_id}/heartbeat",
-    response_model=schemas.Machine,
-    summary="O Gateway de Hardware reporta um 'heartbeat'",
-    description=desc.HEARTBEAT_DESCRIPTION,
-    dependencies=[Depends(auth.verify_api_key)]
-)
-def report_heartbeat(
-    machine_id: int,
-    db: Session = Depends(get_db)
-):
-    """ História: Endpoint de Heartbeat  """
-    db_machine = crud.get_machine(db, machine_id=machine_id)
-    if db_machine is None:
-        raise HTTPException(status_code=404, detail="Máquina não encontrada.")
-
-    return crud.update_machine_heartbeat(db, db_machine=db_machine)
