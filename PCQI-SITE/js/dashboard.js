@@ -230,6 +230,51 @@ async function renderMachinesView(container, user) {
   });
 }
 
+function renderMachineList(screenElement, sector, user) {
+  let machineHTML = `<h3>Máquinas no Setor: ${sector.name}</h3>`;
+
+  if (sector.description) {
+    machineHTML += `<p class="sector-description">${sector.description}</p>`;
+  }
+  machineHTML += `<h4 style="margin-top: 1rem;">Máquinas:</h4>`;
+
+  if (!sector.machines || sector.machines.length === 0) {
+    machineHTML += "<p>Nenhuma máquina cadastrada neste setor.</p>";
+  } else {
+    machineHTML += '<div class="machine-grid">';
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000); 
+
+    sector.machines.forEach((machine) => {
+      const isOnline = machine.last_heartbeat && new Date(machine.last_heartbeat) > fiveMinutesAgo;
+      const statusClass = isOnline ? "online" : "offline";
+      const statusText = isOnline ? "Online" : "Offline";
+
+      machineHTML += `
+        <div class="machine-card">
+            <div class="status-indicator ${statusClass}" title="Status: ${statusText}"></div>
+            
+            <h4>${machine.name}</h4>
+            <p style="font-size: 1.2rem; color: #555;">ID: ${machine.id}</p>
+            
+            <div class="card-actions">
+                <button class="edit-machine action-btn" 
+                    data-machine-id="${machine.id}"
+                    data-machine-name="${machine.name}">
+                    Editar
+                </button>
+                <button class="delete-machine" 
+                    data-machine-id="${machine.id}"
+                    data-machine-name="${machine.name}">
+                    Excluir 
+                </button>
+            </div>
+        </div>
+      `;
+    });
+    machineHTML += "</div>";
+  }
+}
+
 async function renderCreateMachineForm(viewContainer, user) {
   const form = document.getElementById("form-create-machine");
   const selectSector = document.getElementById("machine-sector");
