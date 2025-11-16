@@ -251,3 +251,18 @@ async function getStatsHistory(token, range = 7) {
     if (!response.ok) throw new Error(data.detail || 'Erro ao buscar histórico.');
     return data;
 }
+
+async function removeUserFromSector(token, sectorId, userId) {
+    const url = `${API_BASE_URL}/api/v1/sectors/${sectorId}/members/${userId}`;
+    
+    const response = await fetch(url, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.detail || 'Erro ao remover membro.');
+    }
+    return data;
+}
