@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:loading_icon_button/loading_icon_button.dart';
 import 'package:pcqi_app/config/app_colors.dart';
@@ -102,6 +101,7 @@ class _EditarPerfilState extends State<EditarPerfil> {
 
       /*if (response.statusCode == 200) {*/
       UserModel result = UserModel.fromJson(jsonDecode(response.body));
+      if (!mounted) return;
       final provider = context.read<ProviderModel>();
       if (result.name != null && result.name != "") {
         provider.setUsername(result.name!);

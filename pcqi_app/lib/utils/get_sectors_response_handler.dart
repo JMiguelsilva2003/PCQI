@@ -16,7 +16,7 @@ class GetSectorsResponseHandler {
         return sectors;
       }
     } catch (e) {
-      print(e);
+      return null;
     }
     return null;
   }

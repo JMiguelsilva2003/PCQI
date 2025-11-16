@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:pcqi_app/services/http_request.dart';
 
 class StatsService {

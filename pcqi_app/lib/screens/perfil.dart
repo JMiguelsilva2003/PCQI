@@ -1,12 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:pcqi_app/config/app_colors.dart';
 import 'package:pcqi_app/models/user_model.dart';
 import 'package:pcqi_app/providers/provider_model.dart';
 import 'package:pcqi_app/screens/editar_perfil.dart';
-import 'package:pcqi_app/screens/landing_page.dart';
 import 'package:pcqi_app/services/shared_preferences_helper.dart';
 import 'package:provider/provider.dart';
 
@@ -48,6 +46,7 @@ class _PerfilState extends State<Perfil> {
 
       if (response.statusCode == 200) {
         UserModel result = UserModel.fromJson(jsonDecode(response.body));
+        if (!mounted) return;
         final provider = context.read<ProviderModel>();
         provider.setUser(result);
         isLoading = false;
@@ -180,6 +179,7 @@ class _PerfilState extends State<Perfil> {
                         onPressed: () async {
                           await SharedPreferencesHelper.setAccessToken("");
                           await SharedPreferencesHelper.setRefreshToken("");
+                          if (!context.mounted) return;
                           Navigator.of(
                             context,
                             rootNavigator: true,
@@ -234,7 +234,7 @@ class _PerfilState extends State<Perfil> {
   }
 
   // diálogo de confirmação da exclusão
-  void _confirmDelete(BuildContext context) async {
+  /*void _confirmDelete(BuildContext context) async {
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -283,6 +283,7 @@ class _PerfilState extends State<Perfil> {
     );
 
     if (confirm == true) {
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -292,5 +293,5 @@ class _PerfilState extends State<Perfil> {
         ),
       );
     }
-  }
+  }*/
 }

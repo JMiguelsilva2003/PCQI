@@ -75,6 +75,7 @@ class RequestMethods {
       "auth/forgot-password",
       user.toJson(),
     );
+    if (!context.mounted) return;
     await ForgotPasswordResponseHandler.handleForgotPasswordResponse(
       response,
       context,
@@ -83,6 +84,7 @@ class RequestMethods {
 
   Future<List<SectorModel>?> getSectorList() async {
     final response = await HttpRequest.getWithAuthorization("sectors");
+    if (!context.mounted) return null;
     return GetSectorsResponseHandler.handleGetSectorsResponse(
       response,
       context,
@@ -91,6 +93,7 @@ class RequestMethods {
 
   Future<List<MachineModel>?> getMachineList() async {
     final response = await HttpRequest.getWithAuthorization("machines");
+    if (!context.mounted) return null;
     return GetMachinesResponseHandler.handleGetMachinesResponse(
       response,
       context,

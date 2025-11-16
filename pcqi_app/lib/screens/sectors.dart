@@ -34,7 +34,7 @@ class _SectorsState extends State<Sectors> {
       return Scaffold(
         backgroundColor: AppColors.branco,
         body: FutureBuilder<void>(
-          future: _loadData(),
+          future: getSectorList(),
           builder: (context, snapshot) {
             return Center(
               child: Column(
@@ -99,7 +99,7 @@ class _SectorsState extends State<Sectors> {
         if (sectorList!.isEmpty) {
           return RefreshIndicator(
             onRefresh: () async {
-              await _loadData();
+              await getSectorList();
             },
             child: Stack(
               children: [
@@ -134,7 +134,7 @@ class _SectorsState extends State<Sectors> {
         } else {
           return Scaffold(
             body: RefreshIndicator(
-              onRefresh: _loadData,
+              onRefresh: getSectorList,
               child: ListView(
                 children: sectorList!.map((sector) {
                   return CustomSectorViewCard(
@@ -188,7 +188,9 @@ class _SectorsState extends State<Sectors> {
                             setState(() {});
                           }
                         }
-                      } catch (e) {}
+                      } catch (e) {
+                        return null;
+                      }
                     },
                   );
                 }).toList(),
@@ -200,7 +202,7 @@ class _SectorsState extends State<Sectors> {
     }
   }
 
-  Future<void> _loadData() async {
+  Future<void> getSectorList() async {
     setState(() => gotInfoFromServer = false);
     sectorList = await requestMethods.getSectorList();
     if (!mounted) return;

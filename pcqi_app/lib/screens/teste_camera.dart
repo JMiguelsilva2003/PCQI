@@ -1,6 +1,4 @@
 import 'dart:convert';
-
-import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:camera/camera.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
@@ -184,6 +182,7 @@ class _TesteCameraState extends State<TesteCamera> {
                   DeviceOrientation.portraitUp,
                 ]);
                 if (!didPop) {
+                  if (!context.mounted) return;
                   Navigator.pop(context);
                 }
               },
@@ -553,6 +552,7 @@ class _TesteCameraState extends State<TesteCamera> {
               DeviceOrientation.portraitDown,
               DeviceOrientation.portraitUp,
             ]);
+            if (!mounted) return;
             Navigator.pop(context);
           },
         ),
@@ -841,7 +841,7 @@ class _TesteCameraState extends State<TesteCamera> {
                 isStreamRunning = false;
                 connectionStatus = WebSocketConnectionStatus.disconnected;
                 textStatus =
-                    responseFromServer.status! + ": " + lastAnalysisDecision;
+                    "${responseFromServer.status!}: $lastAnalysisDecision";
                 debugTextStatus = responseFromServer.status!;
               });
             } else {
@@ -857,10 +857,12 @@ class _TesteCameraState extends State<TesteCamera> {
               });
             }
 
-          case BinaryDataReceived(data: final data):
+          /*case BinaryDataReceived(data: final data):
             print('Received Binary: $data');
           case CloseReceived(code: final code, reason: final reason):
             print('Connection to server closed: $code [$reason]');
+            */
+          default:
         }
       });
 

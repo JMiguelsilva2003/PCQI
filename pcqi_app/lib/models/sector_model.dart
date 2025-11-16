@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:pcqi_app/models/machine_model.dart';
 
 class SectorModel {
@@ -19,9 +17,9 @@ class SectorModel {
     name: json['name'] ?? '',
     description: json['description'] ?? '',
     id: json['id'] ?? -2,
-   machines: (json["machines"] ?? [])
-    .map<MachineModel>((m) => MachineModel.fromJson(m))
-    .toList()
+    machines: (json["machines"] ?? [])
+        .map<MachineModel>((m) => MachineModel.fromJson(m))
+        .toList(),
   );
 
   Map<String, dynamic> toJson() {

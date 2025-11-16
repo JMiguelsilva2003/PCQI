@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pcqi_app/config/app_colors.dart';
 import 'package:pcqi_app/config/app_styles.dart';
 import 'package:pcqi_app/screens/teste_camera.dart';
-import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart'
-    as PersistentBottomNavBarV2;
+import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
 import 'package:pcqi_app/services/stats_services.dart';
 
 class Homescreen extends StatefulWidget {
@@ -45,8 +44,11 @@ class _HomescreenState extends State<Homescreen> {
                     return Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.error_outline,
-                            size: 60, color: Colors.red.shade300),
+                        Icon(
+                          Icons.error_outline,
+                          size: 60,
+                          color: Colors.red.shade300,
+                        ),
                         const SizedBox(height: 10),
                         Text(
                           "Erro ao carregar estatísticas.",
@@ -69,7 +71,7 @@ class _HomescreenState extends State<Homescreen> {
                             backgroundColor: AppColors.azulEscuro,
                             foregroundColor: AppColors.branco,
                           ),
-                        )
+                        ),
                       ],
                     );
                   }
@@ -89,13 +91,26 @@ class _HomescreenState extends State<Homescreen> {
                       const SizedBox(height: 25),
 
                       /// Cards estilizados
-                      _buildStatCard(Icons.assessment_rounded, "Total de Mangas", data["total"]),
                       _buildStatCard(
-                          Icons.assignment_turned_in_outlined, "Maduras", data["maduras"]),
-                      _buildStatCard(Icons.assistant_photo,
-                          "Verdes", data["verdes"]),
-                            _buildStatCard(Icons.question_mark_rounded,
-                          "Outras", data["outras"])
+                        Icons.assessment_rounded,
+                        "Total de Mangas",
+                        data["total"],
+                      ),
+                      _buildStatCard(
+                        Icons.assignment_turned_in_outlined,
+                        "Maduras",
+                        data["maduras"],
+                      ),
+                      _buildStatCard(
+                        Icons.assistant_photo,
+                        "Verdes",
+                        data["verdes"],
+                      ),
+                      _buildStatCard(
+                        Icons.question_mark_rounded,
+                        "Outras",
+                        data["outras"],
+                      ),
                     ],
                   );
                 },
@@ -108,9 +123,11 @@ class _HomescreenState extends State<Homescreen> {
               right: 30,
               child: FloatingActionButton.extended(
                 onPressed: () {
-                  PersistentBottomNavBarV2.pushWithoutNavBar(
+                  pushWithoutNavBar(
                     context,
-                    MaterialPageRoute(builder: (context) => const TesteCamera()),
+                    MaterialPageRoute(
+                      builder: (context) => const TesteCamera(),
+                    ),
                   );
                 },
                 icon: const Icon(Icons.camera_alt),
@@ -140,7 +157,7 @@ class _HomescreenState extends State<Homescreen> {
             BoxShadow(
               blurRadius: 8,
               offset: const Offset(0, 3),
-              color: AppColors.azulEscuro.withOpacity(0.25),
+              color: AppColors.azulEscuro.withValues(alpha: 0.25),
             ),
           ],
         ),
