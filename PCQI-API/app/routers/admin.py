@@ -4,7 +4,7 @@ from typing import List
 
 from app import crud, models, schemas
 from app.database import get_db
-from app.auth import get_current_admin_user
+from app.auth import get_current_admin_user 
 
 router = APIRouter()
 
@@ -39,9 +39,6 @@ def promote_user_to_admin(
 
     return crud.update_user_role(db=db, user=db_user, role="admin")
 
-# ROTA DELETE para Usuários
-
-
 @router.delete(
     "/users/{user_id}",
     response_model=schemas.User,
@@ -63,9 +60,6 @@ def delete_user(
 
     return db_user
 
-# Rota para controle Mestre
-
-
 @router.post(
     "/machines/{machine_id}/control",
     status_code=status.HTTP_201_CREATED,
@@ -78,7 +72,7 @@ def admin_control_machine(
     machine_id: int,
     request: schemas.MachineControlRequest,
     db: Session = Depends(get_db),
-    current_admin: models.User = Depends(auth.get_current_admin_user)
+    current_admin: models.User = Depends(get_current_admin_user)
 ):
 
     db_machine = crud.get_machine(db, machine_id=machine_id)
