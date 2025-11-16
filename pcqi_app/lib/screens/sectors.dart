@@ -1,6 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:loading_icon_button/loading_icon_button.dart';
+import 'package:pcqi_app/config/app_colors.dart';
+import 'package:pcqi_app/config/app_styles.dart';
 import 'package:pcqi_app/models/machine_model.dart';
 import 'package:pcqi_app/models/sector_model.dart';
 import 'package:pcqi_app/services/request_methods.dart';
@@ -14,29 +17,129 @@ class Sectors extends StatefulWidget {
 }
 
 class _SectorsState extends State<Sectors> {
-  List<SectorModel> sectorList = [];
+  List<SectorModel>? sectorList;
   late RequestMethods requestMethods;
-  bool loading = true;
+
+  bool gotInfoFromServer = false;
 
   @override
   void initState() {
     super.initState();
     requestMethods = RequestMethods(context: context);
-    _loadData();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: loading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
+    if (!gotInfoFromServer) {
+      return Scaffold(
+        backgroundColor: AppColors.branco,
+        body: FutureBuilder<void>(
+          future: _loadData(),
+          builder: (context, snapshot) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(color: AppColors.azulEscuro),
+                  SizedBox(height: 20),
+                  Text(
+                    "Carregando...",
+                    style: AppStyles.textStyleTituloSecundario,
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      );
+    } else {
+      if (sectorList == null) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error_outline_rounded,
+                size: 50,
+                color: AppColors.azulEscuro,
+              ),
+              SizedBox(height: 10),
+              Text(
+                "Falha ao obter informações. Por favor, tente novamente.",
+                style: AppStyles.textStyleTituloSecundario,
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 20),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 40),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: LoadingButton(
+                    type: ButtonType.elevated,
+                    style: AppStyles.loadingButtonStyle,
+                    successDuration: Duration(seconds: 0),
+                    onPressed: () async {
+                      setState(() {
+                        gotInfoFromServer = false;
+                      });
+                    },
+                    child: Text(
+                      "Tentar novamente",
+                      style: AppStyles.loadingButtonTextStyle,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      } else {
+        if (sectorList!.isEmpty) {
+          return RefreshIndicator(
+            onRefresh: () async {
+              await _loadData();
+            },
+            child: Stack(
+              children: [
+                ListView(children: [
+                        ],
+                      ),
+                Align(
+                  alignment: Alignment.center,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.sentiment_dissatisfied_rounded,
+                          size: 50,
+                          color: AppColors.azulEscuro,
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          "Não foram encontrados setores cadastrados em seu usuário",
+                          style: AppStyles.textStyleTituloSecundario,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        } else {
+          return Scaffold(
+            body: RefreshIndicator(
               onRefresh: _loadData,
               child: ListView(
-                children: sectorList.map((sector) {
+                children: sectorList!.map((sector) {
                   return CustomSectorViewCard(
-                    name: sector.name ?? "",
-                    description: sector.description ?? "",
+                    name: sector.name!,
+                    description: sector.description!,
                     machines: sector.machines,
 
                     onCreateMachine: (machineName) async {
@@ -48,7 +151,7 @@ class _SectorsState extends State<Sectors> {
                         MachineModel novaMaquina = MachineModel.fromJson(
                           jsonDecode(maquinaCriada),
                         );
-                        for (var setor in sectorList) {
+                        for (var setor in sectorList!) {
                           if (setor.id.toString() ==
                               novaMaquina.sectorId.toString()) {
                             sector.machines.add(novaMaquina);
@@ -73,7 +176,7 @@ class _SectorsState extends State<Sectors> {
                             jsonDecode(maquinaApagando),
                           );
                           if (antigaMaquina.id.toString() == machineId) {
-                            for (var setor in sectorList) {
+                            for (var setor in sectorList!) {
                               if (setor.id.toString() ==
                                   antigaMaquina.sectorId.toString()) {
                                 sector.machines.removeWhere(
@@ -91,15 +194,16 @@ class _SectorsState extends State<Sectors> {
                 }).toList(),
               ),
             ),
-    );
+          );
+        }
+      }
+    }
   }
 
   Future<void> _loadData() async {
-    setState(() => loading = true);
-
-    sectorList = await requestMethods.getSectorList() ?? [];
-
+    setState(() => gotInfoFromServer = false);
+    sectorList = await requestMethods.getSectorList();
     if (!mounted) return;
-    setState(() => loading = false);
+    setState(() => gotInfoFromServer = true);
   }
 }
