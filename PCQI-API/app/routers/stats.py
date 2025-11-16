@@ -4,7 +4,7 @@ from typing import Optional, List
 
 from app import crud, models, schemas
 from app.database import get_db
-from app.routers.auth import get_current_user
+from app.auth import get_current_user
 
 router = APIRouter()
 
@@ -41,7 +41,7 @@ def get_stats(
 def get_stats_history(
     range: int = Query(7, ge=1, le=30, description="Número de dias (1-30) para o histórico."),
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(auth.get_current_user)
+    current_user: models.User = Depends(get_current_user)
 ):
     """ História: Estatísticas Históricas """
     stats_history = crud.get_stats_history(db, range_days=range)
@@ -55,7 +55,7 @@ def get_stats_history(
 )
 def get_stats_performance(
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(auth.get_current_user)
+    current_user: models.User = Depends(get_current_user)
 ):
     """ História: Estatísticas por Máquina"""
     stats = crud.get_stats_performance_by_machine(db, user=current_user)
