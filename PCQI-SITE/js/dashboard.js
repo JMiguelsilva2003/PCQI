@@ -242,7 +242,7 @@ function renderMachineList(screenElement, sector, user) {
     machineHTML += "<p>Nenhuma máquina cadastrada neste setor.</p>";
   } else {
     machineHTML += '<div class="machine-grid">';
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000); 
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
 
     sector.machines.forEach((machine) => {
       const isOnline = machine.last_heartbeat && new Date(machine.last_heartbeat) > fiveMinutesAgo;
@@ -273,6 +273,46 @@ function renderMachineList(screenElement, sector, user) {
     });
     machineHTML += "</div>";
   }
+
+  screenElement.innerHTML = machineHTML;
+  screenElement.querySelectorAll(".delete-machine").forEach((button) => {
+    button.addEventListener("click", async (e) => {
+      const machineId = e.target.dataset.machineId;
+      const machineName = e.target.dataset.machineName;
+      const machineCard = e.target.closest(".machine-card");
+
+      if (confirm(`Tem certeza que deseja deletar a máquina "${machineName}" (ID: ${machineId})?`)) {
+        try {
+          await deleteMachine(currentAccessToken, machineId);
+          alert("Máquina removida com sucesso!");
+          machineCard.remove(); 
+        } catch (error) {
+          alert(`Erro ao deletar: ${error.message}`);
+        }
+      }
+    });
+  });
+
+  screenElement.querySelectorAll(".edit-machine").forEach((button) => {
+    button.addEventListener("click", async (e) => {
+      const machineId = e.target.dataset.machineId;
+      const oldName = e.target.dataset.machineName;
+      const machineCard = e.target.closest(".machine-card");
+
+      const newName = prompt(`Digite o novo nome para a máquina "${oldName}":`, oldName);
+
+      if (newName && newName.trim() !== "" && newName !== oldName) {
+        try {
+          await updateMachineName(currentAccessToken, machineId, newName.trim());
+          alert("Nome atualizado com sucesso!");
+          machineCard.querySelector("h4").textContent = newName;
+          e.target.dataset.machineName = newName;
+        } catch (error) {
+          alert(`Erro ao atualizar: ${error.message}`);
+        }
+      }
+    });
+  });
 }
 
 async function renderCreateMachineForm(viewContainer, user) {
@@ -428,7 +468,7 @@ async function renderProfilesView(container) {
         </div>
       `;
       screen.appendChild(card);
-    }); 
+    });
 
     screen.querySelectorAll(".promote-btn").forEach((button) => {
       button.addEventListener("click", async (e) => {
@@ -504,6 +544,7 @@ async function renderProfilesView(container) {
 }
 
 let historyChartInstance = null;
+let performanceChartInstance = null;
 
 async function renderStatisticsView(container, user) {
     const loadingEl = container.querySelector("#stats-loading");
@@ -572,18 +613,26 @@ async function renderStatisticsView(container, user) {
         console.error("Erro ao carregar histórico:", error);
         historyLoadingEl.innerHTML = `<p style="color:red;">Erro ao carregar gráfico: ${error.message}</p>`;
     }
+
+    const performanceLoadingEl = container.querySelector("#performance-loading");
+    try {
+        const performanceData = await getStatsPerformance(currentAccessToken);
+        renderPerformanceChart(performanceData);
+        performanceLoadingEl.style.display = "none";
+    } catch (error) {
+        console.error("Erro ao carregar performance:", error);
+        performanceLoadingEl.innerHTML = `<p style="color:red;">Erro ao carregar gráfico: ${error.message}</p>`;
+    }
 }
 
 function renderHistoryChart(data) {
     const ctx = document.getElementById('historyChart')?.getContext('2d');
     if (!ctx) return;
 
-    // Destrói o gráfico antigo, se existir
     if (historyChartInstance) {
         historyChartInstance.destroy();
     }
 
-    // Inverte os dados (API vem desc, gráfico precisa asc) e formata
     const labels = data.map(item => item.date).reverse();
     const madurasData = data.map(item => item.maduras).reverse();
     const verdesData = data.map(item => item.verdes).reverse();
@@ -617,5 +666,46 @@ function renderHistoryChart(data) {
         }
     });
 }
+
+function renderPerformanceChart(data) {
+    const ctx = document.getElementById('performanceChart')?.getContext('2d');
+    if (!ctx) return;
+
+    if (performanceChartInstance) {
+        performanceChartInstance.destroy();
+    }
+
+    const labels = data.map(item => item.machine_name);
+    const madurasData = data.map(item => item.maduras);
+    const verdesData = data.map(item => item.verdes);
+
+    performanceChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Maduras (Aceitas)',
+                    data: madurasData,
+                    backgroundColor: '#28a745',
+                },
+                {
+                    label: 'Verdes (Rejeitadas)',
+                    data: verdesData,
+                    backgroundColor: '#dc3545',
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { stacked: true },
+                y: { stacked: true, beginAtZero: true }
+            }
+        }
+    });
+}
+
 
 document.addEventListener("DOMContentLoaded", setupDashboard);
