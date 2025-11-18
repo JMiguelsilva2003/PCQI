@@ -1,12 +1,25 @@
 import torch
 from PIL import Image
 import io
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from local_api.ml.model import model, device
 from local_api.config import TRANSFORM, CLASSES
+from local_api.utils.quality import check_image_quality
 
 def predict_image_from_bytes(image_bytes: bytes) -> dict:
-    """Recebe os bytes de uma imagem, processa com o modelo e retorna a predição."""
+    
+    quality = check_image_quality(image_bytes)
+    if not quality['valid']:
+        return {
+            "prediction": "ERRO_QUALIDADE",
+            "confidence": 0.0,
+            "error": quality['error']
+        }
+
     try:
         image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
     except Exception:
