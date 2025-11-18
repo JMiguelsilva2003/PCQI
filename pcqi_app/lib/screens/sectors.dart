@@ -180,7 +180,11 @@ class _SectorsState extends State<Sectors> {
                         },
 
                         onEditMachine: (machineId) async {
-                          Navigator.pushNamed(context, '/machine-edit');
+                          Navigator.pushNamed(
+                            context,
+                            '/machine-edit',
+                            arguments: machineId,
+                          );
                         },
 
                         onDeleteMachine: (machineId) async {

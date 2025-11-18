@@ -18,7 +18,12 @@ class HttpRequest {
   }
 
   static postWithAuthorization(String method, [String? additionalInfo]) async {
-    var urlSend = Uri.parse("$url/$method");
+    Uri urlSend;
+    if (additionalInfo == null) {
+      urlSend = Uri.parse("$url/$method");
+    } else {
+      urlSend = Uri.parse("$url/$method/$additionalInfo");
+    }
 
     final token = SharedPreferencesHelper.getAccessToken();
 
@@ -47,7 +52,6 @@ class HttpRequest {
         .timeout(timeoutSeconds);
   }
 
-  /// ✅ GET com token (sectors / machines)
   static Future getWithAuthorization(String endpoint) async {
     final token = SharedPreferencesHelper.getAccessToken();
 
@@ -63,7 +67,7 @@ class HttpRequest {
   ) async {
     final token = SharedPreferencesHelper.getAccessToken();
 
-    var urlSend = Uri.parse("$url/$endpoint/");
+    var urlSend = Uri.parse("$url/$endpoint");
     return http
         .post(
           urlSend,
@@ -75,7 +79,6 @@ class HttpRequest {
         )
         .timeout(timeoutSeconds);
   }
-
 
   static Future deleteWithAuthorization(String endpoint) async {
     final token = SharedPreferencesHelper.getAccessToken();

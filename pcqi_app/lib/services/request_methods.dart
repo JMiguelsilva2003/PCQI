@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:pcqi_app/models/admin_machine_command_model.dart';
 import 'package:pcqi_app/models/machine_model.dart';
 import 'package:pcqi_app/models/sector_model.dart';
 import 'package:pcqi_app/models/user_model.dart';
+import 'package:pcqi_app/utils/admin_machine_response_handler.dart';
 import 'package:pcqi_app/utils/auto_login_response_handler.dart';
 import 'package:pcqi_app/services/http_request.dart';
 import 'package:pcqi_app/utils/forgot_password_response_handler.dart';
@@ -101,7 +103,7 @@ class RequestMethods {
   }
 
   Future<dynamic> createMachine(String sectorId, String machineName) async {
-    final response = await HttpRequest.postWithAuthorizationJson("machines", {
+    final response = await HttpRequest.postWithAuthorizationJson("machines/", {
       "name": machineName,
       "sector_id": sectorId,
     });
@@ -114,5 +116,29 @@ class RequestMethods {
       "machines/$machineId",
     );
     return response.body;
+  }
+
+  Future<bool?> sendAdminMachineRequest(
+    String machineID,
+    String command,
+  ) async {
+    try {
+      AdminMachineCommandModel request = AdminMachineCommandModel(
+        command: command,
+      );
+      final response = await HttpRequest.postWithAuthorizationJson(
+        "admin/machines/$machineID/control",
+        request.toJson(),
+      );
+      if (!context.mounted) return null;
+      bool isRequestSucessfull =
+          await AdminMachineResponseHandler.handleGetSectorsResponse(
+            response,
+            context,
+          );
+      return isRequestSucessfull;
+      //if (!context.mounted) return;
+    } catch (e) {}
+    return null;
   }
 }
