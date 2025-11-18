@@ -152,15 +152,19 @@ class _MachineEditState extends State<MachineEdit> {
           lastRequest = SendingRequest.resume;
         });
         bool? isRequestSucessfull = await requestMethods
-            .sendAdminMachineRequest(machineID, 'PAUSE');
+            .sendAdminMachineRequest(machineID, 'RESUME');
       } else if (request == SendingRequest.pause) {
         setState(() {
           lastRequest = SendingRequest.pause;
         });
+        bool? isRequestSucessfull = await requestMethods
+            .sendAdminMachineRequest(machineID, 'PAUSE');
       } else if (request == SendingRequest.ejectManual) {
         setState(() {
           lastRequest = SendingRequest.ejectManual;
         });
+        bool? isRequestSucessfull = await requestMethods
+            .sendAdminMachineRequest(machineID, 'EJECT_MANUAL');
       }
 
       setState(() {

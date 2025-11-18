@@ -131,7 +131,7 @@ class RequestMethods {
         request.toJson(),
       );
       if (!context.mounted) return null;
-      bool isRequestSucessfull =
+      bool? isRequestSucessfull =
           await AdminMachineResponseHandler.handleGetSectorsResponse(
             response,
             context,
