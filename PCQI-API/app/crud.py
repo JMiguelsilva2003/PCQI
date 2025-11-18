@@ -171,6 +171,12 @@ def update_machine_name(db: Session, db_machine: models.Machine, name: str) -> m
     db.refresh(db_machine)
     return db_machine
 
+def get_all_machines(db: Session, skip: int = 0, limit: int = 100):
+    """
+    Retorna todas as máquinas do sistema (apenas para admins).
+    """
+    return db.query(models.Machine).offset(skip).limit(limit).all()
+
 # Funções para Stats
 
 def get_command_stats(

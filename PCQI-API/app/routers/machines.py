@@ -52,7 +52,10 @@ def read_user_machines(
     Retorna uma lista de todas as máquinas de todos os setores
     dos quais o usuário é membro.
     """
-    return crud.get_machines_for_user(db=db, user=current_user)
+    if current_user.role == "admin":
+        return crud.get_all_machines(db=db)
+    else:
+        return crud.get_machines_for_user(db=db, user=current_user)
 
 
 @router.get(
