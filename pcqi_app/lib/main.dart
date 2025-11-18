@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pcqi_app/providers/provider_model.dart';
+import 'package:pcqi_app/providers/provider_sector_list.dart';
 import 'package:pcqi_app/screens/forgot_password.dart';
 import 'package:pcqi_app/screens/homepage_widget.dart';
 import 'package:pcqi_app/screens/machine_edit.dart';
@@ -18,8 +19,11 @@ Future main() async {
   await SharedPreferencesHelper.init();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => ProviderModel(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ProviderModel()),
+        ChangeNotifierProvider(create: (context) => ProviderSectorList()),
+      ],
       child: const MyApp(),
     ),
   );
