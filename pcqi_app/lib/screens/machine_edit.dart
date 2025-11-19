@@ -1,6 +1,4 @@
 import 'dart:async';
-
-import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:pcqi_app/config/app_colors.dart';
@@ -8,7 +6,6 @@ import 'package:pcqi_app/config/app_styles.dart';
 import 'package:pcqi_app/models/app_enums.dart';
 import 'package:pcqi_app/services/request_methods.dart';
 import 'package:pcqi_app/widgets/custom_admin_machine_request_widget.dart';
-import 'package:pcqi_app/widgets/simple_awesome_dialog.dart';
 
 class MachineEdit extends StatefulWidget {
   const MachineEdit({super.key});

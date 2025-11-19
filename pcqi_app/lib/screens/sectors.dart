@@ -26,6 +26,9 @@ class _SectorsState extends State<Sectors> {
 
   bool gotInfoFromServer = false;
 
+  TextEditingController controllerSearchBar = TextEditingController();
+  List<SectorModel>? filteredList;
+
   @override
   void initState() {
     super.initState();
@@ -93,6 +96,7 @@ class _SectorsState extends State<Sectors> {
                           onPressed: () async {
                             setState(() {
                               gotInfoFromServer = false;
+                              futureSectorList = getSectorList();
                             });
                           },
                           child: Text(
@@ -148,75 +152,173 @@ class _SectorsState extends State<Sectors> {
             } else {
               return Scaffold(
                 backgroundColor: AppColors.branco,
-                body: RefreshIndicator(
-                  onRefresh: getSectorList,
-                  child: ListView(
-                    children: providerSectorList.getSectorList!.map((sector) {
-                      return CustomSectorViewCard(
-                        name: sector.name!,
-                        description: sector.description!,
-                        machines: sector.machines,
+                body: Column(
+                  children: [
+                    SafeArea(
+                      bottom: false,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: ValueListenableBuilder<TextEditingValue>(
+                          valueListenable: controllerSearchBar,
+                          builder: (context, value, child) {
+                            return SearchBar(
+                              controller: controllerSearchBar,
+                              hintText: 'Pesquisar...',
 
-                        onCreateMachine: (machineName) async {
-                          var maquinaCriada = await requestMethods
-                              .createMachine(
-                                sector.id!.toString(),
-                                machineName,
-                              );
-                          if (maquinaCriada != null) {
-                            MachineModel novaMaquina = MachineModel.fromJson(
-                              jsonDecode(maquinaCriada),
-                            );
-                            for (var setor
-                                in providerSectorList.getSectorList!) {
-                              if (setor.id.toString() ==
-                                  novaMaquina.sectorId.toString()) {
-                                sector.machines.add(novaMaquina);
-                                break;
-                              }
-                            }
-                            setState(() {});
-                          }
-                        },
+                              hintStyle: WidgetStateProperty.all(
+                                TextStyle(color: AppColors.cinzaEscuro),
+                              ),
+                              textStyle: WidgetStateProperty.all(
+                                TextStyle(color: AppColors.preto, fontSize: 16),
+                              ),
+                              backgroundColor: WidgetStateProperty.all(
+                                AppColors.branco,
+                              ),
+                              surfaceTintColor: WidgetStateProperty.all(
+                                Colors.transparent,
+                              ),
+                              elevation: WidgetStateProperty.all(0),
+                              shadowColor: WidgetStateProperty.all(
+                                Colors.black12,
+                              ),
+                              side: WidgetStateProperty.all(
+                                BorderSide(
+                                  color: AppColors.azulEscuro,
+                                  width: 1,
+                                ),
+                              ),
+                              shape: WidgetStateProperty.all(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              padding: WidgetStateProperty.all(
+                                EdgeInsets.symmetric(horizontal: 16),
+                              ),
 
-                        onEditMachine: (machineId) async {
-                          Navigator.pushNamed(
-                            context,
-                            '/machine-edit',
-                            arguments: machineId,
-                          );
-                        },
+                              leading: Icon(Icons.search),
+                              trailing: [
+                                /*// Filter button
+                                IconButton(
+                                  icon: Icon(Icons.filter_list),
+                                  onPressed: () {},
+                                ),*/
 
-                        onDeleteMachine: (machineId) async {
-                          var maquinaApagando = await requestMethods
-                              .deleteMachine(machineId);
-                          try {
-                            if (maquinaApagando != null) {
-                              MachineModel antigaMaquina =
-                                  MachineModel.fromJson(
-                                    jsonDecode(maquinaApagando),
-                                  );
-                              if (antigaMaquina.id.toString() == machineId) {
-                                for (var setor
-                                    in providerSectorList.getSectorList!) {
-                                  if (setor.id.toString() ==
-                                      antigaMaquina.sectorId.toString()) {
-                                    sector.machines.removeWhere(
-                                      (m) => m.id == antigaMaquina.id,
-                                    );
-                                    break;
+                                // Clear button
+                                if (value.text.isNotEmpty)
+                                  IconButton(
+                                    icon: Icon(Icons.clear),
+                                    onPressed: () {
+                                      controllerSearchBar.clear();
+                                      filteredList =
+                                          providerSectorList.getSectorList!;
+                                      setState(() {});
+                                    },
+                                  ),
+                              ],
+                              onChanged: (value) {
+                                if (value.trim().isNotEmpty) {
+                                  filteredList = [];
+                                  for (var sector
+                                      in providerSectorList.getSectorList!) {
+                                    if (sector.name!
+                                        .trim()
+                                        .toLowerCase()
+                                        .contains(value.trim().toLowerCase())) {
+                                      filteredList!.add(sector);
+                                    }
                                   }
+                                } else {
+                                  filteredList =
+                                      providerSectorList.getSectorList!;
                                 }
                                 setState(() {});
-                              }
-                            }
-                          } catch (e) {
-                            return null;
-                          }
-                        },
-                      );
-                    }).toList(),
-                  ),
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: RefreshIndicator(
+                        onRefresh: getSectorList,
+                        child: ListView(
+                          padding: EdgeInsets.zero,
+                          children: /*providerSectorList.getSectorList!.map(*/
+                              filteredList!.map((sector) {
+                                return CustomSectorViewCard(
+                                  name: sector.name!,
+                                  description: sector.description!,
+                                  machines: sector.machines,
+
+                                  onCreateMachine: (machineName) async {
+                                    var maquinaCriada = await requestMethods
+                                        .createMachine(
+                                          sector.id!.toString(),
+                                          machineName,
+                                        );
+                                    if (maquinaCriada != null) {
+                                      MachineModel novaMaquina =
+                                          MachineModel.fromJson(
+                                            jsonDecode(maquinaCriada),
+                                          );
+                                      for (var setor
+                                          in providerSectorList
+                                              .getSectorList!) {
+                                        if (setor.id.toString() ==
+                                            novaMaquina.sectorId.toString()) {
+                                          sector.machines.add(novaMaquina);
+                                          break;
+                                        }
+                                      }
+                                      setState(() {});
+                                    }
+                                  },
+
+                                  onEditMachine: (machineId) async {
+                                    Navigator.pushNamed(
+                                      context,
+                                      '/machine-edit',
+                                      arguments: machineId,
+                                    );
+                                  },
+
+                                  onDeleteMachine: (machineId) async {
+                                    var maquinaApagando = await requestMethods
+                                        .deleteMachine(machineId);
+                                    try {
+                                      if (maquinaApagando != null) {
+                                        MachineModel antigaMaquina =
+                                            MachineModel.fromJson(
+                                              jsonDecode(maquinaApagando),
+                                            );
+                                        if (antigaMaquina.id.toString() ==
+                                            machineId) {
+                                          for (var setor
+                                              in providerSectorList
+                                                  .getSectorList!) {
+                                            if (setor.id.toString() ==
+                                                antigaMaquina.sectorId
+                                                    .toString()) {
+                                              sector.machines.removeWhere(
+                                                (m) => m.id == antigaMaquina.id,
+                                              );
+                                              break;
+                                            }
+                                          }
+                                          setState(() {});
+                                        }
+                                      }
+                                    } catch (e) {
+                                      return null;
+                                    }
+                                  },
+                                );
+                              }).toList(),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               );
             }
@@ -232,6 +334,8 @@ class _SectorsState extends State<Sectors> {
       List<SectorModel>? sectorList = await requestMethods.getSectorList();
       if (!mounted) return;
       providerSectorList.setSectorList(sectorList);
+      // May remove later the following line:
+      filteredList = sectorList;
 
       if (!mounted) return;
       setState(() => gotInfoFromServer = true);
