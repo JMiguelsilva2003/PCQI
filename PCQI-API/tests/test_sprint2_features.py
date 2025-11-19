@@ -82,6 +82,54 @@ def test_gateway_heartbeat_fails_bad_key(client: TestClient, setup_machine_data)
     
     assert response.status_code == 401 
 
+def test_admin_can_remove_user_from_sector(admin_auth_client, setup_machine_data, db_session: Session):
+    """
+    Testa se o admin pode remover um usuário de um setor.
+    (DELETE /api/v1/sectors/{sector_id}/members/{user_id})
+    """
+    test_user, _, _, sector = setup_machine_data
+    sector_id = sector['id']
+    user_id = test_user.id
+
+    db_sector = crud.get_sector(db_session, sector_id)
+    assert test_user in db_sector.members
+    
+    response = admin_auth_client.delete(f"/api/v1/sectors/{sector_id}/members/{user_id}")
+    
+    assert response.status_code == 200
+    
+    db_session.refresh(db_sector)
+    assert test_user not in db_sector.members
+
+def test_admin_can_use_master_control(admin_auth_client, setup_machine_data, db_session: Session):
+    """
+    Testa se o admin pode injetar um comando manual.
+    (POST /api/v1/admin/machines/{machine_id}/control)
+    """
+    _, machine_a, _, _ = setup_machine_data
+    machine_id = machine_a['id']
+    
+    response = admin_auth_client.post(
+        f"/api/v1/admin/machines/{machine_id}/control",
+        json={"command": "EJECT_MANUAL"}
+    )
+    assert response.status_code == 201
+    
+    command = crud.get_next_pending_command(db_session, machine_id)
+    assert command is not None
+    assert command.action == "EJECT_MANUAL"
+
+def test_user_cannot_use_master_control(setup_machine_data):
+    """ Testa se um usuário comum NÃO PODE usar o controlo mestre. """
+    _, machine_a, user_auth_client, _ = setup_machine_data
+    machine_id = machine_a['id']
+    
+    response = user_auth_client.post(
+        f"/api/v1/admin/machines/{machine_id}/control",
+        json={"command": "EJECT_MANUAL"}
+    )
+    assert response.status_code == 403
+
 def test_get_stats_history(admin_auth_client, populate_stats_data):
     """
     Testa o endpoint de histórico de estatísticas.
