@@ -153,3 +153,34 @@ def populate_stats_data(
         "machine_A1_id": machine_A1['id'],
         "machine_B1_id": machine_B1['id']
     }
+
+@pytest.fixture(scope="function")
+def setup_machine_data(db_session: Session, admin_auth_client: TestClient, test_user: models.User):
+    """
+    - Admin cria 'Setor 1'
+    - Admin adiciona 'test_user' ao 'Setor 1'
+    - 'test_user' cria 'Máquina A' no 'Setor 1'
+    Retorna o test_user e a machine_a
+    """
+    resp_sector = admin_auth_client.post("/api/v1/sectors/", json={"name": "Setor de Teste S2"})
+    assert resp_sector.status_code == 201
+    sector = resp_sector.json()
+
+    resp_add = admin_auth_client.post(f"/api/v1/sectors/{sector['id']}/members", json={"user_id": test_user.id})
+    assert resp_add.status_code == 200
+
+    client = TestClient(admin_auth_client.app) 
+    login_data = {"username": test_user.email, "password": "password123"}
+    resp_login = client.post("/api/v1/auth/login", data=login_data)
+    token = resp_login.json()["access_token"]
+    user_auth_client = TestClient(admin_auth_client.app)
+    user_auth_client.headers = {"Authorization": f"Bearer {token}"}
+
+    resp_machine = user_auth_client.post(
+        "/api/v1/machines/",
+        json={"name": "Máquina A", "sector_id": sector['id']}
+    )
+    assert resp_machine.status_code == 201
+    machine_a = resp_machine.json()
+
+    return test_user, machine_a, user_auth_client, sector
