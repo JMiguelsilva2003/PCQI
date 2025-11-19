@@ -1,22 +1,26 @@
 import 'dart:convert';
 
 import 'package:pcqi_app/models/admin_machine_command_model.dart';
+import 'package:pcqi_app/models/app_enums.dart';
 
 class AdminMachineResponseHandler {
-  static Future<bool?> handleGetSectorsResponse(response, context) async {
+  static Future<RequestStatusAdminMachineControl> handleGetSectorsResponse(
+    response,
+    context,
+  ) async {
     // return types: null means request fail, true means request sucess, false means that the user is not an admin
     try {
       AdminMachineCommandModel responseModel =
           AdminMachineCommandModel.fromJson(jsonDecode(response.body));
       if (responseModel.detail!.startsWith("The user")) {
-        return false;
+        return RequestStatusAdminMachineControl.userNotAdmin;
       } else if (responseModel.message!.startsWith("Comando")) {
-        return true;
+        return RequestStatusAdminMachineControl.sucess;
       } else {
-        return null;
+        return RequestStatusAdminMachineControl.fail;
       }
     } catch (e) {
-      return null;
+      return RequestStatusAdminMachineControl.fail;
     }
   }
 }

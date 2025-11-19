@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pcqi_app/models/admin_machine_command_model.dart';
+import 'package:pcqi_app/models/app_enums.dart';
 import 'package:pcqi_app/models/machine_model.dart';
 import 'package:pcqi_app/models/sector_model.dart';
 import 'package:pcqi_app/models/user_model.dart';
@@ -118,7 +119,7 @@ class RequestMethods {
     return response.body;
   }
 
-  Future<bool?> sendAdminMachineRequest(
+  Future<RequestStatusAdminMachineControl> sendAdminMachineRequest(
     String machineID,
     String command,
   ) async {
@@ -130,15 +131,18 @@ class RequestMethods {
         "admin/machines/$machineID/control",
         request.toJson(),
       );
-      if (!context.mounted) return null;
-      bool? isRequestSucessfull =
+      if (!context.mounted) {
+        return RequestStatusAdminMachineControl.none;
+      }
+      RequestStatusAdminMachineControl isRequestSucessfull =
           await AdminMachineResponseHandler.handleGetSectorsResponse(
             response,
             context,
           );
       return isRequestSucessfull;
       //if (!context.mounted) return;
-    } catch (e) {}
-    return null;
+    } catch (e) {
+      return RequestStatusAdminMachineControl.fail;
+    }
   }
 }
