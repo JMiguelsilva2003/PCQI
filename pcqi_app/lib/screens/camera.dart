@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:camera/camera.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
@@ -824,58 +825,80 @@ class _CameraState extends State<Camera> {
       setState(() {
         connectionStatus = WebSocketConnectionStatus.connecting;
       });
-      WebSocket webSocket = await httpImageRequest.connectToSocket();
-      setState(() {
-        connectionStatus = WebSocketConnectionStatus.connected;
-      });
+      WebSocket? webSocket = await httpImageRequest.connectToSocket();
+      if (webSocket != null) {
+        setState(() {
+          connectionStatus = WebSocketConnectionStatus.connected;
+        });
 
-      webSocket.events.listen((e) async {
-        switch (e) {
-          case TextDataReceived(text: final text):
-            ImageRequestResponseModel responseFromServer =
-                ImageRequestResponseModel.fromJson(jsonDecode(text));
-            if (responseFromServer.status!.startsWith("Decid")) {
-              await cameraController.stopImageStream();
-              await webSocket.close();
-              setState(() {
-                isStreamRunning = false;
-                connectionStatus = WebSocketConnectionStatus.disconnected;
-                textStatus =
-                    "${responseFromServer.status!}: $lastAnalysisDecision";
-                debugTextStatus = responseFromServer.status!;
-              });
-            } else {
-              setState(() {
-                textStatus = setTextStatus(responseFromServer.status!);
-                debugTextStatus = responseFromServer.status!;
-                debugTextCurrentPrediction =
-                    responseFromServer.currentPrediction!;
-                if (responseFromServer.currentPrediction != "FUNDO") {
-                  lastAnalysisDecision = responseFromServer.currentPrediction!;
-                }
-                debugTextConfidence = responseFromServer.confidence!;
-              });
-            }
+        webSocket.events.listen((e) async {
+          switch (e) {
+            case TextDataReceived(text: final text):
+              ImageRequestResponseModel responseFromServer =
+                  ImageRequestResponseModel.fromJson(jsonDecode(text));
+              if (responseFromServer.status!.startsWith("Decid")) {
+                await cameraController.stopImageStream();
+                await webSocket.close();
+                setState(() {
+                  isStreamRunning = false;
+                  connectionStatus = WebSocketConnectionStatus.disconnected;
+                  textStatus =
+                      "${responseFromServer.status!}: $lastAnalysisDecision";
+                  debugTextStatus = responseFromServer.status!;
+                });
+              } else {
+                setState(() {
+                  textStatus = setTextStatus(responseFromServer.status!);
+                  debugTextStatus = responseFromServer.status!;
+                  debugTextCurrentPrediction =
+                      responseFromServer.currentPrediction!;
+                  if (responseFromServer.currentPrediction != "FUNDO") {
+                    lastAnalysisDecision =
+                        responseFromServer.currentPrediction!;
+                  }
+                  debugTextConfidence = responseFromServer.confidence!;
+                });
+              }
 
-          /*case BinaryDataReceived(data: final data):
+            /*case BinaryDataReceived(data: final data):
             print('Received Binary: $data');
           case CloseReceived(code: final code, reason: final reason):
             print('Connection to server closed: $code [$reason]');
             */
-          default:
-        }
-      });
+            default:
+          }
+        });
 
-      await cameraController.startImageStream((image) async {
-        if (isCurrentlySendingImage) return;
-        isCurrentlySendingImage = true;
-        final convertedImage = await cameraImageConverter.convertImage(image);
+        await cameraController.startImageStream((image) async {
+          if (isCurrentlySendingImage) return;
+          isCurrentlySendingImage = true;
+          final convertedImage = await cameraImageConverter.convertImage(image);
 
-        if (convertedImage != null) {
-          webSocket.sendBytes(convertedImage);
-        }
-        isCurrentlySendingImage = false;
-      });
+          if (convertedImage != null) {
+            webSocket.sendBytes(convertedImage);
+          }
+          isCurrentlySendingImage = false;
+        });
+      } else {
+        setState(() {
+          connectionStatus = WebSocketConnectionStatus.disconnected;
+          isStreamRunning = false;
+          isCurrentlySendingImage = false;
+        });
+        if (!mounted) return;
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.error,
+          animType: AnimType.scale,
+          title: "Erro",
+          desc:
+              "Não foi possível conectar-se ao servidor para transmissão de imagens. Por favor, tente novamente.",
+          btnOkColor: AppColors.azulEscuro,
+          btnOkText: "OK",
+          btnOkOnPress: () {},
+          dismissOnTouchOutside: false,
+        ).show();
+      }
     } catch (e) {
       if (connectionStatus == WebSocketConnectionStatus.connected) {
         await cameraController.stopImageStream();
