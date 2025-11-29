@@ -8,6 +8,7 @@ from local_api.state_manager import AnalysisStateManager, FRAMES_PARA_INICIAR, F
 
 @pytest.fixture
 def clean_image_bytes():
+    """ Simula bytes de uma imagem nítida. """
     img = np.zeros((50, 50, 3), dtype=np.uint8)
     img[10:40, 10:40] = 255
     _, buffer = cv2.imencode('.jpg', img)
@@ -15,41 +16,52 @@ def clean_image_bytes():
 
 @pytest.fixture
 def blurry_image_bytes():
+    """ Simula bytes de uma imagem totalmente desfocada. """
     img = np.full((50, 50, 3), 120, dtype=np.uint8)
     _, buffer = cv2.imencode('.jpg', img)
     return buffer.tobytes()
 
 def test_quality_check_passes_on_sharp_image(clean_image_bytes):
+    """ Deve passar em imagem com bom foco/contraste. """
     result = check_image_quality(clean_image_bytes)
     assert result['valid'] is True
 
 def test_quality_check_fails_on_blurry_image(blurry_image_bytes):
+    """ Deve falhar em imagem sem foco. """
     result = check_image_quality(blurry_image_bytes)
     assert result['valid'] is False
     assert "Imagem desfocada" in result['error']
 
-def test_quality_threshold_is_respected(clean_image_bytes):
-    result = check_image_quality(clean_image_bytes)
-    assert 'Score:' in result['error'] 
-    assert result['valid'] is True
+def test_quality_threshold_is_respected(blurry_image_bytes):
+    """ 
+    imagem 'blurry' para forçar o erro e verificar a mensagem.
+    """
+    result = check_image_quality(blurry_image_bytes)
+    
+    assert result['valid'] is False
+    assert 'Score:' in result['error']
 
 def test_state_manager_starts_awaiting():
+    """ O estado inicial deve ser Aguardando. """
     manager = AnalysisStateManager()
     state, decision = manager.process_prediction("FUNDO")
     assert state == "Aguardando"
     assert decision is None
 
 def test_state_manager_transitions_to_analyzing():
+    """ Deve mudar de Aguardando para Analisando após N frames. """
     manager = AnalysisStateManager()
     N = FRAMES_PARA_INICIAR
     
     for _ in range(N - 1):
         state, _ = manager.process_prediction("MATURA")
-        assert state == "Aguardando"
+        assert state == "Aguardando" 
+
     state, _ = manager.process_prediction("MATURA")
     assert state == "Analisando"
 
 def test_state_manager_aggregates_and_decides_correctly():
+    """ Deve escolher o resultado mais frequente (moda). """
     manager = AnalysisStateManager()
     
     for _ in range(FRAMES_PARA_INICIAR):
@@ -71,11 +83,11 @@ def test_state_manager_aggregates_and_decides_correctly():
     assert len(manager.current_frames) == 0
 
 def test_state_manager_resets_on_decision():
+    """ Garante que o manager limpa o estado após decisão. """
     manager = AnalysisStateManager()
     
     for _ in range(FRAMES_PARA_INICIAR + 5):
         manager.process_prediction("MATURA")
-
     for _ in range(FRAMES_PARA_TERMINAR):
         manager.process_prediction("FUNDO")
         
