@@ -233,9 +233,35 @@ class _CameraState extends State<Camera> {
                               onTapDown: (details) =>
                                   tapToFocusCamera(details, constraints),
                               child: Stack(
-                                fit: StackFit.expand,
                                 children: [
-                                  CameraPreview(cameraController),
+                                  Center(
+                                    child: cameraController.value.isInitialized
+                                        ? AspectRatio(
+                                            aspectRatio: cameraController
+                                                .value
+                                                .aspectRatio,
+                                            child: CameraPreview(
+                                              cameraController,
+                                            ),
+                                          )
+                                        : Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              CircularProgressIndicator(
+                                                color: AppColors.azulEscuro,
+                                              ),
+                                              SizedBox(height: 20),
+                                              Text(
+                                                "Carregando...",
+                                                style: AppStyles
+                                                    .textStyleTituloSecundario,
+                                              ),
+                                            ],
+                                          ),
+                                  ),
 
                                   if (cameraFocusPoint != null)
                                     Positioned(
