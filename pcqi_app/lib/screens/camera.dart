@@ -422,12 +422,19 @@ class _CameraState extends State<Camera> {
   Widget buildMachineTitle() {
     final machineInfo =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final providerSectorList = context.read<ProviderSectorList>();
+    String? machineName = providerSectorList
+        .getSingleMachineFromSpecifiedSector(
+          int.parse(machineInfo['machineID']),
+          machineInfo['sectorID'],
+        )!
+        .name;
     return SizedBox(
       height: 40,
       child: Padding(
         padding: const EdgeInsets.all(2.0),
         child: Marquee(
-          text: machineInfo['machineID'],
+          text: machineName ?? "Nome da máquina",
           style: AppStyles.textStyleMarqueeLib,
           blankSpace: 50,
           velocity: 60,
