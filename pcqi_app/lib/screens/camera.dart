@@ -557,6 +557,7 @@ class _CameraState extends State<Camera> {
 
               setState(() {
                 isStreamRunning = false;
+                connectionStatus = WebSocketConnectionStatus.disconnected;
                 selectedCamera = camera;
               });
               await startCamera(selectedCamera);
@@ -593,6 +594,7 @@ class _CameraState extends State<Camera> {
                 await cameraController.stopImageStream();
               }
               setState(() {
+                connectionStatus = WebSocketConnectionStatus.disconnected;
                 isStreamRunning = false;
                 currentResolution = resolution;
               });
@@ -621,6 +623,7 @@ class _CameraState extends State<Camera> {
               await cameraController.stopImageStream();
               setState(() {
                 connectionStatus = WebSocketConnectionStatus.disconnected;
+                textStatus = "Inicie a transmissão para análise";
               });
             }
           },
@@ -676,7 +679,11 @@ class _CameraState extends State<Camera> {
     margin: EdgeInsets.symmetric(horizontal: 8),
     padding: EdgeInsets.all(4),
     width: double.infinity,
-    child: Text(textStatus, style: AppStyles.textStyleDropdownItem),
+    child: Text(
+      textStatus,
+      style: AppStyles.textStyleCameraStatusDescription,
+      textAlign: TextAlign.center,
+    ),
   );
 
   Widget buildAIResultDebug() => Container(
@@ -908,6 +915,7 @@ class _CameraState extends State<Camera> {
 
           setState(() {
             isStreamRunning = false;
+            connectionStatus = WebSocketConnectionStatus.disconnected;
             if (selectedCamera!.lensDirection == CameraLensDirection.back) {
               selectedCamera = frontCameras.first;
             } else {

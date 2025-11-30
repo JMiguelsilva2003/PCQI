@@ -148,6 +148,11 @@ class AppStyles {
     fontFamily: 'Poppins-Regular',
   );
 
+  static final TextStyle textStyleCameraStatusDescription = TextStyle(
+    fontFamily: 'Poppins-Regular',
+    fontSize: 15,
+  );
+
   /* ----- Estilos específicos para a biblioteca LoadingIconButton ----- */
   static final LoadingButtonStyle loadingButtonStyle = LoadingButtonStyle(
     backgroundColor: AppColors.azulEscuro,
