@@ -838,7 +838,13 @@ class _CameraState extends State<Camera> {
       setState(() {
         connectionStatus = WebSocketConnectionStatus.connecting;
       });
-      WebSocket? webSocket = await httpImageRequest.connectToSocket();
+
+      final machineInfo =
+          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+      WebSocket? webSocket = await httpImageRequest.connectToSocket(
+        machineInfo['machineID'],
+      );
+
       if (webSocket != null) {
         setState(() {
           connectionStatus = WebSocketConnectionStatus.connected;
