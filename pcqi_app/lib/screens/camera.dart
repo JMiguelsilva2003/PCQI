@@ -9,10 +9,12 @@ import 'package:pcqi_app/config/app_colors.dart';
 import 'package:pcqi_app/config/app_styles.dart';
 import 'package:pcqi_app/models/image_request_response_model.dart';
 import 'package:pcqi_app/models/validation_result.dart';
+import 'package:pcqi_app/providers/provider_sector_list.dart';
 import 'package:pcqi_app/services/camera_image_converter.dart';
 import 'package:pcqi_app/services/http_image_request.dart';
 import 'package:pcqi_app/utils/validators.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import 'package:web_socket/web_socket.dart';
 
 enum WebSocketConnectionStatus { disconnected, connecting, connected }
@@ -170,55 +172,57 @@ class _CameraState extends State<Camera> {
         );
       } else {
         if (selectedCamera != null) {
-          return Scaffold(
-            backgroundColor: AppColors.azulBebe,
-            body: PopScope(
-              canPop: false,
-              onPopInvokedWithResult: (bool didPop, Object? result) async {
-                if (isStreamRunning) {
-                  await cameraController.stopImageStream();
-                }
-                SystemChrome.setPreferredOrientations([
-                  DeviceOrientation.portraitDown,
-                  DeviceOrientation.portraitUp,
-                ]);
-                if (!didPop) {
-                  if (!context.mounted) return;
-                  Navigator.pop(context);
-                }
-              },
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Center(child: CameraPreview(cameraController)),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: ListView(
-                      padding: EdgeInsets.zero,
-                      children: [
-                        SizedBox(height: 20),
-                        buildMachineTitle(
-                          "Nome da máquina nome da máquina nome da máquina",
-                        ),
-                        SizedBox(height: 30),
-
-                        Column(
+          return Consumer<ProviderSectorList>(
+            builder: (context, value, child) {
+              return Scaffold(
+                backgroundColor: AppColors.azulBebe,
+                body: PopScope(
+                  canPop: false,
+                  onPopInvokedWithResult: (bool didPop, Object? result) async {
+                    if (isStreamRunning) {
+                      await cameraController.stopImageStream();
+                    }
+                    SystemChrome.setPreferredOrientations([
+                      DeviceOrientation.portraitDown,
+                      DeviceOrientation.portraitUp,
+                    ]);
+                    if (!didPop) {
+                      if (!context.mounted) return;
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Center(child: CameraPreview(cameraController)),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: ListView(
+                          padding: EdgeInsets.zero,
                           children: [
-                            buildCameraOptions(),
-                            buildStreamingOptions(),
+                            SizedBox(height: 20),
+                            buildMachineTitle(),
+                            SizedBox(height: 30),
+
+                            Column(
+                              children: [
+                                buildCameraOptions(),
+                                buildStreamingOptions(),
+                              ],
+                            ),
+
+                            SizedBox(height: 30),
+                            goBackButton(),
                           ],
                         ),
-
-                        SizedBox(height: 30),
-                        goBackButton(),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           );
         } else {
           return noCameraAvailable();
@@ -415,13 +419,15 @@ class _CameraState extends State<Camera> {
     }
   }
 
-  Widget buildMachineTitle(String text) {
+  Widget buildMachineTitle() {
+    final machineInfo =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     return SizedBox(
       height: 40,
       child: Padding(
         padding: const EdgeInsets.all(2.0),
         child: Marquee(
-          text: text,
+          text: machineInfo['machineID'],
           style: AppStyles.textStyleMarqueeLib,
           blankSpace: 50,
           velocity: 60,

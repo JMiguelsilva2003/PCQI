@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:pcqi_app/config/app_colors.dart';
 import 'package:pcqi_app/config/app_styles.dart';
 import 'package:pcqi_app/models/app_enums.dart';
+import 'package:pcqi_app/models/machine_model.dart';
+import 'package:pcqi_app/providers/provider_sector_list.dart';
 import 'package:pcqi_app/services/request_methods.dart';
 import 'package:pcqi_app/widgets/custom_admin_machine_request_widget.dart';
+import 'package:provider/provider.dart';
 
 class MachineEdit extends StatefulWidget {
   const MachineEdit({super.key});
@@ -33,130 +36,163 @@ class _MachineEditState extends State<MachineEdit> {
   @override
   Widget build(BuildContext context) {
     machineID = ModalRoute.of(context)!.settings.arguments as String;
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text("Editar máquina"),
-      ),
-      body: ListView(
-        children: [
-          Container(
-            padding: EdgeInsets.all(10),
-            margin: EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.cinzaClaro,
-              borderRadius: BorderRadius.circular(10),
+    return Consumer<ProviderSectorList>(
+      builder: (context, value, child) {
+        return Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_rounded),
+              onPressed: () => Navigator.pop(context),
             ),
-
-            child: ExpandablePanel(
-              header: Center(
-                child: ListTile(
-                  title: Text(
-                    "Opções de administrador",
-                    textAlign: TextAlign.center,
-                    style: AppStyles.textStyleOptionsTab,
-                  ),
+            title: const Text("Editar máquina"),
+          ),
+          body: ListView(
+            children: [
+              Container(
+                padding: EdgeInsets.all(10),
+                margin: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.cinzaClaro,
+                  borderRadius: BorderRadius.circular(10),
                 ),
-              ),
-              collapsed: SizedBox(width: 1),
-              expanded: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  buildSendingAdminRequestStatus(),
-                  SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.center,
+
+                child: ExpandablePanel(
+                  header: Center(
+                    child: ListTile(
+                      title: Text(
+                        "Opções de administrador",
+                        textAlign: TextAlign.center,
+                        style: AppStyles.textStyleOptionsTab,
+                      ),
+                    ),
+                  ),
+                  collapsed: SizedBox(width: 1),
+                  expanded: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ElevatedButton(
-                        onPressed: isAdminMachineCommandEnabled
-                            ? () async {
-                                await sendAdminRequest(
-                                  RequestTypeAdminMachineControl.resume,
-                                );
-                              }
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              currentAdminMachineRequestType ==
-                                  RequestTypeAdminMachineControl.resume
-                              ? AppColors.cinzaEscuro
-                              : AppColors.branco,
+                      buildSendingAdminRequestStatus(),
+                      SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            onPressed: isAdminMachineCommandEnabled
+                                ? () async {
+                                    await sendAdminRequest(
+                                      RequestTypeAdminMachineControl.resume,
+                                    );
+                                  }
+                                : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  currentAdminMachineRequestType ==
+                                      RequestTypeAdminMachineControl.resume
+                                  ? AppColors.cinzaEscuro
+                                  : AppColors.branco,
 
-                          disabledBackgroundColor:
-                              currentAdminMachineRequestType ==
-                                  RequestTypeAdminMachineControl.resume
-                              ? AppColors.azulBebe
-                              : AppColors.cinzaClaro,
-                        ),
-                        child: Icon(
-                          Icons.play_arrow_rounded,
-                          color: AppColors.azulEscuro,
-                        ),
-                      ),
+                              disabledBackgroundColor:
+                                  currentAdminMachineRequestType ==
+                                      RequestTypeAdminMachineControl.resume
+                                  ? AppColors.azulBebe
+                                  : AppColors.cinzaClaro,
+                            ),
+                            child: Icon(
+                              Icons.play_arrow_rounded,
+                              color: AppColors.azulEscuro,
+                            ),
+                          ),
 
-                      ElevatedButton(
-                        onPressed: isAdminMachineCommandEnabled
-                            ? () async {
-                                await sendAdminRequest(
-                                  RequestTypeAdminMachineControl.pause,
-                                );
-                              }
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              currentAdminMachineRequestType ==
-                                  RequestTypeAdminMachineControl.pause
-                              ? AppColors.cinzaEscuro
-                              : AppColors.branco,
+                          ElevatedButton(
+                            onPressed: isAdminMachineCommandEnabled
+                                ? () async {
+                                    await sendAdminRequest(
+                                      RequestTypeAdminMachineControl.pause,
+                                    );
+                                  }
+                                : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  currentAdminMachineRequestType ==
+                                      RequestTypeAdminMachineControl.pause
+                                  ? AppColors.cinzaEscuro
+                                  : AppColors.branco,
 
-                          disabledBackgroundColor:
-                              currentAdminMachineRequestType ==
-                                  RequestTypeAdminMachineControl.pause
-                              ? AppColors.azulBebe
-                              : AppColors.cinzaClaro,
-                        ),
-                        child: Icon(
-                          Icons.pause_rounded,
-                          color: AppColors.azulEscuro,
-                        ),
-                      ),
+                              disabledBackgroundColor:
+                                  currentAdminMachineRequestType ==
+                                      RequestTypeAdminMachineControl.pause
+                                  ? AppColors.azulBebe
+                                  : AppColors.cinzaClaro,
+                            ),
+                            child: Icon(
+                              Icons.pause_rounded,
+                              color: AppColors.azulEscuro,
+                            ),
+                          ),
 
-                      ElevatedButton(
-                        onPressed: isAdminMachineCommandEnabled
-                            ? () async {
-                                await sendAdminRequest(
-                                  RequestTypeAdminMachineControl.ejectManual,
-                                );
-                              }
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              currentAdminMachineRequestType ==
-                                  RequestTypeAdminMachineControl.ejectManual
-                              ? AppColors.cinzaEscuro
-                              : AppColors.branco,
+                          ElevatedButton(
+                            onPressed: isAdminMachineCommandEnabled
+                                ? () async {
+                                    await sendAdminRequest(
+                                      RequestTypeAdminMachineControl
+                                          .ejectManual,
+                                    );
+                                  }
+                                : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  currentAdminMachineRequestType ==
+                                      RequestTypeAdminMachineControl.ejectManual
+                                  ? AppColors.cinzaEscuro
+                                  : AppColors.branco,
 
-                          disabledBackgroundColor:
-                              currentAdminMachineRequestType ==
-                                  RequestTypeAdminMachineControl.ejectManual
-                              ? AppColors.azulBebe
-                              : AppColors.cinzaClaro,
-                        ),
-                        child: Icon(Icons.eject, color: AppColors.azulEscuro),
+                              disabledBackgroundColor:
+                                  currentAdminMachineRequestType ==
+                                      RequestTypeAdminMachineControl.ejectManual
+                                  ? AppColors.azulBebe
+                                  : AppColors.cinzaClaro,
+                            ),
+                            child: Icon(
+                              Icons.eject,
+                              color: AppColors.azulEscuro,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
+              ElevatedButton(
+                onPressed: () {
+                  final provider = context.read<ProviderSectorList>();
+
+                  int? machineIDInt = int.tryParse(machineID);
+                  if (machineIDInt != null) {
+                    MachineModel? machine = provider.getSingleMachineFromSector(
+                      machineIDInt,
+                    );
+
+                    if (machine != null) {
+                      int sectorID = machine.sectorId!;
+
+                      Navigator.of(context, rootNavigator: true).pushNamed(
+                        '/camera',
+                        arguments: {
+                          'sectorID': sectorID,
+                          'machineID': machineID,
+                        },
+                      );
+                    }
+                  }
+                },
+                child: Text("Abrir câmera"),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 

@@ -38,7 +38,10 @@ class ProviderSectorList extends ChangeNotifier {
     return null;
   }
 
-  MachineModel? getSingleMachineFromSector(int machineID, int sectorID) {
+  MachineModel? getSingleMachineFromSpecifiedSector(
+    int machineID,
+    int sectorID,
+  ) {
     // The list still doesn't exists
     if (sectorList == null) return null;
 
@@ -52,6 +55,21 @@ class ProviderSectorList extends ChangeNotifier {
           }
         }
         return null;
+      }
+    }
+    return null;
+  }
+
+  MachineModel? getSingleMachineFromSector(int machineID) {
+    // The list still doesn't exists
+    if (sectorList == null) return null;
+
+    // Searches for the specified sector
+    for (var sector in sectorList!) {
+      for (var machine in sector.machines) {
+        if (machine.id == machineID) {
+          return machine;
+        }
       }
     }
     return null;
