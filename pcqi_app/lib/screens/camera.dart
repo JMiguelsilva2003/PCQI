@@ -57,9 +57,11 @@ class _CameraState extends State<Camera> {
   String debugTextCurrentPrediction = "";
   String debugTextConfidence = "";
 
-  String textStatus = "Aguardando...";
+  String textStatus = "Inicie a transmissão para análise";
 
   String lastAnalysisDecision = "";
+
+  Offset? cameraFocusPoint;
 
   @override
   void initState() {
@@ -140,6 +142,36 @@ class _CameraState extends State<Camera> {
     await startCamera(selectedCamera);
   }
 
+  Future<void> tapToFocusCamera(
+    TapDownDetails details,
+    BoxConstraints constraints,
+  ) async {
+    if (cameraController.value.isInitialized) {
+      setState(() {
+        cameraFocusPoint = details.localPosition;
+      });
+
+      final offset = Offset(
+        details.localPosition.dx / constraints.maxWidth,
+        details.localPosition.dy / constraints.maxHeight,
+      );
+
+      try {
+        await cameraController.setFocusPoint(offset);
+        await cameraController.setExposurePoint(offset);
+        Future.delayed(const Duration(seconds: 1), () {
+          if (mounted) {
+            setState(() {
+              cameraFocusPoint = null;
+            });
+          }
+        });
+      } catch (e) {
+        return;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_permissionStatus == PermissionStatus.granted) {
@@ -195,7 +227,39 @@ class _CameraState extends State<Camera> {
                     children: [
                       Expanded(
                         flex: 2,
-                        child: Center(child: CameraPreview(cameraController)),
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            return GestureDetector(
+                              onTapDown: (details) =>
+                                  tapToFocusCamera(details, constraints),
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  CameraPreview(cameraController),
+
+                                  if (cameraFocusPoint != null)
+                                    Positioned(
+                                      left: cameraFocusPoint!.dx - 40,
+                                      top: cameraFocusPoint!.dy - 40,
+                                      child: Container(
+                                        width: 80,
+                                        height: 80,
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: AppColors.azulEscuro,
+                                            width: 2,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            40,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                       ),
                       Expanded(
                         flex: 1,
