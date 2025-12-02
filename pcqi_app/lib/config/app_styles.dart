@@ -153,6 +153,36 @@ class AppStyles {
     fontSize: 15,
   );
 
+  static final TextStyle textStyleSectorTitleCard = TextStyle(
+    fontFamily: 'Poppins-Regular',
+    fontSize: 20,
+    fontWeight: FontWeight.bold,
+  );
+
+  static final TextStyle textStyleSectorSecondaryTitleCard = TextStyle(
+    fontFamily: 'Poppins-Regular',
+    fontSize: 20,
+    color: AppColors.cinza,
+  );
+
+  static final TextStyle textStyleSectorSubtextTitleCard = TextStyle(
+    fontFamily: 'Poppins-Regular',
+    fontSize: 15,
+    color: AppColors.cinza,
+  );
+
+  static final TextStyle textStyleMachineTitleCard = TextStyle(
+    fontFamily: 'Poppins-Regular',
+    fontSize: 15,
+    fontWeight: FontWeight.bold,
+  );
+
+  static final TextStyle textStyleMachineSecondaryTitleCard = TextStyle(
+    fontFamily: 'Poppins-Regular',
+    fontSize: 15,
+    color: AppColors.cinza,
+  );
+
   /* ----- Estilos específicos para a biblioteca LoadingIconButton ----- */
   static final LoadingButtonStyle loadingButtonStyle = LoadingButtonStyle(
     backgroundColor: AppColors.azulEscuro,
@@ -170,3 +200,6 @@ class AppStyles {
     color: AppColors.branco,
   );
 }
+
+
+

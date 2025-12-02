@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_icon_button/loading_icon_button.dart';
 import 'package:pcqi_app/config/app_colors.dart';
@@ -9,6 +10,8 @@ import 'package:pcqi_app/models/sector_model.dart';
 import 'package:pcqi_app/providers/provider_sector_list.dart';
 import 'package:pcqi_app/services/request_methods.dart';
 import 'package:pcqi_app/widgets/custom_list_view_card.dart';
+import 'package:pcqi_app/widgets/custom_machine_info_card.dart';
+import 'package:pcqi_app/widgets/custom_sector_item_card.dart';
 import 'package:provider/provider.dart';
 
 class Sectors extends StatefulWidget {
@@ -243,84 +246,155 @@ class _SectorsState extends State<Sectors> {
                       child: RefreshIndicator(
                         onRefresh: getSectorList,
                         child: ListView(
-                          padding: EdgeInsets.zero,
-                          children: /*providerSectorList.getSectorList!.map(*/
-                              filteredList!.map((sector) {
-                                return CustomSectorViewCard(
-                                  name: sector.name!,
-                                  description: sector.description!,
-                                  machines: sector.machines,
-
-                                  onCreateMachine: (machineName) async {
-                                    var maquinaCriada = await requestMethods
-                                        .createMachine(
-                                          sector.id!.toString(),
-                                          machineName,
-                                        );
-                                    if (maquinaCriada != null) {
-                                      MachineModel novaMaquina =
-                                          MachineModel.fromJson(
-                                            jsonDecode(maquinaCriada),
+                          children: [
+                            Column(
+                              children: filteredList!
+                                  .map(
+                                    (sector) => Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 5,
+                                        horizontal: 10,
+                                      ),
+                                      child: CustomSectorItemCard(
+                                        sector: sector,
+                                        onEditMachine: (machineId) async {
+                                          Navigator.pushNamed(
+                                            context,
+                                            '/machine-edit',
+                                            arguments: machineId,
                                           );
-                                      for (var setor
-                                          in providerSectorList
-                                              .getSectorList!) {
-                                        if (setor.id.toString() ==
-                                            novaMaquina.sectorId.toString()) {
-                                          sector.machines.add(novaMaquina);
-                                          break;
-                                        }
-                                      }
-                                      setState(() {});
-                                    }
-                                  },
+                                        },
+                                        onDeleteMachine: (machineId) async {
+                                          var maquinaApagando =
+                                              await requestMethods
+                                                  .deleteMachine(machineId);
+                                          try {
+                                            if (maquinaApagando != null) {
+                                              MachineModel antigaMaquina =
+                                                  MachineModel.fromJson(
+                                                    jsonDecode(maquinaApagando),
+                                                  );
+                                              if (antigaMaquina.id.toString() ==
+                                                  machineId) {
+                                                for (var setor
+                                                    in providerSectorList
+                                                        .getSectorList!) {
+                                                  if (setor.id.toString() ==
+                                                      antigaMaquina.sectorId
+                                                          .toString()) {
+                                                    sector.machines.removeWhere(
+                                                      (m) =>
+                                                          m.id ==
+                                                          antigaMaquina.id,
+                                                    );
+                                                    break;
+                                                  }
+                                                }
+                                                setState(() {});
+                                              }
+                                            }
+                                          } catch (e) {
+                                            return null;
+                                          }
+                                        },
+                                        onCreateMachine: (sectorId) async {
+                                          _openCreateMachineDialog(sectorId);
+                                        },
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                          ],
+                        ),
+                      ),
 
-                                  onEditMachine: (machineId) async {
-                                    Navigator.pushNamed(
-                                      context,
-                                      '/machine-edit',
-                                      arguments: machineId,
-                                    );
-                                  },
+                      /*ListView(
+                              padding: EdgeInsets.zero,
+                              children: /*providerSectorList.getSectorList!.map(*/
+                                  filteredList!.map((sector) {
+                                    return CustomSectorViewCard(
+                                      name: sector.name!,
+                                      description: sector.description!,
+                                      machines: sector.machines,
 
-                                  onDeleteMachine: (machineId) async {
-                                    var maquinaApagando = await requestMethods
-                                        .deleteMachine(machineId);
-                                    try {
-                                      if (maquinaApagando != null) {
-                                        MachineModel antigaMaquina =
-                                            MachineModel.fromJson(
-                                              jsonDecode(maquinaApagando),
+                                      onCreateMachine: (machineName) async {
+                                        var maquinaCriada = await requestMethods
+                                            .createMachine(
+                                              sector.id!.toString(),
+                                              machineName,
                                             );
-                                        if (antigaMaquina.id.toString() ==
-                                            machineId) {
+                                        if (maquinaCriada != null) {
+                                          MachineModel novaMaquina =
+                                              MachineModel.fromJson(
+                                                jsonDecode(maquinaCriada),
+                                              );
                                           for (var setor
                                               in providerSectorList
                                                   .getSectorList!) {
                                             if (setor.id.toString() ==
-                                                antigaMaquina.sectorId
+                                                novaMaquina.sectorId
                                                     .toString()) {
-                                              sector.machines.removeWhere(
-                                                (m) => m.id == antigaMaquina.id,
-                                              );
+                                              sector.machines.add(novaMaquina);
                                               break;
                                             }
                                           }
                                           setState(() {});
                                         }
-                                      }
-                                    } catch (e) {
-                                      return null;
-                                    }
-                                  },
-                                );
-                              }).toList(),
-                        ),
-                      ),
+                                      },
+
+                                      onEditMachine: (machineId) async {
+                                        Navigator.pushNamed(
+                                          context,
+                                          '/machine-edit',
+                                          arguments: machineId,
+                                        );
+                                      },
+
+                                      onDeleteMachine: (machineId) async {
+                                        var maquinaApagando =
+                                            await requestMethods.deleteMachine(
+                                              machineId,
+                                            );
+                                        try {
+                                          if (maquinaApagando != null) {
+                                            MachineModel antigaMaquina =
+                                                MachineModel.fromJson(
+                                                  jsonDecode(maquinaApagando),
+                                                );
+                                            if (antigaMaquina.id.toString() ==
+                                                machineId) {
+                                              for (var setor
+                                                  in providerSectorList
+                                                      .getSectorList!) {
+                                                if (setor.id.toString() ==
+                                                    antigaMaquina.sectorId
+                                                        .toString()) {
+                                                  sector.machines.removeWhere(
+                                                    (m) =>
+                                                        m.id ==
+                                                        antigaMaquina.id,
+                                                  );
+                                                  break;
+                                                }
+                                              }
+                                              setState(() {});
+                                            }
+                                          }
+                                        } catch (e) {
+                                          return null;
+                                        }
+                                      },
+                                    );
+                                  }).toList(),*/
                     ),
                   ],
                 ),
-              );
+              ) /*,
+                    ),
+                  ],
+                ),
+              )*/;
             }
           }
         }
@@ -345,4 +419,56 @@ class _SectorsState extends State<Sectors> {
       setState(() => gotInfoFromServer = true);
     }
   }
+
+  void _openCreateMachineDialog(String sectorID) {
+    final controller = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        title: const Text("Adicionar máquina"),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(labelText: "Nome da máquina"),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: const Text("Cancelar"),
+          ),
+          TextButton(
+            onPressed: () {
+              final name = controller.text.trim();
+              if (name.isEmpty) return;
+
+              Navigator.of(dialogCtx).pop();
+              createNewMachine(name, sectorID);
+            },
+            child: const Text("Salvar"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> createNewMachine(String machineName, String sectorID) async {
+    var maquinaCriada = await requestMethods.createMachine(
+      sectorID,
+      machineName,
+    );
+    if (maquinaCriada != null) {
+      MachineModel novaMaquina = MachineModel.fromJson(
+        jsonDecode(maquinaCriada),
+      );
+      for (var setor in providerSectorList.getSectorList!) {
+        if (setor.id.toString() == novaMaquina.sectorId.toString()) {
+          setor.machines.add(novaMaquina);
+          break;
+        }
+      }
+      setState(() {});
+    }
+  }
 }
+
+
