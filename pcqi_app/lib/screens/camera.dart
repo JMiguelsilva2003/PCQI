@@ -701,17 +701,17 @@ class _CameraState extends State<Camera> {
 
     child: Column(
       children: [
-        Text("Resultado da IA", style: AppStyles.textStyleOptionsTab),
+        Text("Resultado da análise", style: AppStyles.textStyleOptionsTab),
         Text(
-          "status: $debugTextStatus",
+          "Status: $debugTextStatus",
           style: AppStyles.textStyleDropdownItem,
         ),
         Text(
-          "prediction: $debugTextCurrentPrediction",
+          "Previsão: $debugTextCurrentPrediction",
           style: AppStyles.textStyleDropdownItem,
         ),
         Text(
-          "confidence: $debugTextConfidence",
+          "Confiança: $debugTextConfidence",
           style: AppStyles.textStyleDropdownItem,
         ),
       ],
@@ -973,7 +973,9 @@ class _CameraState extends State<Camera> {
                   debugTextStatus = responseFromServer.status!;
                   debugTextCurrentPrediction =
                       responseFromServer.currentPrediction!;
-                  if (responseFromServer.currentPrediction != "FUNDO") {
+                  if (responseFromServer.currentPrediction!
+                      .toLowerCase()
+                      .startsWith("fund")) {
                     lastAnalysisDecision =
                         responseFromServer.currentPrediction!;
                   }
@@ -1036,6 +1038,8 @@ class _CameraState extends State<Camera> {
       return "Posicione em frente à câmera";
     } else if (status.startsWith("Analisando")) {
       return "Analisando...";
+    } else if (status.startsWith("Erro")) {
+      return "Imagem desfocada";
     }
     return status;
   }
