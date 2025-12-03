@@ -337,8 +337,9 @@ class _CameraState extends State<Camera> {
       ),
 
       child: ExpandablePanel(
-        header: Center(
-          child: Text(
+        header: ListTile(
+          titleAlignment: ListTileTitleAlignment.center,
+          title: Text(
             "Opções de câmera",
             textAlign: TextAlign.center,
             style: AppStyles.textStyleOptionsTab,
@@ -372,10 +373,13 @@ class _CameraState extends State<Camera> {
       ),
 
       child: ExpandablePanel(
-        header: Text(
-          "Opções de transmissão",
-          textAlign: TextAlign.center,
-          style: AppStyles.textStyleOptionsTab,
+        header: ListTile(
+          titleAlignment: ListTileTitleAlignment.center,
+          title: Text(
+            "Opções de transmissão",
+            textAlign: TextAlign.center,
+            style: AppStyles.textStyleOptionsTab,
+          ),
         ),
         collapsed: buildStreamingStatus(),
         expanded: Column(
