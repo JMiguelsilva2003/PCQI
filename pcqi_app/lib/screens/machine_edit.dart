@@ -97,10 +97,11 @@ class _MachineEditState extends State<MachineEdit> {
   );
 
   Widget buildAdminOptions() => Container(
-    padding: EdgeInsets.all(10),
+    padding: EdgeInsets.all(15),
     decoration: BoxDecoration(
-      color: AppColors.cinzaClaro,
+      color: AppColors.branco,
       borderRadius: BorderRadius.circular(10),
+      border: Border.all(color: AppColors.azulEscuro, width: 2),
     ),
 
     child: ExpandablePanel(
@@ -206,10 +207,11 @@ class _MachineEditState extends State<MachineEdit> {
   );
 
   Widget buildCameraOptions() => Container(
-    padding: EdgeInsets.all(10),
+    padding: EdgeInsets.all(15),
     decoration: BoxDecoration(
-      color: AppColors.cinzaClaro,
+      color: AppColors.branco,
       borderRadius: BorderRadius.circular(10),
+      border: Border.all(color: AppColors.azulEscuro, width: 2),
     ),
 
     child: ExpandablePanel(
@@ -229,7 +231,7 @@ class _MachineEditState extends State<MachineEdit> {
         children: [
           Text(
             'ID da máquina: $machineID',
-            style: AppStyles.textStyleDropdownItem,
+            style: AppStyles.textStyleSectorSubtextTitleCard,
           ),
         ],
       ),
