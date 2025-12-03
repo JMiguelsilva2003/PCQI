@@ -326,69 +326,69 @@ class _CameraState extends State<Camera> {
     }
   }
 
-  Widget buildCameraOptions() => Container(
-    padding: EdgeInsets.all(10),
-    margin: EdgeInsets.all(8),
-    decoration: BoxDecoration(
-      color: AppColors.cinzaClaro,
-      borderRadius: BorderRadius.circular(10),
-    ),
+  Widget buildCameraOptions() => Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Container(
+      padding: EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: AppColors.branco,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.azulEscuro, width: 2),
+      ),
 
-    child: ExpandablePanel(
-      header: Center(
-        child: ListTile(
-          title: Text(
+      child: ExpandablePanel(
+        header: Center(
+          child: Text(
             "Opções de câmera",
             textAlign: TextAlign.center,
             style: AppStyles.textStyleOptionsTab,
           ),
         ),
-      ),
-      collapsed: SizedBox(width: 1),
-      expanded: Column(
-        children: [
-          buildCameraSelectionDropdownMenu(
-            getCameraListFromCurrentLensDirection(selectedCamera!),
-          ),
-          SizedBox(height: 10),
-          buildResolutionSelectionDropdownMenu(resolutionPresetList),
-          SizedBox(height: 10),
-          if (backCameras.isNotEmpty && frontCameras.isNotEmpty)
-            buildChangeCameraFacingButton(),
-        ],
+        collapsed: SizedBox(width: 1),
+        expanded: Column(
+          children: [
+            buildCameraSelectionDropdownMenu(
+              getCameraListFromCurrentLensDirection(selectedCamera!),
+            ),
+            SizedBox(height: 10),
+            buildResolutionSelectionDropdownMenu(resolutionPresetList),
+            SizedBox(height: 10),
+            if (backCameras.isNotEmpty && frontCameras.isNotEmpty)
+              buildChangeCameraFacingButton(),
+          ],
+        ),
       ),
     ),
   );
 
-  Widget buildStreamingOptions() => Container(
-    padding: EdgeInsets.all(5),
-    margin: EdgeInsets.all(8),
-    decoration: BoxDecoration(
-      color: AppColors.cinzaClaro,
-      borderRadius: BorderRadius.circular(10),
-    ),
-
-    child: ExpandablePanel(
-      header: Center(
-        child: ListTile(
-          title: Text(
-            "Opções de transmissão",
-            textAlign: TextAlign.center,
-            style: AppStyles.textStyleOptionsTab,
-          ),
-        ),
+  Widget buildStreamingOptions() => Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Container(
+      padding: EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: AppColors.branco,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.azulEscuro, width: 2),
       ),
-      collapsed: buildStreamingStatus(),
-      expanded: Column(
-        children: [
-          buildStreamingStatus(),
-          SizedBox(height: 10),
-          buildRequestResults(),
-          SizedBox(height: 10),
-          buildAIResultDebug(),
-          SizedBox(height: 10),
-          buildStartStopStreamButton(),
-        ],
+
+      child: ExpandablePanel(
+        header: Text(
+          "Opções de transmissão",
+          textAlign: TextAlign.center,
+          style: AppStyles.textStyleOptionsTab,
+        ),
+        collapsed: buildStreamingStatus(),
+        expanded: Column(
+          children: [
+            buildStreamingStatus(),
+            SizedBox(height: 10),
+            buildRequestResults(),
+            SizedBox(height: 10),
+            buildAIResultDebug(),
+            SizedBox(height: 10),
+            buildStartStopStreamButton(),
+          ],
+        ),
       ),
     ),
   );
