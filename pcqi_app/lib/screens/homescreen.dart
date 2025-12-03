@@ -140,25 +140,6 @@ class _HomescreenState extends State<Homescreen> {
                 },
               ),
             ),
-
-            /// Floating Camera Button
-            Positioned(
-              top: 30,
-              right: 30,
-              child: FloatingActionButton.extended(
-                onPressed: () {
-                  pushWithoutNavBar(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Camera()),
-                  );
-                },
-                icon: const Icon(Icons.camera_alt),
-                label: const Text("Câmera"),
-                backgroundColor: AppColors.azulEscuro,
-                foregroundColor: AppColors.branco,
-                elevation: 0,
-              ),
-            ),
           ],
         ),
       ),
