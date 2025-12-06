@@ -31,10 +31,13 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     
     new_user = crud.create_user(db=db, user=user)
     
-    try:
-        send_verification_email(email=new_user.email)
-    except Exception as e:
-        print(f"Alerta: Falha ao enviar email de verificação para {new_user.email}. Erro: {e}")
+    crud.activate_user(db=db, user=new_user)
+    
+    # desativado o envio de email para evitar o erro 401 do SendGrid
+    # try:
+    #    send_verification_email(email=new_user.email)
+    # except Exception as e:
+    #    print(f"Alerta: Falha ao enviar email: {e}")
         
     return new_user
 
@@ -123,9 +126,12 @@ def forgot_password(
 ):
     user = crud.get_user_by_email(db, email=request.email)
     
+    # Em modo demo, sem email
     if user:
         try:
-            send_password_reset_email(email=user.email)
+            # Se a chave do SendGrid estivesse boa, enviaria aqui.
+            # send_password_reset_email(email=user.email)
+            print(f"Pedido de reset para {user.email} recebido (Email desativado).")
         except Exception:
             pass 
             
