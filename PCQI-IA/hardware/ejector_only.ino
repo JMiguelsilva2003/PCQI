@@ -13,6 +13,7 @@ const int PASSOS_PARA_EJETAR = 512; // 512 passos = 90 graus
 const int VELOCIDADE_EJECAO = 15; 
 
 String comandoRecebido = "";
+bool sistemaPausado = false; // Variável para controlar o estado
 
 // --- FUNÇÃO SETUP ---
 void setup() {
@@ -27,15 +28,33 @@ void loop() {
     comandoRecebido = Serial.readStringUntil('\n');
     comandoRecebido.trim();
     
+    // 1. Lógica de Ejeção (Normal ou Manual)
     if (comandoRecebido == "REJECT") {
-      ejetarPeca();
+      if (!sistemaPausado) {
+        ejetarPeca();
+      } else {
+        Serial.println("AVISO: Sistema em pausa. Comando REJECT ignorado.");
+      }
+    }
+    
+    // 2. Lógica de Pausa (Controlo Mestre)
+    else if (comandoRecebido == "PAUSE") {
+      sistemaPausado = true;
+      Serial.println("SISTEMA PAUSADO. (Esteira pararia aqui)");
+      // Aqui você adicionaria o código para parar um motor DC de esteira, se houvesse
+    }
+    
+    // 3. Lógica de Retomar (Controlo Mestre)
+    else if (comandoRecebido == "RESUME") {
+      sistemaPausado = false;
+      Serial.println("SISTEMA RETOMADO.");
     }
   }
 }
 
 // --- FUNÇÃO DE AÇÃO ---
 void ejetarPeca() {
-  Serial.println("Comando 'REJECT' recebido. Ejetando...");
+  Serial.println("Ação: Ejetando peça...");
   
   // 1. Gira para "empurrar" a peça
   myStepper.step(PASSOS_PARA_EJETAR);
@@ -47,7 +66,7 @@ void ejetarPeca() {
   
   Serial.println("Ejetor retornou à posição inicial.");
   
-  // Desliga os pinos do motor para economizar energia
+  // Desliga os pinos do motor para economizar energia e evitar aquecimento
   digitalWrite(IN1, LOW);
   digitalWrite(IN2, LOW);
   digitalWrite(IN3, LOW);
