@@ -1,7 +1,7 @@
 from collections import Counter
 
 FRAMES_PARA_INICIAR = 2   
-FRAMES_PARA_TERMINAR = 5  
+FRAMES_PARA_TERMINAR = 15  
 MIN_FRAMES_ANALISE = 5    
 
 class AnalysisStateManager:
@@ -18,21 +18,23 @@ class AnalysisStateManager:
 
     def process_prediction(self, prediction: str) -> (str, str | None):
         final_decision = None
+        
+        pred_upper = prediction.upper() 
 
         if self.state == "Aguardando":
-            if prediction != 'FUNDO':
+            if pred_upper != 'FUNDO':
                 self.object_frames_count += 1
                 self.background_frames_count = 0
                 
                 if self.object_frames_count >= FRAMES_PARA_INICIAR:
                     self.state = "Analisando"
                     self.current_frames = [prediction] * self.object_frames_count
-                    print(f"State Manager: Manga detectada. Mudando para ANALISANDO.")
+                    print(f"State Manager: Manga detectada ({prediction}). Mudando para ANALISANDO.")
             else:
                 self.object_frames_count = 0
         
         elif self.state == "Analisando":
-            if prediction != 'FUNDO':
+            if pred_upper != 'FUNDO':
                 self.current_frames.append(prediction)
                 self.background_frames_count = 0
             else:

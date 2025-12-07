@@ -7,9 +7,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 API_RENDER_URL = os.getenv("RENDER_API_URL")
-MACHINE_ID = 1 
+MACHINE_ID = 52
 API_KEY = os.getenv("HARDWARE_API_KEY")
-ARDUINO_PORT = 'COM7'
+ARDUINO_PORT = 'COM4'
 ARDUINO_BAUDRATE = 9600
 
 try:
@@ -46,22 +46,65 @@ def run_gateway():
     print(f"Gateway de Hardware para Máquina {MACHINE_ID} iniciado.")
     print(f"Perguntando à API em: {API_RENDER_URL}")
     
-    while True:
-        comando = buscar_proximo_comando()
-        
-        if comando:
+    try:
+        headers = {"X-API-Key": API_KEY}
+        url = f"{API_RENDER_URL}/api/v1/machines/{MACHINE_ID}/heartbeat"
+        requests.put(url, headers=headers, timeout=5)
+        print("Heartbeat inicial enviado.")
+    except Exception as e:
+        print(f"Falha ao enviar heartbeat inicial: {e}")
+
+    last_heartbeat_time = time.time()
+    
+    sistema_ativo = 1 
+    
+    while sistema_ativo == 1:
+        try:
+            comando_bruto = buscar_proximo_comando()
             
-            if comando == "VERDE":
-                print("Comando 'VERDE' recebido. Ejetando...")
-                enviar_comando_arduino("REJECT") 
+            if comando_bruto:
+                comando = comando_bruto.upper().strip()
                 
-            elif comando == "MATURA":
-                print("Comando 'MATURA' recebido. Aceitando (nenhuma ação).")
+                if comando == "VERDE":
+                    print("Comando 'VERDE' recebido. Ejetando...")
+                    enviar_comando_arduino("REJECT")
+                    
+                elif comando == "MATURA":
+                    print("Comando 'MATURA' recebido. Aceitando.")
                 
-            else:
-                print(f"Comando '{comando}' desconhecido. Ignorando.")
+                elif comando == "EJECT_MANUAL":
+                    print("COMANDO MESTRE: 'EJECT_MANUAL' recebido. Ejetando...")
+                    enviar_comando_arduino("REJECT") 
                 
-        time.sleep(1)
+                elif comando == "PAUSE":
+                    print("COMANDO MESTRE: 'PAUSE' recebido. Pausando esteira...")
+                    enviar_comando_arduino("PAUSE")
+                
+                elif comando == "RESUME":
+                    print("COMANDO MESTRE: 'RESUME' recebido. Retomando...")
+                    enviar_comando_arduino("RESUME")
+
+                else:
+                    print(f"Comando '{comando}' desconhecido. Ignorando.")
+            
+            current_time = time.time()
+            if (current_time - last_heartbeat_time) > 30:
+                try:
+                    headers = {"X-API-Key": API_KEY}
+                    url = f"{API_RENDER_URL}/api/v1/machines/{MACHINE_ID}/heartbeat"
+                    requests.put(url, headers=headers, timeout=5)
+                    last_heartbeat_time = current_time
+                    print("(Heartbeat enviado)")
+                except Exception as e:
+                    print(f"Erro ao enviar heartbeat: {e}")
+
+            time.sleep(1)
+
+        except KeyboardInterrupt:
+            print("\nEncerrando o Gateway...")
+            sistema_ativo = 0
+            if arduino_serial:
+                arduino_serial.close()
 
 if __name__ == "__main__":
     if not all([API_RENDER_URL, API_KEY]):
