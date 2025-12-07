@@ -101,6 +101,9 @@ def add_command_from_prediction(
 ):
     
     action_from_ia = request.prediction.upper()
+    
+    if action_from_ia == "MADURA":
+        action_from_ia = "MATURA"
 
     if not action_from_ia:
         raise HTTPException(status_code=400, detail="Prediction não pode estar vazia.")
