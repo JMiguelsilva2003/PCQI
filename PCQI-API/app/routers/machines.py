@@ -99,11 +99,11 @@ def add_command_from_prediction(
     request: schemas.AIPredictionRequest, 
     db: Session = Depends(get_db)
 ):
+    
+    action_from_ia = request.prediction.upper()
 
     if not action_from_ia:
         raise HTTPException(status_code=400, detail="Prediction não pode estar vazia.")
-
-    action_from_ia = request.prediction.upper()
 
     try:
         crud.create_machine_command(
