@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:pcqi_app/models/admin_machine_command_model.dart';
+import 'package:pcqi_app/models/app_enums.dart';
 import 'package:pcqi_app/models/machine_model.dart';
 import 'package:pcqi_app/models/sector_model.dart';
 import 'package:pcqi_app/models/user_model.dart';
+import 'package:pcqi_app/utils/admin_machine_response_handler.dart';
 import 'package:pcqi_app/utils/auto_login_response_handler.dart';
 import 'package:pcqi_app/services/http_request.dart';
 import 'package:pcqi_app/utils/forgot_password_response_handler.dart';
@@ -75,6 +78,7 @@ class RequestMethods {
       "auth/forgot-password",
       user.toJson(),
     );
+    if (!context.mounted) return;
     await ForgotPasswordResponseHandler.handleForgotPasswordResponse(
       response,
       context,
@@ -83,6 +87,7 @@ class RequestMethods {
 
   Future<List<SectorModel>?> getSectorList() async {
     final response = await HttpRequest.getWithAuthorization("sectors");
+    if (!context.mounted) return null;
     return GetSectorsResponseHandler.handleGetSectorsResponse(
       response,
       context,
@@ -91,25 +96,53 @@ class RequestMethods {
 
   Future<List<MachineModel>?> getMachineList() async {
     final response = await HttpRequest.getWithAuthorization("machines");
+    if (!context.mounted) return null;
     return GetMachinesResponseHandler.handleGetMachinesResponse(
       response,
       context,
     );
   }
 
-  Future<bool> createMachine(String sectorId, String machineName) async {
-    final response = await HttpRequest.postWithAuthorizationJson("machines", {
+  Future<dynamic> createMachine(String sectorId, String machineName) async {
+    final response = await HttpRequest.postWithAuthorizationJson("machines/", {
       "name": machineName,
       "sector_id": sectorId,
     });
 
-    return response.statusCode == 200 || response.statusCode == 201;
+    return response.body;
   }
 
-  Future<bool> deleteMachine(String machineId) async {
+  Future<dynamic> deleteMachine(String machineId) async {
     final response = await HttpRequest.deleteWithAuthorization(
       "machines/$machineId",
     );
-    return response.statusCode == 200 || response.statusCode == 204;
+    return response.body;
+  }
+
+  Future<RequestStatusAdminMachineControl> sendAdminMachineRequest(
+    String machineID,
+    String command,
+  ) async {
+    try {
+      AdminMachineCommandModel request = AdminMachineCommandModel(
+        command: command,
+      );
+      final response = await HttpRequest.postWithAuthorizationJson(
+        "admin/machines/$machineID/control",
+        request.toJson(),
+      );
+      if (!context.mounted) {
+        return RequestStatusAdminMachineControl.none;
+      }
+      RequestStatusAdminMachineControl isRequestSucessfull =
+          await AdminMachineResponseHandler.handleGetSectorsResponse(
+            response,
+            context,
+          );
+      return isRequestSucessfull;
+      //if (!context.mounted) return;
+    } catch (e) {
+      return RequestStatusAdminMachineControl.fail;
+    }
   }
 }

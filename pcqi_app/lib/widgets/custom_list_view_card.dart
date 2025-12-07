@@ -6,6 +6,7 @@ class CustomSectorViewCard extends StatefulWidget {
   final String description;
   final List<MachineModel> machines;
   final Function(String machineId)? onDeleteMachine;
+  final Function(String machineId)? onEditMachine;
   final Function(String machineName)? onCreateMachine;
 
   const CustomSectorViewCard({
@@ -15,6 +16,7 @@ class CustomSectorViewCard extends StatefulWidget {
     required this.machines,
     this.onDeleteMachine,
     this.onCreateMachine,
+    this.onEditMachine,
   });
 
   @override
@@ -45,8 +47,10 @@ class _CustomSectorViewCardState extends State<CustomSectorViewCard> {
               final name = controller.text.trim();
               if (name.isEmpty) return;
 
-              Navigator.of(dialogCtx).pop(); // FECHA O DIALOG
-              widget.onCreateMachine?.call(name); // ENVIA O NOME PARA A TELA DE SETORES
+              Navigator.of(dialogCtx).pop();
+              widget.onCreateMachine?.call(
+                name,
+              ); // ENVIA O NOME PARA A TELA DE SETORES
             },
             child: const Text("Salvar"),
           ),
@@ -65,7 +69,6 @@ class _CustomSectorViewCardState extends State<CustomSectorViewCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Cabeçalho (nome + botão adicionar + expandir)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -73,12 +76,14 @@ class _CustomSectorViewCardState extends State<CustomSectorViewCard> {
                 Row(
                   children: [
                     TextButton.icon(
-                      onPressed: _openCreateMachineDialog, // ✅ AGORA CHAMA O DIALOG
+                      onPressed: _openCreateMachineDialog,
                       icon: const Icon(Icons.add_circle_outline),
                       label: const Text("Adicionar máquina"),
                     ),
                     IconButton(
-                      icon: Icon(expanded ? Icons.expand_less : Icons.expand_more),
+                      icon: Icon(
+                        expanded ? Icons.expand_less : Icons.expand_more,
+                      ),
                       onPressed: () => setState(() => expanded = !expanded),
                     ),
                   ],
@@ -91,10 +96,21 @@ class _CustomSectorViewCardState extends State<CustomSectorViewCard> {
                 children: widget.machines.map((machine) {
                   return ListTile(
                     title: Text(machine.name ?? "máquina sem nome"),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () =>
-                          widget.onDeleteMachine?.call(machine.id.toString()),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          onPressed: () =>
+                              widget.onEditMachine?.call(machine.id.toString()),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => widget.onDeleteMachine?.call(
+                            machine.id.toString(),
+                          ),
+                        ),
+                      ],
                     ),
                   );
                 }).toList(),

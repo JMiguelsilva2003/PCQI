@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pcqi_app/providers/provider_model.dart';
+import 'package:pcqi_app/providers/provider_sector_list.dart';
 import 'package:pcqi_app/screens/forgot_password.dart';
 import 'package:pcqi_app/screens/homepage_widget.dart';
-import 'package:pcqi_app/screens/perfil.dart';
+import 'package:pcqi_app/screens/machine_edit.dart';
 import 'package:pcqi_app/screens/register.dart';
 import 'package:pcqi_app/screens/landing_page.dart';
 import 'package:pcqi_app/screens/login.dart';
 import 'package:pcqi_app/screens/splash_screen.dart';
-import 'package:pcqi_app/screens/teste_camera.dart';
+import 'package:pcqi_app/screens/camera.dart';
 import 'package:pcqi_app/services/shared_preferences_helper.dart';
 import 'package:provider/provider.dart';
 
@@ -18,8 +19,11 @@ Future main() async {
   await SharedPreferencesHelper.init();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => ProviderModel(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ProviderModel()),
+        ChangeNotifierProvider(create: (context) => ProviderSectorList()),
+      ],
       child: const MyApp(),
     ),
   );
@@ -28,7 +32,6 @@ Future main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -39,7 +42,8 @@ class MyApp extends StatelessWidget {
         '/forgot-password': (context) => ForgotPassword(),
         '/cadastro': (context) => Register(),
         '/homepage': (context) => HomepageWidget(),
-        '/camera': (context) => TesteCamera(),
+        '/camera': (context) => Camera(),
+        '/machine-edit': (context) => MachineEdit(),
       },
     );
   }

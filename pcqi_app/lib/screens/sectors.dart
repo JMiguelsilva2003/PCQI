@@ -1,8 +1,18 @@
+import 'dart:convert';
+
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_icon_button/loading_icon_button.dart';
+import 'package:pcqi_app/config/app_colors.dart';
+import 'package:pcqi_app/config/app_styles.dart';
 import 'package:pcqi_app/models/machine_model.dart';
 import 'package:pcqi_app/models/sector_model.dart';
+import 'package:pcqi_app/providers/provider_sector_list.dart';
 import 'package:pcqi_app/services/request_methods.dart';
 import 'package:pcqi_app/widgets/custom_list_view_card.dart';
+import 'package:pcqi_app/widgets/custom_machine_info_card.dart';
+import 'package:pcqi_app/widgets/custom_sector_item_card.dart';
+import 'package:provider/provider.dart';
 
 class Sectors extends StatefulWidget {
   const Sectors({super.key});
@@ -12,64 +22,453 @@ class Sectors extends StatefulWidget {
 }
 
 class _SectorsState extends State<Sectors> {
-  List<SectorModel> sectorList = [];
-  List<MachineModel> machineList = [];
   late RequestMethods requestMethods;
-  bool loading = true;
+
+  late final ProviderSectorList providerSectorList;
+  late Future<void> futureSectorList;
+
+  bool gotInfoFromServer = false;
+
+  TextEditingController controllerSearchBar = TextEditingController();
+  List<SectorModel>? filteredList;
 
   @override
   void initState() {
     super.initState();
     requestMethods = RequestMethods(context: context);
-    _loadData(); // ✅ carrega automaticamente ao entrar na tela
+    providerSectorList = context.read<ProviderSectorList>();
+    futureSectorList = getSectorList();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: loading
-          ? const Center(child: CircularProgressIndicator()) // ✅ tela de loading
-          : RefreshIndicator(
-              onRefresh: _loadData,
-              child: ListView(
-                children: sectorList.map((sector) {
-                  final machines = machineList
-                      .where((m) => m.sectorId.toString() == sector.id.toString())
-                      .toList();
-
-                  return CustomSectorViewCard(
-                    name: sector.name ?? "",
-                    description: sector.description ?? "",
-                    machines: machines,
-
-                    // ✅ Criar máquina
-                    onCreateMachine: (machineName) async {
-                      await requestMethods.createMachine(
-                        sector.id!.toString(),
-                        machineName,
-                      );
-                      await _loadData(); // ✅ agora atualiza a lista
-                    },
-
-                    // ✅ Deletar máquina
-                    onDeleteMachine: (machineId) async {
-                      await requestMethods.deleteMachine(machineId);
-                      await _loadData(); // ✅ atualiza a lista
-                    },
-                  );
-                }).toList(),
-              ),
+    return Consumer<ProviderSectorList>(
+      builder: (context, value, child) {
+        if (!gotInfoFromServer) {
+          return Scaffold(
+            backgroundColor: AppColors.branco,
+            body: FutureBuilder<void>(
+              future: futureSectorList,
+              builder: (context, snapshot) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(color: AppColors.azulEscuro),
+                      SizedBox(height: 20),
+                      Text(
+                        "Carregando...",
+                        style: AppStyles.textStyleTituloSecundario,
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
+          );
+        } else {
+          if (providerSectorList.getSectorList == null) {
+            return Scaffold(
+              backgroundColor: AppColors.branco,
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline_rounded,
+                      size: 50,
+                      color: AppColors.azulEscuro,
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      "Falha ao obter informações. Por favor, tente novamente.",
+                      style: AppStyles.textStyleTituloSecundario,
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 20),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 40),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: LoadingButton(
+                          type: ButtonType.elevated,
+                          style: AppStyles.loadingButtonStyle,
+                          successDuration: Duration(seconds: 0),
+                          onPressed: () async {
+                            setState(() {
+                              gotInfoFromServer = false;
+                              futureSectorList = getSectorList();
+                            });
+                          },
+                          child: Text(
+                            "Tentar novamente",
+                            style: AppStyles.loadingButtonTextStyle,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          } else {
+            if (providerSectorList.getSectorList!.isEmpty) {
+              return Scaffold(
+                body: RefreshIndicator(
+                  backgroundColor: AppColors.branco,
+                  onRefresh: () async {
+                    await getSectorList();
+                  },
+                  child: Stack(
+                    children: [
+                      ListView(children: [
+                          ],
+                        ),
+                      Align(
+                        alignment: Alignment.center,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.sentiment_dissatisfied_rounded,
+                                size: 50,
+                                color: AppColors.azulEscuro,
+                              ),
+                              SizedBox(height: 10),
+                              Text(
+                                "Não foram encontrados setores cadastrados em seu usuário",
+                                style: AppStyles.textStyleTituloSecundario,
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            } else {
+              return Scaffold(
+                backgroundColor: AppColors.branco,
+                body: Column(
+                  children: [
+                    SafeArea(
+                      bottom: false,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: ValueListenableBuilder<TextEditingValue>(
+                          valueListenable: controllerSearchBar,
+                          builder: (context, value, child) {
+                            return SearchBar(
+                              controller: controllerSearchBar,
+                              hintText: 'Pesquisar...',
+
+                              hintStyle: WidgetStateProperty.all(
+                                TextStyle(color: AppColors.cinzaEscuro),
+                              ),
+                              textStyle: WidgetStateProperty.all(
+                                TextStyle(color: AppColors.preto, fontSize: 16),
+                              ),
+                              backgroundColor: WidgetStateProperty.all(
+                                AppColors.branco,
+                              ),
+                              surfaceTintColor: WidgetStateProperty.all(
+                                Colors.transparent,
+                              ),
+                              elevation: WidgetStateProperty.all(0),
+                              shadowColor: WidgetStateProperty.all(
+                                Colors.black12,
+                              ),
+                              side: WidgetStateProperty.all(
+                                BorderSide(
+                                  color: AppColors.azulEscuro,
+                                  width: 1,
+                                ),
+                              ),
+                              shape: WidgetStateProperty.all(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              padding: WidgetStateProperty.all(
+                                EdgeInsets.symmetric(horizontal: 16),
+                              ),
+
+                              leading: Icon(Icons.search),
+                              trailing: [
+                                /*// Filter button
+                                IconButton(
+                                  icon: Icon(Icons.filter_list),
+                                  onPressed: () {},
+                                ),*/
+
+                                // Clear button
+                                if (value.text.isNotEmpty)
+                                  IconButton(
+                                    icon: Icon(Icons.clear),
+                                    onPressed: () {
+                                      controllerSearchBar.clear();
+                                      filteredList =
+                                          providerSectorList.getSectorList!;
+                                      setState(() {});
+                                    },
+                                  ),
+                              ],
+                              onChanged: (value) {
+                                if (value.trim().isNotEmpty) {
+                                  filteredList = [];
+                                  for (var sector
+                                      in providerSectorList.getSectorList!) {
+                                    if (sector.name!
+                                        .trim()
+                                        .toLowerCase()
+                                        .contains(value.trim().toLowerCase())) {
+                                      filteredList!.add(sector);
+                                    }
+                                  }
+                                } else {
+                                  filteredList =
+                                      providerSectorList.getSectorList!;
+                                }
+                                setState(() {});
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: RefreshIndicator(
+                        onRefresh: getSectorList,
+                        child: ListView(
+                          children: [
+                            Column(
+                              children: filteredList!
+                                  .map(
+                                    (sector) => Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 5,
+                                        horizontal: 10,
+                                      ),
+                                      child: CustomSectorItemCard(
+                                        sector: sector,
+                                        onEditMachine: (machineId) async {
+                                          Navigator.pushNamed(
+                                            context,
+                                            '/machine-edit',
+                                            arguments: machineId,
+                                          );
+                                        },
+                                        onDeleteMachine: (machineId) async {
+                                          var maquinaApagando =
+                                              await requestMethods
+                                                  .deleteMachine(machineId);
+                                          try {
+                                            if (maquinaApagando != null) {
+                                              MachineModel antigaMaquina =
+                                                  MachineModel.fromJson(
+                                                    jsonDecode(maquinaApagando),
+                                                  );
+                                              if (antigaMaquina.id.toString() ==
+                                                  machineId) {
+                                                for (var setor
+                                                    in providerSectorList
+                                                        .getSectorList!) {
+                                                  if (setor.id.toString() ==
+                                                      antigaMaquina.sectorId
+                                                          .toString()) {
+                                                    sector.machines.removeWhere(
+                                                      (m) =>
+                                                          m.id ==
+                                                          antigaMaquina.id,
+                                                    );
+                                                    break;
+                                                  }
+                                                }
+                                                setState(() {});
+                                              }
+                                            }
+                                          } catch (e) {
+                                            return null;
+                                          }
+                                        },
+                                        onCreateMachine: (sectorId) async {
+                                          _openCreateMachineDialog(sectorId);
+                                        },
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      /*ListView(
+                              padding: EdgeInsets.zero,
+                              children: /*providerSectorList.getSectorList!.map(*/
+                                  filteredList!.map((sector) {
+                                    return CustomSectorViewCard(
+                                      name: sector.name!,
+                                      description: sector.description!,
+                                      machines: sector.machines,
+
+                                      onCreateMachine: (machineName) async {
+                                        var maquinaCriada = await requestMethods
+                                            .createMachine(
+                                              sector.id!.toString(),
+                                              machineName,
+                                            );
+                                        if (maquinaCriada != null) {
+                                          MachineModel novaMaquina =
+                                              MachineModel.fromJson(
+                                                jsonDecode(maquinaCriada),
+                                              );
+                                          for (var setor
+                                              in providerSectorList
+                                                  .getSectorList!) {
+                                            if (setor.id.toString() ==
+                                                novaMaquina.sectorId
+                                                    .toString()) {
+                                              sector.machines.add(novaMaquina);
+                                              break;
+                                            }
+                                          }
+                                          setState(() {});
+                                        }
+                                      },
+
+                                      onEditMachine: (machineId) async {
+                                        Navigator.pushNamed(
+                                          context,
+                                          '/machine-edit',
+                                          arguments: machineId,
+                                        );
+                                      },
+
+                                      onDeleteMachine: (machineId) async {
+                                        var maquinaApagando =
+                                            await requestMethods.deleteMachine(
+                                              machineId,
+                                            );
+                                        try {
+                                          if (maquinaApagando != null) {
+                                            MachineModel antigaMaquina =
+                                                MachineModel.fromJson(
+                                                  jsonDecode(maquinaApagando),
+                                                );
+                                            if (antigaMaquina.id.toString() ==
+                                                machineId) {
+                                              for (var setor
+                                                  in providerSectorList
+                                                      .getSectorList!) {
+                                                if (setor.id.toString() ==
+                                                    antigaMaquina.sectorId
+                                                        .toString()) {
+                                                  sector.machines.removeWhere(
+                                                    (m) =>
+                                                        m.id ==
+                                                        antigaMaquina.id,
+                                                  );
+                                                  break;
+                                                }
+                                              }
+                                              setState(() {});
+                                            }
+                                          }
+                                        } catch (e) {
+                                          return null;
+                                        }
+                                      },
+                                    );
+                                  }).toList(),*/
+                    ),
+                  ],
+                ),
+              ) /*,
+                    ),
+                  ],
+                ),
+              )*/;
+            }
+          }
+        }
+      },
     );
   }
 
-  Future<void> _loadData() async {
-    setState(() => loading = true);
+  Future<void> getSectorList() async {
+    try {
+      setState(() => gotInfoFromServer = false);
+      List<SectorModel>? sectorList = await requestMethods.getSectorList();
+      if (!mounted) return;
+      providerSectorList.setSectorList(sectorList);
+      // May remove later the following line:
+      filteredList = sectorList;
 
-    sectorList = await requestMethods.getSectorList() ?? [];
-    machineList = await requestMethods.getMachineList() ?? [];
+      if (!mounted) return;
+      setState(() => gotInfoFromServer = true);
+    } catch (e) {
+      providerSectorList.setSectorList(null);
+      if (!mounted) return;
+      setState(() => gotInfoFromServer = true);
+    }
+  }
 
-    if (!mounted) return;
-    setState(() => loading = false); // ✅ reconstrução correta da tela
+  void _openCreateMachineDialog(String sectorID) {
+    final controller = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        title: const Text("Adicionar máquina"),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(labelText: "Nome da máquina"),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: const Text("Cancelar"),
+          ),
+          TextButton(
+            onPressed: () {
+              final name = controller.text.trim();
+              if (name.isEmpty) return;
+
+              Navigator.of(dialogCtx).pop();
+              createNewMachine(name, sectorID);
+            },
+            child: const Text("Salvar"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> createNewMachine(String machineName, String sectorID) async {
+    var maquinaCriada = await requestMethods.createMachine(
+      sectorID,
+      machineName,
+    );
+    if (maquinaCriada != null) {
+      MachineModel novaMaquina = MachineModel.fromJson(
+        jsonDecode(maquinaCriada),
+      );
+      for (var setor in providerSectorList.getSectorList!) {
+        if (setor.id.toString() == novaMaquina.sectorId.toString()) {
+          setor.machines.add(novaMaquina);
+          break;
+        }
+      }
+      setState(() {});
+    }
   }
 }
+
+

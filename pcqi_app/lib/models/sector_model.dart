@@ -17,7 +17,9 @@ class SectorModel {
     name: json['name'] ?? '',
     description: json['description'] ?? '',
     id: json['id'] ?? -2,
-    // machine list yet to be implemented
+    machines: (json["machines"] ?? [])
+        .map<MachineModel>((m) => MachineModel.fromJson(m))
+        .toList(),
   );
 
   Map<String, dynamic> toJson() {

@@ -1,11 +1,9 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:pcqi_app/services/http_request.dart';
 
 class StatsService {
-  static const String _baseUrl = "https://pcqi-api.onrender.com/api/v1/stats";
-
   static Future<Map<String, dynamic>> getStats() async {
-    final response = await http.get(Uri.parse(_baseUrl));
+    final response = await HttpRequest.getWithAuthorization("stats");
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);

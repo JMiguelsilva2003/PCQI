@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:camera/camera.dart';
 import 'package:expandable/expandable.dart';
@@ -10,22 +9,24 @@ import 'package:pcqi_app/config/app_colors.dart';
 import 'package:pcqi_app/config/app_styles.dart';
 import 'package:pcqi_app/models/image_request_response_model.dart';
 import 'package:pcqi_app/models/validation_result.dart';
+import 'package:pcqi_app/providers/provider_sector_list.dart';
 import 'package:pcqi_app/services/camera_image_converter.dart';
 import 'package:pcqi_app/services/http_image_request.dart';
 import 'package:pcqi_app/utils/validators.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import 'package:web_socket/web_socket.dart';
 
 enum WebSocketConnectionStatus { disconnected, connecting, connected }
 
-class TesteCamera extends StatefulWidget {
-  const TesteCamera({super.key});
+class Camera extends StatefulWidget {
+  const Camera({super.key});
 
   @override
-  State<TesteCamera> createState() => _TesteCameraState();
+  State<Camera> createState() => _CameraState();
 }
 
-class _TesteCameraState extends State<TesteCamera> {
+class _CameraState extends State<Camera> {
   List<CameraDescription> allAvailableCameras = [];
   List<CameraDescription> frontCameras = [];
   List<CameraDescription> backCameras = [];
@@ -56,7 +57,11 @@ class _TesteCameraState extends State<TesteCamera> {
   String debugTextCurrentPrediction = "";
   String debugTextConfidence = "";
 
-  String textStatus = "Aguardando...";
+  String textStatus = "Inicie a transmissão para análise";
+
+  String lastAnalysisDecision = "";
+
+  Offset? cameraFocusPoint;
 
   @override
   void initState() {
@@ -137,6 +142,36 @@ class _TesteCameraState extends State<TesteCamera> {
     await startCamera(selectedCamera);
   }
 
+  Future<void> tapToFocusCamera(
+    TapDownDetails details,
+    BoxConstraints constraints,
+  ) async {
+    if (cameraController.value.isInitialized) {
+      setState(() {
+        cameraFocusPoint = details.localPosition;
+      });
+
+      final offset = Offset(
+        details.localPosition.dx / constraints.maxWidth,
+        details.localPosition.dy / constraints.maxHeight,
+      );
+
+      try {
+        await cameraController.setFocusPoint(offset);
+        await cameraController.setExposurePoint(offset);
+        Future.delayed(const Duration(seconds: 1), () {
+          if (mounted) {
+            setState(() {
+              cameraFocusPoint = null;
+            });
+          }
+        });
+      } catch (e) {
+        return;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_permissionStatus == PermissionStatus.granted) {
@@ -169,54 +204,115 @@ class _TesteCameraState extends State<TesteCamera> {
         );
       } else {
         if (selectedCamera != null) {
-          return Scaffold(
-            backgroundColor: AppColors.azulBebe,
-            body: PopScope(
-              canPop: false,
-              onPopInvokedWithResult: (bool didPop, Object? result) async {
-                if (isStreamRunning) {
-                  await cameraController.stopImageStream();
-                }
-                SystemChrome.setPreferredOrientations([
-                  DeviceOrientation.portraitDown,
-                  DeviceOrientation.portraitUp,
-                ]);
-                if (!didPop) {
-                  Navigator.pop(context);
-                }
-              },
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Center(child: CameraPreview(cameraController)),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: ListView(
-                      padding: EdgeInsets.zero,
-                      children: [
-                        SizedBox(height: 20),
-                        buildMachineTitle(
-                          "Nome da máquina nome da máquina nome da máquina",
-                        ),
-                        SizedBox(height: 30),
+          return Consumer<ProviderSectorList>(
+            builder: (context, value, child) {
+              return Scaffold(
+                backgroundColor: AppColors.azulBebe,
+                body: PopScope(
+                  canPop: false,
+                  onPopInvokedWithResult: (bool didPop, Object? result) async {
+                    if (isStreamRunning) {
+                      await cameraController.stopImageStream();
+                    }
+                    SystemChrome.setPreferredOrientations([
+                      DeviceOrientation.portraitDown,
+                      DeviceOrientation.portraitUp,
+                    ]);
+                    if (!didPop) {
+                      if (!context.mounted) return;
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            return GestureDetector(
+                              onTapDown: (details) =>
+                                  tapToFocusCamera(details, constraints),
+                              child: Stack(
+                                children: [
+                                  Center(
+                                    child: cameraController.value.isInitialized
+                                        ? AspectRatio(
+                                            aspectRatio: cameraController
+                                                .value
+                                                .aspectRatio,
+                                            child: CameraPreview(
+                                              cameraController,
+                                            ),
+                                          )
+                                        : Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              CircularProgressIndicator(
+                                                color: AppColors.azulEscuro,
+                                              ),
+                                              SizedBox(height: 20),
+                                              Text(
+                                                "Carregando...",
+                                                style: AppStyles
+                                                    .textStyleTituloSecundario,
+                                              ),
+                                            ],
+                                          ),
+                                  ),
 
-                        Column(
+                                  if (cameraFocusPoint != null)
+                                    Positioned(
+                                      left: cameraFocusPoint!.dx - 40,
+                                      top: cameraFocusPoint!.dy - 40,
+                                      child: Container(
+                                        width: 80,
+                                        height: 80,
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: AppColors.azulEscuro,
+                                            width: 2,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            40,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: ListView(
+                          padding: EdgeInsets.zero,
                           children: [
-                            buildCameraOptions(),
-                            buildStreamingOptions(),
+                            SizedBox(height: 20),
+                            buildMachineTitle(),
+                            SizedBox(height: 30),
+
+                            Column(
+                              children: [
+                                buildCameraOptions(),
+                                buildStreamingOptions(),
+                              ],
+                            ),
+
+                            SizedBox(height: 30),
+                            goBackButton(),
                           ],
                         ),
-
-                        SizedBox(height: 30),
-                        goBackButton(),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           );
         } else {
           return noCameraAvailable();
@@ -230,69 +326,73 @@ class _TesteCameraState extends State<TesteCamera> {
     }
   }
 
-  Widget buildCameraOptions() => Container(
-    padding: EdgeInsets.all(10),
-    margin: EdgeInsets.all(8),
-    decoration: BoxDecoration(
-      color: AppColors.cinzaClaro,
-      borderRadius: BorderRadius.circular(10),
-    ),
+  Widget buildCameraOptions() => Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Container(
+      padding: EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: AppColors.branco,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.azulEscuro, width: 2),
+      ),
 
-    child: ExpandablePanel(
-      header: Center(
-        child: ListTile(
+      child: ExpandablePanel(
+        header: ListTile(
+          titleAlignment: ListTileTitleAlignment.center,
           title: Text(
             "Opções de câmera",
             textAlign: TextAlign.center,
             style: AppStyles.textStyleOptionsTab,
           ),
         ),
-      ),
-      collapsed: SizedBox(width: 1),
-      expanded: Column(
-        children: [
-          buildCameraSelectionDropdownMenu(
-            getCameraListFromCurrentLensDirection(selectedCamera!),
-          ),
-          SizedBox(height: 10),
-          buildResolutionSelectionDropdownMenu(resolutionPresetList),
-          SizedBox(height: 10),
-          if (backCameras.isNotEmpty && frontCameras.isNotEmpty)
-            buildChangeCameraFacingButton(),
-        ],
+        collapsed: SizedBox(width: 1),
+        expanded: Column(
+          children: [
+            buildCameraSelectionDropdownMenu(
+              getCameraListFromCurrentLensDirection(selectedCamera!),
+            ),
+            SizedBox(height: 10),
+            buildResolutionSelectionDropdownMenu(resolutionPresetList),
+            SizedBox(height: 10),
+            if (backCameras.isNotEmpty && frontCameras.isNotEmpty)
+              buildChangeCameraFacingButton(),
+          ],
+        ),
       ),
     ),
   );
 
-  Widget buildStreamingOptions() => Container(
-    padding: EdgeInsets.all(5),
-    margin: EdgeInsets.all(8),
-    decoration: BoxDecoration(
-      color: AppColors.cinzaClaro,
-      borderRadius: BorderRadius.circular(10),
-    ),
+  Widget buildStreamingOptions() => Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Container(
+      padding: EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: AppColors.branco,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.azulEscuro, width: 2),
+      ),
 
-    child: ExpandablePanel(
-      header: Center(
-        child: ListTile(
+      child: ExpandablePanel(
+        header: ListTile(
+          titleAlignment: ListTileTitleAlignment.center,
           title: Text(
             "Opções de transmissão",
             textAlign: TextAlign.center,
             style: AppStyles.textStyleOptionsTab,
           ),
         ),
-      ),
-      collapsed: buildStreamingStatus(),
-      expanded: Column(
-        children: [
-          buildStreamingStatus(),
-          SizedBox(height: 10),
-          buildRequestResults(),
-          SizedBox(height: 10),
-          buildAIResultDebug(),
-          SizedBox(height: 10),
-          buildStartStopStreamButton(),
-        ],
+        collapsed: buildStreamingStatus(),
+        expanded: Column(
+          children: [
+            buildStreamingStatus(),
+            SizedBox(height: 10),
+            buildRequestResults(),
+            SizedBox(height: 10),
+            buildAIResultDebug(),
+            SizedBox(height: 10),
+            buildStartStopStreamButton(),
+          ],
+        ),
       ),
     ),
   );
@@ -413,13 +513,22 @@ class _TesteCameraState extends State<TesteCamera> {
     }
   }
 
-  Widget buildMachineTitle(String text) {
+  Widget buildMachineTitle() {
+    final machineInfo =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final providerSectorList = context.read<ProviderSectorList>();
+    String? machineName = providerSectorList
+        .getSingleMachineFromSpecifiedSector(
+          int.parse(machineInfo['machineID']),
+          machineInfo['sectorID'],
+        )!
+        .name;
     return SizedBox(
       height: 40,
       child: Padding(
         padding: const EdgeInsets.all(2.0),
         child: Marquee(
-          text: text,
+          text: machineName ?? "Nome da máquina",
           style: AppStyles.textStyleMarqueeLib,
           blankSpace: 50,
           velocity: 60,
@@ -452,6 +561,7 @@ class _TesteCameraState extends State<TesteCamera> {
 
               setState(() {
                 isStreamRunning = false;
+                connectionStatus = WebSocketConnectionStatus.disconnected;
                 selectedCamera = camera;
               });
               await startCamera(selectedCamera);
@@ -488,6 +598,7 @@ class _TesteCameraState extends State<TesteCamera> {
                 await cameraController.stopImageStream();
               }
               setState(() {
+                connectionStatus = WebSocketConnectionStatus.disconnected;
                 isStreamRunning = false;
                 currentResolution = resolution;
               });
@@ -516,6 +627,7 @@ class _TesteCameraState extends State<TesteCamera> {
               await cameraController.stopImageStream();
               setState(() {
                 connectionStatus = WebSocketConnectionStatus.disconnected;
+                textStatus = "Inicie a transmissão para análise";
               });
             }
           },
@@ -551,6 +663,7 @@ class _TesteCameraState extends State<TesteCamera> {
               DeviceOrientation.portraitDown,
               DeviceOrientation.portraitUp,
             ]);
+            if (!mounted) return;
             Navigator.pop(context);
           },
         ),
@@ -570,7 +683,11 @@ class _TesteCameraState extends State<TesteCamera> {
     margin: EdgeInsets.symmetric(horizontal: 8),
     padding: EdgeInsets.all(4),
     width: double.infinity,
-    child: Text(textStatus, style: AppStyles.textStyleDropdownItem),
+    child: Text(
+      textStatus,
+      style: AppStyles.textStyleCameraStatusDescription,
+      textAlign: TextAlign.center,
+    ),
   );
 
   Widget buildAIResultDebug() => Container(
@@ -584,17 +701,17 @@ class _TesteCameraState extends State<TesteCamera> {
 
     child: Column(
       children: [
-        Text("Resultado da IA", style: AppStyles.textStyleOptionsTab),
+        Text("Resultado da análise", style: AppStyles.textStyleOptionsTab),
         Text(
-          "status: $debugTextStatus",
+          "Status: $debugTextStatus",
           style: AppStyles.textStyleDropdownItem,
         ),
         Text(
-          "prediction: $debugTextCurrentPrediction",
+          "Previsão: $debugTextCurrentPrediction",
           style: AppStyles.textStyleDropdownItem,
         ),
         Text(
-          "confidence: $debugTextConfidence",
+          "Confiança: $debugTextConfidence",
           style: AppStyles.textStyleDropdownItem,
         ),
       ],
@@ -802,6 +919,7 @@ class _TesteCameraState extends State<TesteCamera> {
 
           setState(() {
             isStreamRunning = false;
+            connectionStatus = WebSocketConnectionStatus.disconnected;
             if (selectedCamera!.lensDirection == CameraLensDirection.back) {
               selectedCamera = frontCameras.first;
             } else {
@@ -822,41 +940,88 @@ class _TesteCameraState extends State<TesteCamera> {
       setState(() {
         connectionStatus = WebSocketConnectionStatus.connecting;
       });
-      WebSocket webSocket = await httpImageRequest.connectToSocket();
-      setState(() {
-        connectionStatus = WebSocketConnectionStatus.connected;
-      });
 
-      webSocket.events.listen((e) async {
-        switch (e) {
-          case TextDataReceived(text: final text):
-            ImageRequestResponseModel responseFromServer =
-                ImageRequestResponseModel.fromJson(jsonDecode(text));
-            setState(() {
-              textStatus = setTextStatus(responseFromServer.status!);
-              debugTextStatus = responseFromServer.status!;
-              debugTextCurrentPrediction =
-                  responseFromServer.currentPrediction!;
-              debugTextConfidence = responseFromServer.confidence!;
-            });
+      final machineInfo =
+          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+      WebSocket? webSocket = await httpImageRequest.connectToSocket(
+        machineInfo['machineID'],
+      );
 
-          case BinaryDataReceived(data: final data):
+      if (webSocket != null) {
+        setState(() {
+          connectionStatus = WebSocketConnectionStatus.connected;
+        });
+
+        webSocket.events.listen((e) async {
+          switch (e) {
+            case TextDataReceived(text: final text):
+              ImageRequestResponseModel responseFromServer =
+                  ImageRequestResponseModel.fromJson(jsonDecode(text));
+              if (responseFromServer.status!.startsWith("Decid")) {
+                await cameraController.stopImageStream();
+                await webSocket.close();
+                setState(() {
+                  isStreamRunning = false;
+                  connectionStatus = WebSocketConnectionStatus.disconnected;
+                  textStatus =
+                      "${responseFromServer.status!}: $lastAnalysisDecision";
+                  debugTextStatus = responseFromServer.status!;
+                });
+              } else {
+                setState(() {
+                  textStatus = setTextStatus(responseFromServer.status!);
+                  debugTextStatus = responseFromServer.status!;
+                  debugTextCurrentPrediction =
+                      responseFromServer.currentPrediction!;
+                  if (responseFromServer.currentPrediction!
+                      .toLowerCase()
+                      .startsWith("fund")) {
+                    lastAnalysisDecision =
+                        responseFromServer.currentPrediction!;
+                  }
+                  debugTextConfidence = responseFromServer.confidence!;
+                });
+              }
+
+            /*case BinaryDataReceived(data: final data):
             print('Received Binary: $data');
           case CloseReceived(code: final code, reason: final reason):
             print('Connection to server closed: $code [$reason]');
-        }
-      });
+            */
+            default:
+          }
+        });
 
-      await cameraController.startImageStream((image) async {
-        if (isCurrentlySendingImage) return;
-        isCurrentlySendingImage = true;
-        var convertedImage = await cameraImageConverter.convertImage(image);
+        await cameraController.startImageStream((image) async {
+          if (isCurrentlySendingImage) return;
+          isCurrentlySendingImage = true;
+          final convertedImage = await cameraImageConverter.convertImage(image);
 
-        if (convertedImage != null) {
-          webSocket.sendBytes(convertedImage);
-        }
-        isCurrentlySendingImage = false;
-      });
+          if (convertedImage != null) {
+            webSocket.sendBytes(convertedImage);
+          }
+          isCurrentlySendingImage = false;
+        });
+      } else {
+        setState(() {
+          connectionStatus = WebSocketConnectionStatus.disconnected;
+          isStreamRunning = false;
+          isCurrentlySendingImage = false;
+        });
+        if (!mounted) return;
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.error,
+          animType: AnimType.scale,
+          title: "Erro",
+          desc:
+              "Não foi possível conectar-se ao servidor para transmissão de imagens. Por favor, tente novamente.",
+          btnOkColor: AppColors.azulEscuro,
+          btnOkText: "OK",
+          btnOkOnPress: () {},
+          dismissOnTouchOutside: false,
+        ).show();
+      }
     } catch (e) {
       if (connectionStatus == WebSocketConnectionStatus.connected) {
         await cameraController.stopImageStream();
@@ -873,8 +1038,8 @@ class _TesteCameraState extends State<TesteCamera> {
       return "Posicione em frente à câmera";
     } else if (status.startsWith("Analisando")) {
       return "Analisando...";
-    } else if (status.startsWith("Decid")) {
-      return "Análise concluída";
+    } else if (status.startsWith("Erro")) {
+      return "Imagem desfocada";
     }
     return status;
   }

@@ -17,7 +17,7 @@ class GetMachinesResponseHandler {
         return sectors;
       }
     } catch (e) {
-      print(e);
+      return null;
     }
     return null;
   }
