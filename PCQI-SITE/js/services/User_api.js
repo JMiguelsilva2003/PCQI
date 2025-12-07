@@ -238,3 +238,60 @@ async function getStats(token, sectorId = null, machineId = null) {
     }
     return data;
 }
+
+async function getStatsHistory(token, range = 7) {
+    const url = new URL(`${API_BASE_URL}/api/v1/stats/history`);
+    url.searchParams.append('range', range);
+    
+    const response = await fetch(url.toString(), {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.detail || 'Erro ao buscar histórico.');
+    return data;
+}
+
+async function removeUserFromSector(token, sectorId, userId) {
+    const url = `${API_BASE_URL}/api/v1/sectors/${sectorId}/members/${userId}`;
+    
+    const response = await fetch(url, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.detail || 'Erro ao remover membro.');
+    }
+    return data;
+}
+
+async function getStatsPerformance(token) {
+    const url = new URL(`${API_BASE_URL}/api/v1/stats/performance_by_machine`);
+    
+    const response = await fetch(url.toString(), {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.detail || 'Erro ao buscar performance.');
+    return data;
+}
+
+async function updateMachineName(token, machineId, newName) {
+    const response = await fetch(`${API_BASE_URL}/api/v1/machines/${machineId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ name: newName })
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.detail || 'Erro ao atualizar máquina.');
+    }
+    return data;
+}

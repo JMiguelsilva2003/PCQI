@@ -77,6 +77,7 @@ function setupNavigation(user) {
     btnVerPerfis.style.display = "block";
   }
 
+  //  Botão Ver Máquinas
   btnVerMaquinas.addEventListener("click", async () => {
     setActiveButton(btnVerMaquinas);
     await loadHTML("/components/viewMachines.html", "component-dashboard");
@@ -84,6 +85,7 @@ function setupNavigation(user) {
     renderMachinesView(contentContainer, user);
   });
 
+  //  Botão Estatísticas
   btnVerStats.addEventListener("click", async () => {
     setActiveButton(btnVerStats);
     await loadHTML("/components/viewStatistics.html", "component-dashboard");
@@ -91,6 +93,7 @@ function setupNavigation(user) {
     renderStatisticsView(contentContainer, user);
   });
 
+  //  Botão Ver Perfis (Admin) 
   if (user.role === "admin") {
     btnVerPerfis.addEventListener("click", async () => {
       setActiveButton(btnVerPerfis);
@@ -119,7 +122,7 @@ async function renderMachinesView(container, user) {
   try {
     screen.innerHTML = "<p>Carregando seus setores...</p>";
     const sectors = await getSectors(currentAccessToken);
-    allSectorsCache = sectors;
+    allSectorsCache = sectors; 
 
     tabsContainer.querySelectorAll(".tab").forEach((tab) => tab.remove());
 
@@ -150,7 +153,7 @@ async function renderMachinesView(container, user) {
                         await deleteSector(currentAccessToken, sector.id);
                         alert("Setor deletado com sucesso!");
                         tab.remove();
-
+                        
                         const firstTab = tabsContainer.querySelector(".tab");
                         if (firstTab) firstTab.click();
                         else screen.innerHTML = "<p>Nenhum setor encontrado.</p>";
@@ -238,68 +241,78 @@ function renderMachineList(screenElement, sector, user) {
   if (!sector.machines || sector.machines.length === 0) {
     machineHTML += "<p>Nenhuma máquina cadastrada neste setor.</p>";
   } else {
-    machineHTML +=
-      '<div class="machine-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">';
+    machineHTML += '<div class="machine-grid">';
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+
     sector.machines.forEach((machine) => {
+      const isOnline = machine.last_heartbeat && new Date(machine.last_heartbeat) > fiveMinutesAgo;
+      const statusClass = isOnline ? "online" : "offline";
+      const statusText = isOnline ? "Online" : "Offline";
+
       machineHTML += `
-                <div class="machine-card" style="background: #fff; border: 1px solid #ccc; border-radius: 4px; padding: 1rem;">
-                    <h4>${machine.name}</h4>
-                    <p style="font-size: 1.2rem; color: #555;">ID: ${machine.id}</p>
-                    <button class="delete-machine" 
-                        data-machine-id = "${machine.id}">
-                        excluir 
-                    </button>
-                </div>
-            `;
+        <div class="machine-card">
+            <div class="status-indicator ${statusClass}" title="Status: ${statusText}"></div>
+            
+            <h4>${machine.name}</h4>
+            <p style="font-size: 1.2rem; color: #555;">ID: ${machine.id}</p>
+            
+            <div class="card-actions">
+                <button class="edit-machine action-btn" 
+                    data-machine-id="${machine.id}"
+                    data-machine-name="${machine.name}">
+                    Editar
+                </button>
+                <button class="delete-machine" 
+                    data-machine-id="${machine.id}"
+                    data-machine-name="${machine.name}">
+                    Excluir 
+                </button>
+            </div>
+        </div>
+      `;
     });
     machineHTML += "</div>";
   }
 
-  let membersHTML = "";
+  screenElement.innerHTML = machineHTML;
+  screenElement.querySelectorAll(".delete-machine").forEach((button) => {
+    button.addEventListener("click", async (e) => {
+      const machineId = e.target.dataset.machineId;
+      const machineName = e.target.dataset.machineName;
+      const machineCard = e.target.closest(".machine-card");
 
-  if (user.role === "admin" && sector.members) {
-    membersHTML = `<h3 style="margin-top: 2rem;">Membros no Setor: ${sector.name}</h3>`;
-
-    if (sector.members.length === 0) {
-      membersHTML += "<p>Nenhum membro cadastrado neste setor.</p>";
-    } else {
-      membersHTML +=
-        '<div class="member-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">';
-      sector.members.forEach((member) => {
-        membersHTML += `
-                    <div class="member-card" style="background: #fff; border: 1px solid #ccc; border-radius: 4px; padding: 1rem;">
-                        <h4>${member.name || "Nome não disponível"}</h4>
-                        <p style="font-size: 1.2rem; color: #555;">${
-                          member.email || "Email não disponível"
-                        }</p>
-                    </div>
-                `;
-      });
-      membersHTML += "</div>";
-    }
-  }
-
-  screenElement.innerHTML = machineHTML + membersHTML;
-
-    screenElement.querySelectorAll(".delete-machine").forEach((button) => {
-      button.addEventListener("click", async (e) => {
-        const machineId = e.target.dataset.machineId;
-        const machineCard = e.target.closest(".machine-card");
-        const machineName = machineCard.querySelector("h4").textContent;
-
-        if (confirm(`Tem certeza que deseja deletar a máquina "${machineName}" (ID: ${machineId})?`)) {
-          try {
-            await deleteMachine(currentAccessToken, machineId);
-            alert("Máquina removida com sucesso!");
-            
-            machineCard.remove();
-
-          } catch (error) {
-            alert(`Erro ao deletar: ${error.message}`);
-          }
+      if (confirm(`Tem certeza que deseja deletar a máquina "${machineName}" (ID: ${machineId})?`)) {
+        try {
+          await deleteMachine(currentAccessToken, machineId);
+          alert("Máquina removida com sucesso!");
+          machineCard.remove(); 
+        } catch (error) {
+          alert(`Erro ao deletar: ${error.message}`);
         }
-      });
+      }
     });
+  });
+
+  screenElement.querySelectorAll(".edit-machine").forEach((button) => {
+    button.addEventListener("click", async (e) => {
+      const machineId = e.target.dataset.machineId;
+      const oldName = e.target.dataset.machineName;
+      const machineCard = e.target.closest(".machine-card");
+
+      const newName = prompt(`Digite o novo nome para a máquina "${oldName}":`, oldName);
+
+      if (newName && newName.trim() !== "" && newName !== oldName) {
+        try {
+          await updateMachineName(currentAccessToken, machineId, newName.trim());
+          alert("Nome atualizado com sucesso!");
+          machineCard.querySelector("h4").textContent = newName;
+          e.target.dataset.machineName = newName;
+        } catch (error) {
+          alert(`Erro ao atualizar: ${error.message}`);
+        }
+      }
+    });
+  });
 }
 
 async function renderCreateMachineForm(viewContainer, user) {
@@ -337,7 +350,6 @@ async function renderCreateMachineForm(viewContainer, user) {
     try {
       await createMachine(currentAccessToken, machineName, parseInt(sectorId));
       alert("Máquina criada com sucesso!");
-
       document.getElementById("btn-ver-maquinas").click();
     } catch (error) {
       console.error("Erro ao criar máquina:", error);
@@ -364,8 +376,18 @@ async function renderProfilesView(container) {
   try {
     const [users, allSectors] = await Promise.all([
       getAllUsers(currentAccessToken),
-      getSectors(currentAccessToken),
+      getSectors(currentAccessToken), 
     ]);
+
+    const userSectorMap = {};
+    allSectors.forEach((sector) => {
+        sector.members.forEach((member) => {
+            if (!userSectorMap[member.id]) {
+                userSectorMap[member.id] = [];
+            }
+            userSectorMap[member.id].push({ id: sector.id, name: sector.name });
+        });
+    });
 
     screen.innerHTML = "";
 
@@ -378,57 +400,84 @@ async function renderProfilesView(container) {
         sectorOptions += `<option value="${sector.id}">${sector.name}</option>`;
       });
 
+      const userSectors = userSectorMap[user.id] || [];
+      let userSectorsHTML = '<div class="info-item"><span>Membro dos Setores</span>';
+      if (userSectors.length > 0) {
+        userSectorsHTML += '<ul class="sector-membership-list">';
+        userSectors.forEach(sector => {
+            userSectorsHTML += `
+                <li>
+                    <span>${sector.name}</span>
+                    <button class="remove-from-sector-btn" 
+                            data-user-id="${user.id}" 
+                            data-sector-id="${sector.id}"
+                            data-user-name="${user.name}"
+                            data-sector-name="${sector.name}"
+                            title="Remover ${user.name} do setor ${sector.name}">
+                        X
+                    </button>
+                </li>`;
+        });
+        userSectorsHTML += '</ul>';
+      } else {
+        userSectorsHTML += "<span>Nenhum</span>";
+      }
+      userSectorsHTML += '</div>';
+
       card.innerHTML = `
-                <div class="info-grid">
-                    <div class="info-item">
-                        <span>Nome</span>
-                        <span>${user.name}</span>
-                    </div>
-                    <div class="info-item">
-                        <span>Email</span>
-                        <span>${user.email}</span>
-                    </div>
-                    <div class="info-item">
-                        <span>Permissão</span>
-                        <span>${user.role}</span>
-                    </div>
-                    <div class="info-item">
-                        <span>Ações</span>
-                        <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
-                            <button class="promote-btn" 
-                                data-user-id="${user.id}" 
-                                ${user.role === "admin" ? "disabled" : ""}>
-                                ${user.role === "admin" ? "Já é Admin" : "Promover"}
-                            </button>
-                            <select class="add-to-sector-select" data-user-id="${user.id}" style="padding: 0.8rem; border-radius: 6px;">
-                                ${sectorOptions}
-                            </select>
-                            
-                            <button class="delete-btn logout-btn" 
-                                data-user-id="${user.id}" 
-                                data-user-name="${user.name}"
-                                ${user.role === "admin" ? "disabled" : ""}>
-                                Excluir
-                            </button>
-                        </div>
-                    </div>
+        <div class="info-grid">
+            <div class="info-item">
+                <span>Nome</span>
+                <span>${user.name}</span>
+            </div>
+            <div class="info-item">
+                <span>Email</span>
+                <span>${user.email}</span>
+            </div>
+            <div class="info-item">
+                <span>Permissão</span>
+                <span>${user.role}</span>
+            </div>
+            
+            ${userSectorsHTML} 
+
+            <div class="info-item">
+                <span>Adicionar ao Setor</span>
+                <select class="add-to-sector-select" data-user-id="${user.id}" style="padding: 0.8rem; border-radius: 6px;">
+                    ${sectorOptions}
+                </select>
+            </div>
+
+            <div class="info-item">
+                <span>Ações de Admin</span>
+                <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
+                    <button class="promote-btn" 
+                        data-user-id="${user.id}" 
+                        ${user.role === "admin" ? "disabled" : ""}>
+                        ${user.role === "admin" ? "Já é Admin" : "Promover"}
+                    </button>
+                    
+                    <button class="delete-btn logout-btn" 
+                        data-user-id="${user.id}" 
+                        data-user-name="${user.name}"
+                        ${user.role === "admin" ? "disabled" : ""}>
+                        Excluir Usuário
+                    </button>
                 </div>
-            `;
+            </div>
+        </div>
+      `;
       screen.appendChild(card);
     });
 
     screen.querySelectorAll(".promote-btn").forEach((button) => {
       button.addEventListener("click", async (e) => {
         const userId = e.target.dataset.userId;
-        if (
-          confirm(
-            `Tem certeza que deseja promover o usuário ${userId} a admin?`
-          )
-        ) {
+        if (confirm(`Tem certeza que deseja promover o usuário ${userId} a admin?`)) {
           try {
             await promoteUser(currentAccessToken, userId);
             alert("Usuário promovido com sucesso!");
-            renderProfilesView(container);
+            renderProfilesView(container); 
           } catch (error) {
             alert(`Erro ao promover: ${error.message}`);
           }
@@ -441,13 +490,11 @@ async function renderProfilesView(container) {
         const userId = e.target.dataset.userId;
         const userName = e.target.dataset.userName;
         
-        if (confirm(`Tem certeza que deseja deletar o usuário "${userName}" (ID: ${userId})? \n\nAtenção: esta ação não pode ser desfeita.`)) {
+        if (confirm(`Tem certeza que deseja deletar o usuário "${userName}" (ID: ${userId})?`)) {
           try {
             await deleteUser(currentAccessToken, userId);
             alert("Usuário removido com sucesso!");
-            
             e.target.closest(".profile-card").remove();
-
           } catch (error) {
             alert(`Erro ao deletar: ${error.message}`);
           }
@@ -459,23 +506,45 @@ async function renderProfilesView(container) {
       select.addEventListener("change", async (e) => {
         const sectorId = e.target.value;
         const userId = e.target.dataset.userId;
-
         if (!sectorId) return;
 
         try {
           await addUserToSector(currentAccessToken, sectorId, userId);
           alert(`Usuário ${userId} adicionado ao setor ${sectorId}!`);
-          e.target.value = "";
+          renderProfilesView(container);
         } catch (error) {
           alert(`Erro ao adicionar ao setor: ${error.message}`);
         }
       });
     });
+
+    screen.querySelectorAll(".remove-from-sector-btn").forEach((button) => {
+        button.addEventListener("click", async (e) => {
+            const userId = e.target.dataset.userId;
+            const sectorId = e.target.dataset.sectorId;
+            const userName = e.target.dataset.userName;
+            const sectorName = e.target.dataset.sectorName;
+
+            if (confirm(`Tem certeza que deseja remover "${userName}" do setor "${sectorName}"?`)) {
+                try {
+                    await removeUserFromSector(currentAccessToken, sectorId, userId);
+                    alert("Membro removido com sucesso!");
+                    e.target.closest("li").remove();
+                } catch (error) {
+                    alert(`Erro ao remover: ${error.message}`);
+                }
+            }
+        });
+    });
+
   } catch (error) {
     console.error("Erro ao carregar dados de admin:", error);
     screen.innerHTML = `<p style='color:red;'>Erro ao carregar dados: ${error.message}</p>`;
   }
 }
+
+let historyChartInstance = null;
+let performanceChartInstance = null;
 
 async function renderStatisticsView(container, user) {
     const loadingEl = container.querySelector("#stats-loading");
@@ -529,16 +598,113 @@ async function renderStatisticsView(container, user) {
         } catch (error) {
             console.error("Erro ao buscar estatísticas:", error);
             loadingEl.style.display = "none";
-            totalEl.textContent = "Erro";
-            madurasEl.textContent = "Erro";
-            verdesEl.textContent = "Erro";
-            outrasEl.textContent = "Erro";
+            totalEl.textContent = "Erro"; 
         }
     };
 
     filterBtn.addEventListener("click", fetchAndRenderStats);
-
     fetchAndRenderStats();
+    const historyLoadingEl = container.querySelector("#history-loading");
+    try {
+        const historyData = await getStatsHistory(currentAccessToken, 7);
+        renderHistoryChart(historyData);
+        historyLoadingEl.style.display = "none";
+    } catch (error) {
+        console.error("Erro ao carregar histórico:", error);
+        historyLoadingEl.innerHTML = `<p style="color:red;">Erro ao carregar gráfico: ${error.message}</p>`;
+    }
+
+    const performanceLoadingEl = container.querySelector("#performance-loading");
+    try {
+        const performanceData = await getStatsPerformance(currentAccessToken);
+        renderPerformanceChart(performanceData);
+        performanceLoadingEl.style.display = "none";
+    } catch (error) {
+        console.error("Erro ao carregar performance:", error);
+        performanceLoadingEl.innerHTML = `<p style="color:red;">Erro ao carregar gráfico: ${error.message}</p>`;
+    }
+}
+
+function renderHistoryChart(data) {
+    const ctx = document.getElementById('historyChart')?.getContext('2d');
+    if (!ctx) return;
+
+    if (historyChartInstance) {
+        historyChartInstance.destroy();
+    }
+
+    const labels = data.map(item => item.date).reverse();
+    const madurasData = data.map(item => item.maduras).reverse();
+    const verdesData = data.map(item => item.verdes).reverse();
+
+    historyChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Mangas Maduras',
+                    data: madurasData,
+                    borderColor: '#28a745',
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    fill: true,
+                    tension: 0.1
+                },
+                {
+                    label: 'Mangas Verdes',
+                    data: verdesData,
+                    borderColor: '#dc3545',
+                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                    fill: true,
+                    tension: 0.1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+        }
+    });
+}
+
+function renderPerformanceChart(data) {
+    const ctx = document.getElementById('performanceChart')?.getContext('2d');
+    if (!ctx) return;
+
+    if (performanceChartInstance) {
+        performanceChartInstance.destroy();
+    }
+
+    const labels = data.map(item => item.machine_name);
+    const madurasData = data.map(item => item.maduras);
+    const verdesData = data.map(item => item.verdes);
+
+    performanceChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Maduras (Aceitas)',
+                    data: madurasData,
+                    backgroundColor: '#28a745',
+                },
+                {
+                    label: 'Verdes (Rejeitadas)',
+                    data: verdesData,
+                    backgroundColor: '#dc3545',
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { stacked: true },
+                y: { stacked: true, beginAtZero: true }
+            }
+        }
+    });
 }
 
 
