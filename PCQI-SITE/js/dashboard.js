@@ -420,9 +420,7 @@ async function renderProfilesView(container) {
   const screen = container.querySelector("#profiles-container");
 
   if (!screen) {
-    console.error(
-      "Erro: Contêiner de perfis '#profiles-container' não encontrado."
-    );
+    console.error("Erro: Contêiner de perfis '#profiles-container' não encontrado.");
     return;
   }
   screen.innerHTML = "<p>Carregando usuários e setores...</p>";
@@ -447,7 +445,7 @@ async function renderProfilesView(container) {
 
     users.forEach((user) => {
       const card = document.createElement("div");
-      card.className = "profile-card";
+      card.className = "admin-user-card";
 
       let sectorOptions = '<option value="">Adicionar ao Setor...</option>';
       allSectors.forEach((sector) => {
@@ -456,6 +454,7 @@ async function renderProfilesView(container) {
 
       const userSectors = userSectorMap[user.id] || [];
       let userSectorsHTML = '<div class="info-item"><span>Membro dos Setores</span>';
+      
       if (userSectors.length > 0) {
         userSectorsHTML += '<ul class="sector-membership-list">';
         userSectors.forEach(sector => {
@@ -468,13 +467,13 @@ async function renderProfilesView(container) {
                             data-user-name="${user.name}"
                             data-sector-name="${sector.name}"
                             title="Remover ${user.name} do setor ${sector.name}">
-                        X
+                        ✕
                     </button>
                 </li>`;
         });
         userSectorsHTML += '</ul>';
       } else {
-        userSectorsHTML += "<span>Nenhum</span>";
+        userSectorsHTML += "<span>Nenhum setor vinculado</span>";
       }
       userSectorsHTML += '</div>';
 
@@ -490,32 +489,36 @@ async function renderProfilesView(container) {
             </div>
             <div class="info-item">
                 <span>Permissão</span>
-                <span>${user.role}</span>
+                <span style="color: ${user.role === 'admin' ? '#d35400' : '#2c3e50'}; font-weight: bold;">
+                    ${user.role.toUpperCase()}
+                </span>
             </div>
             
             ${userSectorsHTML} 
 
             <div class="info-item">
-                <span>Adicionar ao Setor</span>
-                <select class="add-to-sector-select" data-user-id="${user.id}" style="padding: 0.8rem; border-radius: 6px;">
+                <span>Gerenciar</span>
+                <select class="add-to-sector-select" data-user-id="${user.id}" style="padding: 0.6rem; border-radius: 6px; border: 1px solid #ccc; width: 100%;">
                     ${sectorOptions}
                 </select>
             </div>
 
             <div class="info-item">
-                <span>Ações de Admin</span>
-                <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
+                <span>Ações</span>
+                <div style="display: flex; gap: 0.5rem; margin-top: 5px;">
                     <button class="promote-btn" 
                         data-user-id="${user.id}" 
+                        style="flex: 1; padding: 8px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;"
                         ${user.role === "admin" ? "disabled" : ""}>
-                        ${user.role === "admin" ? "Já é Admin" : "Promover"}
+                        ${user.role === "admin" ? "Admin" : "Promover"}
                     </button>
                     
-                    <button class="delete-btn logout-btn" 
+                    <button class="delete-btn" 
                         data-user-id="${user.id}" 
                         data-user-name="${user.name}"
+                        style="flex: 1; padding: 8px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;"
                         ${user.role === "admin" ? "disabled" : ""}>
-                        Excluir Usuário
+                        Excluir
                     </button>
                 </div>
             </div>
@@ -548,7 +551,7 @@ async function renderProfilesView(container) {
           try {
             await deleteUser(currentAccessToken, userId);
             alert("Usuário removido com sucesso!");
-            e.target.closest(".profile-card").remove();
+            e.target.closest(".admin-user-card").remove();
           } catch (error) {
             alert(`Erro ao deletar: ${error.message}`);
           }
@@ -564,10 +567,11 @@ async function renderProfilesView(container) {
 
         try {
           await addUserToSector(currentAccessToken, sectorId, userId);
-          alert(`Usuário ${userId} adicionado ao setor ${sectorId}!`);
+          alert(`Usuário ${userId} adicionado ao setor com sucesso!`);
           renderProfilesView(container);
         } catch (error) {
           alert(`Erro ao adicionar ao setor: ${error.message}`);
+          e.target.value = "";
         }
       });
     });
@@ -583,7 +587,7 @@ async function renderProfilesView(container) {
                 try {
                     await removeUserFromSector(currentAccessToken, sectorId, userId);
                     alert("Membro removido com sucesso!");
-                    e.target.closest("li").remove();
+                    renderProfilesView(container); 
                 } catch (error) {
                     alert(`Erro ao remover: ${error.message}`);
                 }
