@@ -161,132 +161,6 @@ function setupNavigation(user) {
 async function renderMachinesView(container, user) {
   const tabsContainer = container.querySelector(".tabs");
   const screen = container.querySelector("#machines-screen-content");
-  const btnCriarMaquina = container.querySelector("#btn-criar-maquina");
-  const newTabBtn = container.querySelector("#newtab");
-
-  if (!tabsContainer || !screen || !btnCriarMaquina || !newTabBtn) {
-    console.error("Estrutura do component 'viewMachines.html' não encontrada.");
-    if (screen) {
-      screen.innerHTML =
-        "<p style='color:red;'>Erro ao carregar o componente.</p>";
-    }
-    return;
-  }
-
-  try {
-    screen.innerHTML = "<p>Carregando seus setores...</p>";
-    const sectors = await getSectors(currentAccessToken);
-    allSectorsCache = sectors; 
-
-    tabsContainer.querySelectorAll(".tab").forEach((tab) => tab.remove());
-
-    if (sectors.length === 0) {
-      screen.innerHTML =
-        "<p>Nenhum setor encontrado. Crie um novo para começar.</p>";
-    } else {
-      sectors.forEach((sector, index) => {
-        const tab = document.createElement("div");
-        tab.classList.add("tab");
-        tab.dataset.sectorId = sector.id;
-
-        const tabName = document.createElement("span");
-        tabName.textContent = sector.name;
-        tab.appendChild(tabName);
-
-        if (user.role === "admin") {
-            const deleteSectorBtn = document.createElement("button");
-            deleteSectorBtn.textContent = "X";
-            deleteSectorBtn.classList.add("delete-sector-btn");
-            deleteSectorBtn.title = `Deletar setor ${sector.name}`;
-            
-            deleteSectorBtn.addEventListener("click", async (e) => {
-                e.stopPropagation(); 
-                
-                if (confirm(`Tem certeza que deseja deletar o setor "${sector.name}"? \n\nAVISO: Setores com máquinas não podem ser deletados.`)) {
-                    try {
-                        await deleteSector(currentAccessToken, sector.id);
-                        alert("Setor deletado com sucesso!");
-                        tab.remove();
-                        
-                        const firstTab = tabsContainer.querySelector(".tab");
-                        if (firstTab) firstTab.click();
-                        else screen.innerHTML = "<p>Nenhum setor encontrado.</p>";
-
-                    } catch (error) {
-                        alert(`Erro ao deletar setor: ${error.message}`);
-                    }
-                }
-            });
-            tab.appendChild(deleteSectorBtn);
-        }
-
-        tabsContainer.insertBefore(tab, newTabBtn);
-
-        tab.addEventListener("click", (e) => {
-          if (e.target.classList.contains("delete-sector-btn")) return;
-
-          tabsContainer
-            .querySelectorAll(".tab")
-            .forEach((t) => t.classList.remove("active"));
-          tab.classList.add("active");
-
-          renderMachineList(screen, sector, user);
-        });
-
-        if (index === 0) {
-          tab.click();
-        }
-      });
-    }
-  } catch (error) {
-    console.error("Erro ao carregar setores:", error);
-    screen.innerHTML = `<p style='color:red;'>Erro ao carregar setores: ${error.message}</p>`;
-  }
-
-  if (user.role === "admin") {
-    newTabBtn.classList.add("admin-visible");
-
-    if (!newTabBtn.dataset.listenerAttached) {
-      newTabBtn.dataset.listenerAttached = "true";
-
-      newTabBtn.addEventListener("click", async () => {
-        const newSectorName = prompt(
-          "Digite o nome do novo setor (obrigatório):"
-        );
-
-        if (newSectorName) {
-          const newSectorDesc = prompt(
-            "Digite a descrição do setor (opcional):"
-          );
-
-          try {
-            await createSector(
-              currentAccessToken,
-              newSectorName,
-              newSectorDesc || ""
-            );
-            renderMachinesView(container, user); 
-          } catch (error) {
-            alert(`Erro ao criar setor: ${error.message}`);
-          }
-        }
-      });
-    }
-  }
-
-  btnCriarMaquina.addEventListener("click", async () => {
-    await loadHTML(
-      "/components/formCreateMachine.html",
-      "machines-screen-content"
-    );
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    renderCreateMachineForm(container, user);
-  });
-}
-
-async function renderMachinesView(container, user) {
-  const tabsContainer = container.querySelector(".tabs");
-  const screen = container.querySelector("#machines-screen-content");
   const newTabBtn = container.querySelector("#newtab");
 
   if (!tabsContainer || !screen || !newTabBtn) {
@@ -298,7 +172,7 @@ async function renderMachinesView(container, user) {
     screen.innerHTML = `
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #7f8c8d;">
             <div class="spinner" style="border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin-bottom: 10px;"></div>
-            <p>Carregando setores e status...</p>
+            <p>Carregando setores...</p>
         </div>
         <style>@keyframes spin {0% {transform: rotate(0deg);} 100% {transform: rotate(360deg);}}</style>
     `;
@@ -333,14 +207,11 @@ async function renderMachinesView(container, user) {
             
             deleteSectorBtn.addEventListener("click", async (e) => {
                 e.stopPropagation();
-                
-                if (confirm(`Tem certeza que deseja deletar o setor "${sector.name}"? \n\nAVISO: Setores com máquinas não podem ser deletados.`)) {
+                if (confirm(`Tem certeza que deseja deletar o setor "${sector.name}"?`)) {
                     try {
                         await deleteSector(currentAccessToken, sector.id);
                         alert("Setor deletado com sucesso!");
-                        
                         renderMachinesView(container, user);
-
                     } catch (error) {
                         alert(`Erro ao deletar setor: ${error.message}`);
                     }
@@ -350,12 +221,12 @@ async function renderMachinesView(container, user) {
         }
 
         tabsContainer.appendChild(tab);
+
         tab.addEventListener("click", (e) => {
           if (e.target.classList.contains("delete-sector-btn")) return;
-
           tabsContainer.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
           tab.classList.add("active");
-
+          
           renderMachineList(screen, sector, user);
         });
 
@@ -371,7 +242,6 @@ async function renderMachinesView(container, user) {
 
   if (user.role === "admin") {
     newTabBtn.style.display = "flex"; 
-
     const newBtnClone = newTabBtn.cloneNode(true);
     newTabBtn.parentNode.replaceChild(newBtnClone, newTabBtn);
 
@@ -402,6 +272,109 @@ async function renderMachinesView(container, user) {
         renderCreateMachineForm(container, user);
       });
   }
+}
+
+function renderMachineList(screenElement, sector, user) {
+  let contentHTML = "";
+
+  contentHTML += `<div style="margin-bottom: 1.5rem;">
+      <h3 style="color: #2c3e50; font-size: 1.4rem;">${sector.name}</h3>
+      <p style="color: #7f8c8d; font-size: 0.95rem;">${sector.description || 'Sem descrição definida.'}</p>
+  </div>`;
+
+  if (!sector.machines || sector.machines.length === 0) {
+    contentHTML += `
+        <div style="text-align: center; padding: 3rem; color: #95a5a6; background: #fdfdfd; border: 2px dashed #eee; border-radius: 12px;">
+            <p style="font-size: 1.1rem; margin-bottom: 1rem;">Este setor ainda não possui máquinas.</p>
+            <p style="font-size: 0.9rem;">Clique em "Criar Nova Máquina" abaixo para começar.</p>
+        </div>
+    `;
+  } else {
+    contentHTML += '<div class="machine-grid">';
+    
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+
+    sector.machines.forEach((machine) => {
+      const isOnline = machine.last_heartbeat && new Date(machine.last_heartbeat) > fiveMinutesAgo;
+      const statusClass = isOnline ? "online" : "offline";
+      const statusText = isOnline ? "ONLINE" : "OFFLINE";
+
+      contentHTML += `
+        <div class="machine-card ${statusClass}">
+            <div class="machine-header">
+                <div class="machine-info">
+                    <h4>${machine.name}</h4>
+                    <p class="machine-id">ID: #${machine.id}</p>
+                </div>
+                <div class="status-badge ${statusClass}">
+                    <span class="status-dot"></span>
+                    ${statusText}
+                </div>
+            </div>
+            
+            <div style="flex-grow: 1;">
+                 <p style="font-size: 0.8rem; color: #aaa;">
+                    Último sinal: ${machine.last_heartbeat ? new Date(machine.last_heartbeat).toLocaleTimeString() : 'Nunca'}
+                 </p>
+            </div>
+
+            <div class="card-actions">
+                <button class="action-btn btn-edit edit-machine" 
+                    data-machine-id="${machine.id}"
+                    data-machine-name="${machine.name}">
+                    Editar
+                </button>
+                <button class="action-btn btn-delete delete-machine" 
+                    data-machine-id="${machine.id}"
+                    data-machine-name="${machine.name}">
+                    Excluir
+                </button>
+            </div>
+        </div>
+      `;
+    });
+    contentHTML += "</div>";
+  }
+
+  screenElement.innerHTML = contentHTML;
+
+  screenElement.querySelectorAll(".delete-machine").forEach((button) => {
+    button.addEventListener("click", async (e) => {
+      const machineId = e.target.dataset.machineId;
+      const machineName = e.target.dataset.machineName;
+      const machineCard = e.target.closest(".machine-card");
+
+      if (confirm(`Tem certeza que deseja deletar a máquina "${machineName}"?`)) {
+        try {
+          await deleteMachine(currentAccessToken, machineId);
+          machineCard.style.opacity = "0";
+          setTimeout(() => machineCard.remove(), 300);
+        } catch (error) {
+          alert(`Erro ao deletar: ${error.message}`);
+        }
+      }
+    });
+  });
+
+  screenElement.querySelectorAll(".edit-machine").forEach((button) => {
+    button.addEventListener("click", async (e) => {
+      const machineId = e.target.dataset.machineId;
+      const oldName = e.target.dataset.machineName;
+      const machineCard = e.target.closest(".machine-card");
+
+      const newName = prompt(`Novo nome para "${oldName}":`, oldName);
+
+      if (newName && newName.trim() !== "" && newName !== oldName) {
+        try {
+          await updateMachineName(currentAccessToken, machineId, newName.trim());
+          machineCard.querySelector("h4").textContent = newName;
+          e.target.dataset.machineName = newName;
+        } catch (error) {
+          alert(`Erro ao atualizar: ${error.message}`);
+        }
+      }
+    });
+  });
 }
 
 async function renderCreateMachineForm(viewContainer, user) {
