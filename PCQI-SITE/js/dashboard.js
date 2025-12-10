@@ -69,6 +69,39 @@ async function setupDashboard() {
   renderMachinesView(contentContainer, userData);
 }
 
+function initializeHeaderComponent(user) {
+  const nameElement = document.getElementById("perfil-display");
+  if (nameElement) {
+      const names = user.name.split(' ');
+      const shortName = names[0] + (names.length > 1 ? ' ' + names[names.length - 1] : '');
+      nameElement.textContent = shortName;
+  }
+
+  const roleElement = document.getElementById("perfil-role");
+  if (roleElement) {
+      const roleName = user.role === 'admin' ? 'Administrador' : 'Colaborador';
+      roleElement.textContent = roleName;
+      
+      if(user.role === 'admin') {
+          const avatar = document.querySelector('.profile-avatar');
+          if(avatar) avatar.style.backgroundColor = '#27ae60';
+      }
+  }
+
+  const logoutBtn = document.getElementById("logout-button");
+  if (logoutBtn) {
+      const newBtn = logoutBtn.cloneNode(true);
+      logoutBtn.parentNode.replaceChild(newBtn, logoutBtn);
+      
+      newBtn.addEventListener("click", () => {
+          if(confirm("Deseja realmente sair do sistema?")) {
+              localStorage.clear();
+              window.location.href = "/screens/index.html";
+          }
+      });
+  }
+}
+
 function setupNavigation(user) {
   const btnVerMaquinas = document.getElementById("btn-ver-maquinas");
   const btnVerPerfis = document.getElementById("btn-ver-perfis");
