@@ -552,3 +552,7 @@ body {
   background-color: #dc3545;
   color: white;
 }
+
+.main-nav {
+  margin: 10px;
+}
