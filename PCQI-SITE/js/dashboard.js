@@ -285,50 +285,69 @@ async function renderMachinesView(container, user) {
 }
 
 function renderMachineList(screenElement, sector, user) {
-  let machineHTML = `<h3>Máquinas no Setor: ${sector.name}</h3>`;
+  let contentHTML = "";
 
-  if (sector.description) {
-    machineHTML += `<p class="sector-description">${sector.description}</p>`;
-  }
-  machineHTML += `<h4 style="margin-top: 1rem;">Máquinas:</h4>`;
+  contentHTML += `<div style="margin-bottom: 1.5rem;">
+      <h3 style="color: #2c3e50; font-size: 1.4rem;">${sector.name}</h3>
+      <p style="color: #7f8c8d; font-size: 0.95rem;">${sector.description || 'Sem descrição definida.'}</p>
+  </div>`;
 
   if (!sector.machines || sector.machines.length === 0) {
-    machineHTML += "<p>Nenhuma máquina cadastrada neste setor.</p>";
+    contentHTML += `
+        <div style="text-align: center; padding: 3rem; color: #95a5a6; background: #fdfdfd; border: 2px dashed #eee; border-radius: 12px;">
+            <p style="font-size: 1.1rem; margin-bottom: 1rem;">Este setor ainda não possui máquinas.</p>
+            <p style="font-size: 0.9rem;">Clique em "Criar Nova Máquina" abaixo para começar.</p>
+        </div>
+    `;
   } else {
-    machineHTML += '<div class="machine-grid">';
+    contentHTML += '<div class="machine-grid">';
+    
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
 
     sector.machines.forEach((machine) => {
       const isOnline = machine.last_heartbeat && new Date(machine.last_heartbeat) > fiveMinutesAgo;
       const statusClass = isOnline ? "online" : "offline";
-      const statusText = isOnline ? "Online" : "Offline";
+      const statusText = isOnline ? "ONLINE" : "OFFLINE";
 
-      machineHTML += `
-        <div class="machine-card">
-            <div class="status-indicator ${statusClass}" title="Status: ${statusText}"></div>
+      contentHTML += `
+        <div class="machine-card ${statusClass}">
+            <div class="machine-header">
+                <div class="machine-info">
+                    <h4>${machine.name}</h4>
+                    <p class="machine-id">ID: #${machine.id}</p>
+                </div>
+                <div class="status-badge ${statusClass}">
+                    <span class="status-dot"></span>
+                    ${statusText}
+                </div>
+            </div>
             
-            <h4>${machine.name}</h4>
-            <p style="font-size: 1.2rem; color: #555;">ID: ${machine.id}</p>
-            
+            <div style="flex-grow: 1;">
+                 <p style="font-size: 0.8rem; color: #aaa;">
+                    Último sinal: ${machine.last_heartbeat ? new Date(machine.last_heartbeat).toLocaleTimeString() : 'Nunca'}
+                 </p>
+            </div>
+
             <div class="card-actions">
-                <button class="edit-machine action-btn" 
+                <button class="action-btn btn-edit edit-machine" 
                     data-machine-id="${machine.id}"
                     data-machine-name="${machine.name}">
                     Editar
                 </button>
-                <button class="delete-machine" 
+                <button class="action-btn btn-delete delete-machine" 
                     data-machine-id="${machine.id}"
                     data-machine-name="${machine.name}">
-                    Excluir 
+                    Excluir
                 </button>
             </div>
         </div>
       `;
     });
-    machineHTML += "</div>";
+    contentHTML += "</div>";
   }
 
-  screenElement.innerHTML = machineHTML;
+  screenElement.innerHTML = contentHTML;
+
   screenElement.querySelectorAll(".delete-machine").forEach((button) => {
     button.addEventListener("click", async (e) => {
       const machineId = e.target.dataset.machineId;
@@ -338,8 +357,8 @@ function renderMachineList(screenElement, sector, user) {
       if (confirm(`Tem certeza que deseja deletar a máquina "${machineName}" (ID: ${machineId})?`)) {
         try {
           await deleteMachine(currentAccessToken, machineId);
-          alert("Máquina removida com sucesso!");
-          machineCard.remove(); 
+          machineCard.style.opacity = "0";
+          setTimeout(() => machineCard.remove(), 300);
         } catch (error) {
           alert(`Erro ao deletar: ${error.message}`);
         }
@@ -358,7 +377,6 @@ function renderMachineList(screenElement, sector, user) {
       if (newName && newName.trim() !== "" && newName !== oldName) {
         try {
           await updateMachineName(currentAccessToken, machineId, newName.trim());
-          alert("Nome atualizado com sucesso!");
           machineCard.querySelector("h4").textContent = newName;
           e.target.dataset.machineName = newName;
         } catch (error) {

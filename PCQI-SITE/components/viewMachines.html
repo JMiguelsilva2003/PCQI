@@ -1,16 +1,25 @@
-<div class="components">
+<div class="machines-component-container">
     
-    <div class="tabs">
-        <button id="newtab" class="admin-visible">+</button>
+    <div class="tabs-header">
+        <div class="tabs-scroll-area">
+            <div class="tabs">
+                </div>
+        </div>
+        <button id="newtab" class="add-sector-btn admin-visible" title="Criar Novo Setor">
+            +
+        </button>
     </div>
 
-    <div class="screen" id="machines-screen-content">
-        <p>Carregando máquinas...</p>
+    <div class="screen machine-screen-content" id="machines-screen-content">
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Carregando status das máquinas...</p>
+        </div>
     </div>
 
-    <div class_controls" style="padding: 1rem; background-color: #f3f2f2; border-top: 1px solid #c8c3c3; text-align: right;">
-        <button id="btn-criar-maquina" class="logout-btn" style="border-color: #3399e6; color: #3399e6;">
-            + Criar Nova Máquina
+    <div class="controls-footer">
+        <button id="btn-criar-maquina" class="btn-primary-action">
+            <span class="icon">+</span> Criar Nova Máquina
         </button>
     </div>
 </div>
