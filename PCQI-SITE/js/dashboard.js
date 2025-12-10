@@ -1,5 +1,14 @@
 let currentAccessToken = null;
 let allSectorsCache = [];
+let statsInterval = null;
+
+function stopStatsUpdate() {
+  if (statsInterval) {
+    clearInterval(statsInterval);
+    statsInterval = null;
+    console.log("Atualização em tempo real parada.");
+  }
+}
 
 async function authGuardAndGetUserData() {
   const accessToken = localStorage.getItem("accessToken");
@@ -79,6 +88,7 @@ function setupNavigation(user) {
 
   //  Botão Ver Máquinas
   btnVerMaquinas.addEventListener("click", async () => {
+    stopStatsUpdate();
     setActiveButton(btnVerMaquinas);
     await loadHTML("/components/viewMachines.html", "component-dashboard");
     await new Promise((resolve) => setTimeout(resolve, 0));
@@ -96,6 +106,7 @@ function setupNavigation(user) {
   //  Botão Ver Perfis (Admin) 
   if (user.role === "admin") {
     btnVerPerfis.addEventListener("click", async () => {
+      stopStatsUpdate();
       setActiveButton(btnVerPerfis);
       await loadHTML("/components/viewProfiles.html", "component-dashboard");
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -547,6 +558,8 @@ let historyChartInstance = null;
 let performanceChartInstance = null;
 
 async function renderStatisticsView(container, user) {
+    stopStatsUpdate();
+
     const loadingEl = container.querySelector("#stats-loading");
     const totalEl = container.querySelector("#stats-total");
     const madurasEl = container.querySelector("#stats-maduras");
@@ -578,15 +591,11 @@ async function renderStatisticsView(container, user) {
         }
     });
 
-    const fetchAndRenderStats = async () => {
-        loadingEl.style.display = "block";
-        totalEl.textContent = "...";
-        madurasEl.textContent = "...";
-        verdesEl.textContent = "...";
-        outrasEl.textContent = "...";
-
+    const updateAllData = async (isFirstLoad = false) => {
         const sectorId = sectorSelect.value === "all" ? null : sectorSelect.value;
         const machineId = machineSelect.value === "all" ? null : machineSelect.value;
+
+        if (isFirstLoad) loadingEl.style.display = "block";
 
         try {
             const stats = await getStats(currentAccessToken, sectorId, machineId);
@@ -594,35 +603,40 @@ async function renderStatisticsView(container, user) {
             madurasEl.textContent = stats.maduras;
             verdesEl.textContent = stats.verdes;
             outrasEl.textContent = stats.outras;
-            loadingEl.style.display = "none";
+
+            const historyData = await getStatsHistory(currentAccessToken, 7);
+            renderHistoryChart(historyData);
+
+            const performanceData = await getStatsPerformance(currentAccessToken);
+            renderPerformanceChart(performanceData);
+
         } catch (error) {
-            console.error("Erro ao buscar estatísticas:", error);
-            loadingEl.style.display = "none";
-            totalEl.textContent = "Erro"; 
+            console.error("Erro na atualização automática:", error);
+            if (isFirstLoad) {
+                totalEl.textContent = "Erro";
+                loadingEl.innerHTML = `<p style="color:red">Falha de conexão.</p>`;
+            }
+        } finally {
+            if (isFirstLoad) {
+                loadingEl.style.display = "none";
+                const histLoad = container.querySelector("#history-loading");
+                const perfLoad = container.querySelector("#performance-loading");
+                if(histLoad) histLoad.style.display = "none";
+                if(perfLoad) perfLoad.style.display = "none";
+            }
         }
     };
 
-    filterBtn.addEventListener("click", fetchAndRenderStats);
-    fetchAndRenderStats();
-    const historyLoadingEl = container.querySelector("#history-loading");
-    try {
-        const historyData = await getStatsHistory(currentAccessToken, 7);
-        renderHistoryChart(historyData);
-        historyLoadingEl.style.display = "none";
-    } catch (error) {
-        console.error("Erro ao carregar histórico:", error);
-        historyLoadingEl.innerHTML = `<p style="color:red;">Erro ao carregar gráfico: ${error.message}</p>`;
-    }
+    filterBtn.addEventListener("click", () => {
+        stopStatsUpdate();
+        updateAllData(true);
+        statsInterval = setInterval(() => updateAllData(false), 3000);
+    });
 
-    const performanceLoadingEl = container.querySelector("#performance-loading");
-    try {
-        const performanceData = await getStatsPerformance(currentAccessToken);
-        renderPerformanceChart(performanceData);
-        performanceLoadingEl.style.display = "none";
-    } catch (error) {
-        console.error("Erro ao carregar performance:", error);
-        performanceLoadingEl.innerHTML = `<p style="color:red;">Erro ao carregar gráfico: ${error.message}</p>`;
-    }
+    await updateAllData(true);
+    statsInterval = setInterval(() => {
+        updateAllData(false);
+    }, 3000);
 }
 
 function renderHistoryChart(data) {
