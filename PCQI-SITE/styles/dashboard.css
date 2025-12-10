@@ -417,6 +417,21 @@ body {
   border-color: #287ab8;
 }
 
+.action-btn-st {
+  padding: 0.5rem;
+  border: 1px solid #3399e6;
+  background-color: #3399e6;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.action-btn-st:hover {
+  background-color: #287ab8;
+  border-color: #287ab8;
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
