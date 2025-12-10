@@ -90,21 +90,20 @@ function initializeHeaderComponent(user) {
 
   const profileCard = document.querySelector(".profile-card");
   
-  if (profileCard && user.role === 'admin') {
+  if (profileCard) {
       profileCard.addEventListener("click", () => {
-          const btnPerfis = document.getElementById("btn-ver-perfis");
-          if (btnPerfis) {
-              btnPerfis.click(); 
-          }
+          window.location.href = "/screens/user-profile.html"; 
       });
   }
-  
+
   const logoutBtn = document.getElementById("logout-button");
   if (logoutBtn) {
       const newBtn = logoutBtn.cloneNode(true);
       logoutBtn.parentNode.replaceChild(newBtn, logoutBtn);
       
-      newBtn.addEventListener("click", () => {
+      newBtn.addEventListener("click", (e) => {
+          e.stopPropagation(); 
+          
           if(confirm("Deseja realmente sair do sistema?")) {
               localStorage.clear();
               window.location.href = "/screens/index.html";

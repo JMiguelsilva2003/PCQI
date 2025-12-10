@@ -587,6 +587,7 @@ body {
 }
 
 .profile-card:hover {
+    cursor: pointer;
     background-color: #e2f0e6;
     box-shadow: 0 4px 12px rgba(46, 204, 113, 0.15);
     transform: translateY(-1px);
