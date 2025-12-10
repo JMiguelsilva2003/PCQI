@@ -573,6 +573,8 @@ body {
 }
 
 .profile-card {
+    cursor: pointer;
+    margin-top: 10px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -641,6 +643,7 @@ body {
 }
 
 .logout-btn:hover {
+    color: black;
     background-color: #fdf2f2;
     border-color: #e74c3c;
 }

@@ -88,6 +88,17 @@ function initializeHeaderComponent(user) {
       }
   }
 
+  const profileCard = document.querySelector(".profile-card");
+  
+  if (profileCard && user.role === 'admin') {
+      profileCard.addEventListener("click", () => {
+          const btnPerfis = document.getElementById("btn-ver-perfis");
+          if (btnPerfis) {
+              btnPerfis.click(); 
+          }
+      });
+  }
+  
   const logoutBtn = document.getElementById("logout-button");
   if (logoutBtn) {
       const newBtn = logoutBtn.cloneNode(true);
